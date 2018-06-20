@@ -1,0 +1,13 @@
+language: julia
+os:
+  - linux
+  - osx
+julia:
+  - 0.6
+script:
+  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+  - julia -e 'Pkg.clone(pwd())'
+  - julia -e 'Pkg.test("MathProgComplex", coverage=false)'
+# after_success:
+  # - julia -e  'using Coverage; cd(Pkg.dir("MathProgComplex")); LCOV.writefile("lcov.info", process_folder(".")); run(pipeline(`curl -s https://codecov.io/bash`, `bash`))'
+  # - julia -e 'cd(Pkg.dir("MathProgComplex")); include(joinpath("docs", "make.jl"))'
