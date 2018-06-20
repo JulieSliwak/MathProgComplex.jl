@@ -1,6 +1,6 @@
 module MathProgComplex
 
-using DataStructures
+using DataStructures, JuMP
 
 import Base: ==, !=, <<, >>, isless, isconst, isreal, isnull, isequal
 import Base: +, -, *, /, ^, conj, conj!, abs2, norm, real, imag
@@ -39,7 +39,7 @@ include(joinpath("algebra", "unaries.jl"))
 # include(joinpath("export_dat", "utils_dat_import.jl"))
 
 ## export JuMP
-# include(joinpath("export_JuMP", "utils_jump.jl"))
+include(joinpath("export_JuMP", "utils_jump.jl"))
 
 # include("utils_dat_compare.jl")
 # include("utils_dat_export.jl")

@@ -1,3 +1,7 @@
+export get_variables, get_variabletype, has_variable, add_variable!, add_variables!
+export get_objective, set_objective!
+export has_constraint, get_constraints, get_constraint, add_constraint!, rm_constraint!
+
 ###############################################################################
 #### Variables
 ###############################################################################
@@ -133,6 +137,10 @@ end
 
 rm_constraint!(pb::Problem, cstrName::String) = pop!(pb.constraints, cstrName)
 
+
+###############################################################################
+#### Solution problem intel evaluation
+###############################################################################
 """
   pt = get_slacks(pb::Problem, pt::Point)
 
