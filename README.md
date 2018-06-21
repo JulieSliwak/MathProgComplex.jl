@@ -1,20 +1,49 @@
 # MathProgComplex.jl
 
-The `MathProgComplex` module enables the construction of polynomial optimization problems in complex variables for power systems. It uses the `PolynomialOptim` environment. The environment can adapt to several input formats (Matpower, GOC, IIDM) if the user defines the proper functions (a read function and elements of the power network along with their parameters and constraints). Once the optimization problem is built, the problem can be exported in real numbers and in text files (to be treated by AMPL for example). It is also possible to convert the problem in a JuMP model in real numbers (cartesian or polar form).
+The `MathProgComplex` module is a tool for polynomial optimization problems with complex variables. These problems consist in optimizing a generic complex multivariate polynomial function, subject to some complex polynomial equality and inequality constraints.
+The `MathProgComplex` module enables:
+- the manipulation of multivariate polynomials with complex numbers to construct polynomial optimization problems with complex variables (POP-C).
+- the evaluation of polynomials, for example the objective and the constraints of a (POP-C) from points
+- the resolution of a (POP-C) via a JuMP model
+- the export of a (POP-C) to be solved using another language
 
-<!-- ## Setting Julia for custom modules
+
+## Setting Julia for custom modules
 The modules need to be accessible from julia's path to be loaded with the `using` command.
 This can be done by running `push!(LOAD_PATH, "location/of/modules")`, which will update the path for the current session.
 
-The path can be updated at every start of a Julia session by adding the command to the `.juliarc.jl` file, which should be located (or created) at the location given by `homedir()`. -->
+The path can be updated at every start of a Julia session by adding the command to the `.juliarc.jl` file, which should be located (or created) at the location given by `homedir()`.
 
-## PolynomialOptim
+## Structures
 
-The `PolynomialOptim` environment provides a structure and methods for working with **complex polynomial optimization problems** subject to **polynomial constraints**. It is based on a polynomial environment that allows to work on polynomial objects with natural operations (+, -, \*, conj, |.|).
+The `MathProgComplex` environment provides a structure and methods for working with **complex polynomial optimization problems** subject to **polynomial constraints**. It is based on a polynomial environment that allows to work on polynomial objects with natural operations (+, -, \*, conj, |.|^2).
 
-The base type is `Variable`, from which `Exponents`, `Monomial`, and `Polynomial` can be constructed by calling the respective constructors or with algebraic operations (+, -, \*, conj, |.|). The `Point` type holds the variables at which polynomials can be evaluated.
+The base type is `Variable`: it is a structure with a name (a string) and a type (Complex, Real or Bool).
 
-Available functions on `Polynomial`, `Mononomial`, `Variable` types:
+```julia
+using MathProgComplex
+a = Variable("a", Complex)
+b = Variable("b", Real)
+c = Variable("c", Bool)
+```
+
+From `Variable` type, `Exponent` and `Polynomial` can be constructed by calling the respective constructors or with algebraic operations (+, -, \*, conj, |.|).
+
+An `Exponent` is a product of `Variables`.
+```julia
+expo1 = a*b
+expo2 = conj(a)^3*b^5
+expo3 = abs2(a) # =a*conj(a)
+```
+
+A `Polynomial` is a sum of `Exponents` times complex numbers.
+```julia
+p = 3*expo1 + (4+2im)*expo2 +2im*expo3
+```
+
+The `Point` type holds the variables at which polynomials can be evaluated.
+
+Available functions on `Polynomial`, `Exponent`, `Variable` types:
 
 - isconst, isone
 - evaluate
@@ -23,7 +52,7 @@ Available functions on `Polynomial`, `Mononomial`, `Variable` types:
 - cplx2real: convert the provided object to a tuple of real and imaginary part, expressed with real and imaginary part variables.
 
 ```julia
-include(joinpath("src_PolynomialOptim", "PolynomialOptim.jl"))
+using MathProgComplex
 
 a = Variable("a", Complex)
 b = Variable("b", Real)
@@ -50,13 +79,13 @@ val_real = evaluate(p_real, pt_r) # 7 + 0im
 val_imag = evaluate(p_imag, pt_r) # 0
 ```
 
-### Polynomial problems
+### Polynomial optimization problems
 
 A `Constraint` structure holding a `Polynomial` and complex upper and lower bounds is defined to build the `Problem` type made of:
 
 - several `Variables`
 - a `Polynomial` objective,
-- several constraints names along with their corresponding `Constraint`
+- several named `constraints`
 
 ### Implemented methods
 
@@ -67,7 +96,7 @@ A `Constraint` structure holding a `Polynomial` and complex upper and lower boun
 - pb_cplx2real: converts the problem variables, objective and constraints to real expressions function of real and imaginary part of the original problem variables.
 
 ```julia
-include(joinpath("src_PolynomialOptim", "PolynomialOptim.jl"))
+using MathProgComplex
 
 a = Variable("a", Complex)
 b = Variable("b", Real)
@@ -76,8 +105,6 @@ p_cstr1 = 3a + b + 2
 p_cstr2 = abs2(b) + 5a*b + 2
 
 pb = Problem()
-
-add_variable!(pb, a); add_variable!(pb, b)
 
 set_objective!(pb, p_obj)
 
@@ -99,4 +126,19 @@ print("slack by constraint at given point:\n", get_slacks(pb, pt_sol))
 # Cstr 1 -3.0 + 0.0im
 # Cstr 2 -5 + 1im
 # Cstr 3 -8 + 0im
+```
+
+### Resolution
+The polynomial optimization problems can be converted into JuMP models or be exported into text files to be used in another language.
+
+#### Using JuMP
+ ```julia
+m, JuMPvar = get_JuMP_cartesian_model(pb, solver)
+solve(m)
+ ```
+
+#### Using export
+```julia  
+export_to_dat(pb, amplexportpath, point)
+run_knitro(amplexportpath, amplscriptpath)
 ```
