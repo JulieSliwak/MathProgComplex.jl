@@ -1,4 +1,4 @@
-using JuMP, Ipopt, MathProgComplex
+using JuMP, Ipopt, MathProgComplex, Ipopt
 
 function main()
     WB2 = Problem()
@@ -19,6 +19,17 @@ function main()
 
     print(WB2)
 
+
+    # mysolver = KnitroSolver(KTR_PARAM_OUTLEV=3,
+    #                       KTR_PARAM_MAXIT=600,
+    #                       KTR_PARAM_SCALE=0,
+    #                       KTR_PARAM_FEASTOL=1.0,
+    #                       KTR_PARAM_OPTTOL=1.0,
+    #                       KTR_PARAM_FEASTOLABS=1e-8,
+    #                       KTR_PARAM_OPTTOLABS=1e-6)
+    #                     #   KTR_PARAM_BAR_INITPT=2,
+    #                     #   KTR_PARAM_PRESOLVE=0,
+    #                     #   KTR_PARAM_HONORBNDS=0)
 
     mysolver = IpoptSolver()
 
