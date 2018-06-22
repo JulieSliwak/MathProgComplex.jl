@@ -1,31 +1,62 @@
 using JuMP, Ipopt, MathProgComplex
 
-function main()
-    WB2 = Problem()
+@testset "Rosenbrock Ipopt" begin
+    # min (1-x)^2 + 100*(y-x^2)^2
+    # solution: (x,y) = (1,1)
+    # optimal objective 0
+    rosenbrock = Problem()
 
-    VOLT1_Im = MathProgComplex.Variable("VOLT1_Im", Real)
-    VOLT1_Re = MathProgComplex.Variable("VOLT1_Re", Real)
-    VOLT2_Im = MathProgComplex.Variable("VOLT2_Im", Real)
-    VOLT2_Re = MathProgComplex.Variable("VOLT2_Re", Real)
+    x = MathProgComplex.Variable("x", Real)
+    y = MathProgComplex.Variable("y", Real)
+    set_objective!(rosenbrock, (1-x)^2 + 100*(y-x^2)^2)
 
-    set_objective!(WB2, (192.3076923076923)*VOLT1_Im^2 + (-192.3076923076923)*VOLT1_Im * VOLT2_Im + (961.5384615384615)*VOLT1_Im * VOLT2_Re + (192.3076923076923)*VOLT1_Re^2 + (-961.5384615384615)*VOLT1_Re * VOLT2_Im + (-192.3076923076923)*VOLT1_Re * VOLT2_Re)
-
-    add_constraint!(WB2, "BaseCase_1_BALANCE-UNIT_Im", -400.0 << ((480.7692307692308)*VOLT1_Im^2 + (-480.7692307692308)*VOLT1_Im * VOLT2_Im + (-96.15384615384615)*VOLT1_Im * VOLT2_Re + (480.7692307692308)*VOLT1_Re^2 + (96.15384615384615)*VOLT1_Re * VOLT2_Im + (-480.7692307692308)*VOLT1_Re * VOLT2_Re) << 400.0)
-    add_constraint!(WB2, "BaseCase_1_BALANCE-UNIT_Re", 0.0 << ((96.15384615384615)*VOLT1_Im^2 + (-96.15384615384615)*VOLT1_Im * VOLT2_Im + (480.7692307692308)*VOLT1_Im * VOLT2_Re + (96.15384615384615)*VOLT1_Re^2 + (-480.7692307692308)*VOLT1_Re * VOLT2_Im + (-96.15384615384615)*VOLT1_Re * VOLT2_Re) << 600.0)
-    add_constraint!(WB2, "BaseCase_1_Volt_VOLTM_Re", 0.9025 << (VOLT1_Im^2 + VOLT1_Re^2) << 1.1025)
-    add_constraint!(WB2, "BaseCase_2_BALANCE-LOAD_Im", -350.0 + (-480.7692307692308)*VOLT1_Im * VOLT2_Im + (96.15384615384615)*VOLT1_Im * VOLT2_Re + (-96.15384615384615)*VOLT1_Re * VOLT2_Im + (-480.7692307692308)*VOLT1_Re * VOLT2_Re + (480.7692307692308)*VOLT2_Im^2 + (480.7692307692308)*VOLT2_Re^2 == 0.0)
-    add_constraint!(WB2, "BaseCase_2_BALANCE-LOAD_Re", 350.0 + (-96.15384615384615)*VOLT1_Im * VOLT2_Im + (-480.7692307692308)*VOLT1_Im * VOLT2_Re + (480.7692307692308)*VOLT1_Re * VOLT2_Im + (-96.15384615384615)*VOLT1_Re * VOLT2_Re + (96.15384615384615)*VOLT2_Im^2 + (96.15384615384615)*VOLT2_Re^2 == 0.0)
-    add_constraint!(WB2, "BaseCase_2_Volt_VOLTM_Re", 0.9025 << (VOLT2_Im^2 + VOLT2_Re^2) << 1.056784)
-
-    print(WB2)
-
-
-    mysolver = IpoptSolver()
-
-    m, variables_jump, ctr_jump, ctr_exp = get_JuMP_cartesian_model(WB2, mysolver)
-
+    mysolver = IpoptSolver(print_level = 0)
+    m, variables_jump, ctr_jump, ctr_exp = get_JuMP_cartesian_model(rosenbrock, mysolver)
     solve(m)
 
+    sol = get_JuMP_solution(m, variables_jump, rosenbrock)
+
+    @test sol[x] ≈ 1.0 atol=1e-5
+    @test sol[y] ≈ 1.0 atol=1e-5
+    @test get_objective(rosenbrock, sol) ≈ 0.0 atol=1e-5
 end
 
-main()
+
+@testset "QCQP Ipopt" begin
+    # min x - y
+    # st  x + x^2 + x*y + y^2 <= 1
+    #     -2 <= x, y <= 2
+    # solution: x+y = -1/3
+    # optimal objective -1-4/sqrt(3)
+
+    qcqp = Problem()
+
+    x = MathProgComplex.Variable("x", Real)
+    y = MathProgComplex.Variable("y", Real)
+
+    set_objective!(qcqp, x - y)
+
+    add_constraint!(qcqp, "ctr", (x + x^2 + x*y + y^2) << 1)
+    add_constraint!(qcqp, "x bounds", -2 << x << 2)
+    add_constraint!(qcqp, "y bounds", -2 << y << 2)
+
+    mysolver = IpoptSolver(print_level = 0)
+    m, variables_jump, ctr_jump, ctr_exp = get_JuMP_cartesian_model(qcqp, mysolver)
+    solve(m)
+
+    sol = get_JuMP_solution(m, variables_jump, qcqp)
+
+    ## Test for optimal solution
+    @test sol[x] + sol[y] ≈ -1/3 atol=1e-5
+    @test get_objective(qcqp, sol) ≈ -1-4/sqrt(3) atol=1e-5
+
+    ## Test slack functions
+    slacks = get_slacks(qcqp, sol)
+    @test real(slacks.coords[MathProgComplex.Variable("x bounds", Complex)]) > 0
+    @test real(slacks.coords[MathProgComplex.Variable("y bounds", Complex)]) > 0
+
+    @test imag(slacks.coords[MathProgComplex.Variable("x bounds", Complex)]) == 0
+    @test imag(slacks.coords[MathProgComplex.Variable("y bounds", Complex)]) == 0
+
+    @test get_minslack(qcqp, sol)[1] < 1e-6
+end

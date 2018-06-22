@@ -1,3 +1,5 @@
+export export_to_dat
+
 function get_varsconj(exp::Exponent)
   varconj = Vector{Variable}()
   for (var, expo) in exp
@@ -177,7 +179,7 @@ point `pt`. Output files are `real_minlp_instance.dat` and
 """
 function export_to_dat(pb_optim::Problem, outpath::String, pt::Point = Point())
   ## Get max length varname
-  maxvarlen = -1
+  maxvarlen = 4
   for var in pb_optim.variables
     if length(var[1]) > maxvarlen
       maxvarlen = length(var[1])
@@ -185,7 +187,7 @@ function export_to_dat(pb_optim::Problem, outpath::String, pt::Point = Point())
   end
 
   ## Get max length dat constraint name
-  maxcstrlen = -1
+  maxcstrlen = 9
   for cstrname in keys(pb_optim.constraints)
     if length(cstrname) > maxcstrlen
       maxcstrlen = length(cstrname)
@@ -252,65 +254,65 @@ end
 
 ###
 ###
-function export_matpower_to_dat(QCQP::Problem, filename::String, pt::Point = Point())
-  ## Get max length varname
-  maxvarlen = -1
-  for var in QCQP.variables
-    if length(var.name) > maxvarlen
-      maxvarlen = length(var.name)
-    end
-  end
+# function export_matpower_to_dat(QCQP::Problem, filename::String, pt::Point = Point())
+#   ## Get max length varname
+#   maxvarlen = -1
+#   for var in QCQP.variables
+#     if length(var.name) > maxvarlen
+#       maxvarlen = length(var.name)
+#     end
+#   end
 
-  ## Sort constraints by type (voltm, unit and rest), and build dat constraint name
-  cstr_keys = SortedSet(keys(QCQP.constraints))
-  voltm_keys = filter(x->ismatch(r"VOLTM", x), cstr_keys)
-  unit_keys = filter(x->ismatch(r"UNIT", x), cstr_keys)
-  load_keys = setdiff(cstr_keys, union(unit_keys, voltm_keys))
-  id_to_loadkey = SortedDict(nb_from_str(str)=> (str, "LOAD_$(string(nb_from_str(str)))") for str in load_keys)
-  id_to_voltmkey = SortedDict(nb_from_str(str)=> (str, String(split(str, "_")[2])) for str in voltm_keys)
-  id_to_unitkey = SortedDict(nb_from_str(str)=> (str, "UNIT_$(string(nb_from_str(str)))") for str in unit_keys)
+#   ## Sort constraints by type (voltm, unit and rest), and build dat constraint name
+#   cstr_keys = SortedSet(keys(QCQP.constraints))
+#   voltm_keys = filter(x->ismatch(r"VOLTM", x), cstr_keys)
+#   unit_keys = filter(x->ismatch(r"UNIT", x), cstr_keys)
+#   load_keys = setdiff(cstr_keys, union(unit_keys, voltm_keys))
+#   id_to_loadkey = SortedDict(nb_from_str(str)=> (str, "LOAD_$(string(nb_from_str(str)))") for str in load_keys)
+#   id_to_voltmkey = SortedDict(nb_from_str(str)=> (str, String(split(str, "_")[2])) for str in voltm_keys)
+#   id_to_unitkey = SortedDict(nb_from_str(str)=> (str, "UNIT_$(string(nb_from_str(str)))") for str in unit_keys)
 
-  ## Get max length dat constraint name
-  maxcstrlen = -1
-  for (_, val) in union(id_to_loadkey, id_to_voltmkey, id_to_unitkey)
-    if length(val[2]) > maxcstrlen
-      maxcstrlen = length(val[2])
-    end
-  end
+#   ## Get max length dat constraint name
+#   maxcstrlen = -1
+#   for (_, val) in union(id_to_loadkey, id_to_voltmkey, id_to_unitkey)
+#     if length(val[2]) > maxcstrlen
+#       maxcstrlen = length(val[2])
+#     end
+#   end
 
-  touch(filename)
-  outfile = open(filename, "w")
+#   touch(filename)
+#   outfile = open(filename, "w")
 
-  ## Comment section
-  print_doc(outfile, filename)
+#   ## Comment section
+#   print_doc(outfile, filename)
 
-  ## Print variables
-  variables = get_variables(QCQP)
-  print_variables(outfile, variables, pt, maxvarlen, maxcstrlen)
+#   ## Print variables
+#   variables = get_variables(QCQP)
+#   print_variables(outfile, variables, pt, maxvarlen, maxcstrlen)
 
-  ## Print objective
-  const_printed = false
-  const_val = 0
-  for (expo, coeff) in QCQP.objective
-      if length(expo) != 0
-        print_quad_expo(outfile, expo, "OBJ", coeff, maxvarlen, maxcstrlen)
-      else
-        const_val = coeff
-      end
-  end
-  print_dat_line(outfile, "CONST", "OBJ", "NONE", "NONE", real(const_val), imag(const_val), maxvarlen, maxcstrlen)
+#   ## Print objective
+#   const_printed = false
+#   const_val = 0
+#   for (expo, coeff) in QCQP.objective
+#       if length(expo) != 0
+#         print_quad_expo(outfile, expo, "OBJ", coeff, maxvarlen, maxcstrlen)
+#       else
+#         const_val = coeff
+#       end
+#   end
+#   print_dat_line(outfile, "CONST", "OBJ", "NONE", "NONE", real(const_val), imag(const_val), maxvarlen, maxcstrlen)
 
-  for (i, loadkey) in id_to_loadkey
-    cstr = QCQP.constraints[loadkey[1]]
-    print_constraint(outfile, loadkey[2], cstr, maxvarlen, maxcstrlen, expos)
-  end
-  for (i, voltmkey) in id_to_voltmkey
-    cstr = QCQP.constraints[voltmkey[1]]
-    print_constraint(outfile, voltmkey[2], cstr, maxvarlen, maxcstrlen, expos)
-  end
-  for (i, unitkey) in id_to_unitkey
-    cstr = QCQP.constraints[unitkey[1]]
-    print_constraint(outfile, unitkey[2], cstr, maxvarlen, maxcstrlen, expos)
-  end
-  close(outfile)
-end
+#   for (i, loadkey) in id_to_loadkey
+#     cstr = QCQP.constraints[loadkey[1]]
+#     print_constraint(outfile, loadkey[2], cstr, maxvarlen, maxcstrlen, expos)
+#   end
+#   for (i, voltmkey) in id_to_voltmkey
+#     cstr = QCQP.constraints[voltmkey[1]]
+#     print_constraint(outfile, voltmkey[2], cstr, maxvarlen, maxcstrlen, expos)
+#   end
+#   for (i, unitkey) in id_to_unitkey
+#     cstr = QCQP.constraints[unitkey[1]]
+#     print_constraint(outfile, unitkey[2], cstr, maxvarlen, maxcstrlen, expos)
+#   end
+#   close(outfile)
+# end
