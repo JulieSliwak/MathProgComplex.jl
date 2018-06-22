@@ -57,20 +57,20 @@ end
 Point() = Point(SortedDict{Variable, Number}())
 
 function Point(vars::Array{Variable}, vals::Array{<:Number})
-  if length(vars) != length(vals)
-    error("Point(): input arrays must have same size.")
-  end
-
-  pt = Point()
-  for i=1:length(vars)
-    var, val = vars[i], vals[i]
-    if isreal(var) val = real(val) end
-    if isbool(var) && val != 0
-      val = Int((val/abs(val)+1)/2)
+    if length(vars) != length(vals)
+        error("Point(): input arrays must have same size.")
     end
-    add_coord!(pt, vars[i], val)
-  end
-  return pt
+
+    pt = Point()
+    for i=1:length(vars)
+        var, val = vars[i], vals[i]
+        if isreal(var) val = real(val) end
+        if isbool(var) && val != 0
+            val = Int((val/abs(val)+1)/2)
+        end
+        add_coord!(pt, vars[i], val)
+    end
+    return pt
 end
 
 
@@ -78,7 +78,9 @@ end
 ## Print
 #############################
 function Base.print(io::IO, pt::Point)
-  for (var, val) in pt
-    println(io, var, " ", val)
-  end
+    maxvarlength = maximum(map(x->length(x.name), keys(pt)))
+    for (var, val) in pt
+        print(io, var.name); print(io, " "^(maxvarlength-length(var.name)))
+        println(io, " ", val)
+    end
 end

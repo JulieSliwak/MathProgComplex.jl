@@ -1,6 +1,7 @@
 export get_variables, get_variabletype, has_variable, add_variable!, add_variables!
 export get_objective, set_objective!
 export has_constraint, get_constraints, get_constraint, add_constraint!, rm_constraint!
+export get_slacks, get_relative_slacks, get_minslack
 
 ###############################################################################
 #### Variables
