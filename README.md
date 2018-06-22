@@ -2,7 +2,7 @@
 
 Dev:
 [![Build Status](https://travis-ci.org/JulieSliwak/MathProgComplex.jl.svg?branch=master)](https://travis-ci.org/JulieSliwak/MathProgComplex.jl)
-[![codecov](https://codecov.io/gh/lanl-aJulieSliwak/MathProgComplex/branch/master/graph/badge.svg)](https://codecov.io/gh/JulieSliwak/MathProgComplex.jl)
+[![codecov](https://codecov.io/gh/JulieSliwak/MathProgComplex.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JulieSliwak/MathProgComplex.jl)
 
 The `MathProgComplex` module is a tool for polynomial optimization problems with complex variables. These problems consist in optimizing a generic complex multivariate polynomial function, subject to some complex polynomial equality and inequality constraints.
 The `MathProgComplex` module enables:
