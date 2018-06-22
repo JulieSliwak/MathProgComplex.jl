@@ -1,4 +1,4 @@
-export get_JuMP_cartesian_model
+export get_JuMP_cartesian_model, get_JuMP_solution
 
 
 """
@@ -30,6 +30,8 @@ function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
     pb_poly_real = problem_poly
     m = Model(solver = mysolver)
     variables_jump = SortedDict{String, JuMP.Variable}()
+
+    ## Define JuMP variables
     for (varname, vartype) in pb_poly_real.variables
         if vartype==Real
             variables_jump["$varname"] = @variable(m, basename="$varname", start=1.1)
@@ -39,12 +41,18 @@ function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
             error("$varname must be of type Real or Bool, here type is $vartype")
         end
     end
+
+    ## Define JuMP constraints
     ctr_jump = SortedDict{String,JuMP.ConstraintRef}()
     ctr_exp = SortedDict{String,Tuple{Any,Float64,Float64}}()
-    for (ctr, modeler_ctr) in pb_poly_real.constraints
+    for (ctrname, modeler_ctr) in pb_poly_real.constraints
         polynome = modeler_ctr.p
-        lb = modeler_ctr.lb
-        ub = modeler_ctr.ub
+
+        modeler_ctr.lb == -Inf-Inf*im || imag(modeler_ctr.lb) == 0 || error("get_JuMP_cartesian_model(): Found constraint with complex bound.\nOnly real models are valid at this point.")
+        modeler_ctr.ub == +Inf+Inf*im || imag(modeler_ctr.ub) == 0 || error("get_JuMP_cartesian_model(): Found constraint with complex bound.\nOnly real models are valid at this point.")
+        lb = real(modeler_ctr.lb)
+        ub = real(modeler_ctr.ub)
+
         precond = modeler_ctr.precond
         for value in values(polynome)
             if imag(value)!=0
@@ -52,7 +60,7 @@ function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
             end
         end
         my_timer = @elapsed s_ctr, ispolylinear = poly_to_NLexpression(m, variables_jump,polynome)
-        ctr_exp[ctr] = (s_ctr, lb,ub)
+        ctr_exp[ctrname] = (s_ctr, lb, ub)
         # @printf("%-35s%10.6f s\n", "poly_to_NLexpression for $ctr", my_timer)
         if ispolylinear
             @constraint(m, lb <= s_ctr <= ub)
@@ -60,15 +68,17 @@ function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
             if precond == :sqrt
                 if lb == -Inf && ub >0
                     ##TODO: sqrt constraints for Smax
-                    ctr_jump[ctr] = @NLconstraint(m, -Inf <= s_ctr <= ub)
+                    ctr_jump[ctrname] = @NLconstraint(m, -Inf <= s_ctr <= ub)
                 else
                     error("sqrt non applicable to $lb <= $s_ctr <= $ub")
                 end
             else
-                ctr_jump[ctr] = @NLconstraint(m, lb <= s_ctr <= ub)
+                ctr_jump[ctrname] = @NLconstraint(m, lb <= s_ctr <= ub)
             end
         end
     end
+
+    ## Define JuMP objective
     polynome_obj = pb_poly_real.objective
     my_timer = @elapsed s_obj, ispolylinear = poly_to_NLexpression(m, variables_jump,polynome_obj)
     # @printf("%-35s%10.6f s\n", "poly_to_NLexpression for objective", my_timer)
@@ -112,6 +122,19 @@ function poly_to_NLexpression(m::JuMP.Model, variables_jump::SortedDict{String, 
     return s, ispolylinear
 end
 
+
+"""
+    sol = get_JuMP_solution(m, variables_jump, rosenbrock)
+
+    Return a `Point` storing the candidate point in `m`.
+"""
+function get_JuMP_solution(m, variables_jump, pb::Problem)
+    sol = Point()
+    for (varname, vartype) in pb.variables
+        sol[MathProgComplex.Variable(varname, vartype)] = convert(vartype, getvalue(variables_jump[varname]))
+    end
+    return sol
+end
 
 ###TEST
 #
