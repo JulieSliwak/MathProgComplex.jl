@@ -1,14 +1,19 @@
 # MathProgComplex.jl
 
+Dev:
+[![Build Status](https://travis-ci.org/JulieSliwak/MathProgComplex.jl.svg?branch=master)](https://travis-ci.org/JulieSliwak/MathProgComplex.jl)
+[![codecov](https://codecov.io/gh/lanl-aJulieSliwak/MathProgComplex/branch/master/graph/badge.svg)](https://codecov.io/gh/JulieSliwak/MathProgComplex.jl)
+
 The `MathProgComplex` module is a tool for polynomial optimization problems with complex variables. These problems consist in optimizing a generic complex multivariate polynomial function, subject to some complex polynomial equality and inequality constraints.
 The `MathProgComplex` module enables:
+
 - the manipulation of multivariate polynomials with complex numbers to construct polynomial optimization problems with complex variables (POP-C).
 - the evaluation of polynomials, for example the objective and the constraints of a (POP-C) from points
 - the resolution of a (POP-C) via a JuMP model
 - the export of a (POP-C) to be solved using another language
 
-
 ## Setting Julia for custom modules
+
 The modules need to be accessible from julia's path to be loaded with the `using` command.
 This can be done by running `push!(LOAD_PATH, "location/of/modules")`, which will update the path for the current session.
 
@@ -30,6 +35,7 @@ c = Variable("c", Bool)
 From `Variable` type, `Exponent` and `Polynomial` can be constructed by calling the respective constructors or with algebraic operations (+, -, \*, conj, |.|).
 
 An `Exponent` is a product of `Variables`.
+
 ```julia
 expo1 = a*b
 expo2 = conj(a)^3*b^5
@@ -37,6 +43,7 @@ expo3 = abs2(a) # =a*conj(a)
 ```
 
 A `Polynomial` is a sum of `Exponents` times complex numbers.
+
 ```julia
 p = 3*expo1 + (4+2im)*expo2 +2im*expo3
 ```
@@ -129,16 +136,19 @@ print("slack by constraint at given point:\n", get_slacks(pb, pt_sol))
 ```
 
 ### Resolution
+
 The polynomial optimization problems can be converted into JuMP models or be exported into text files to be used in another language.
 
 #### Using JuMP
+
  ```julia
 m, JuMPvar = get_JuMP_cartesian_model(pb, solver)
 solve(m)
  ```
 
 #### Using export
-```julia  
+
+```julia
 export_to_dat(pb, amplexportpath, point)
 run_knitro(amplexportpath, amplscriptpath)
 ```
