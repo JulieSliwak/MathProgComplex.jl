@@ -3,9 +3,18 @@ os:
   - linux
 julia:
   - 0.6
+cache:
+ directories:
+   - /home/travis/.julia
 addons:
   apt_packages:
   - gfortran
+before_install:
+    # don't keep an old version of the code in the cache
+  - julia -e 'if "MathProgComplex" in keys(Pkg.installed()) Pkg.rm("MathProgComplex"); Pkg.rm("MathProgComplex") end'
+  - julia -e 'Pkg.update()' #make sure we get the latest version of METADATA
+  - julia -e 'if !("Coverage" in keys(Pkg.installed())) Pkg.add("Coverage") end'
+  - julia -e 'if !("Documenter" in keys(Pkg.installed())) Pkg.add("Documenter") end'
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.clone(pwd())'
