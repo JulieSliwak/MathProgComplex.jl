@@ -1,9 +1,9 @@
 
 @testset "evaluation tests" begin
-    x = Variable("x", Complex)
-    y = Variable("y", Complex)
-    z = Variable("z", Real)
-    b = Variable("b", Bool)
+    x = MathProgComplex.Variable("x", Complex)
+    y = MathProgComplex.Variable("y", Complex)
+    z = MathProgComplex.Variable("z", Real)
+    b = MathProgComplex.Variable("b", Bool)
 
     ## Polynomial algebra
     pt = Point(SortedDict(x=>2, y=>1+im, z=>0+im, b=>2.1))

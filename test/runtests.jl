@@ -10,4 +10,4 @@ end
 
 # write your own tests here
 include("polynomial_types.jl")
-include("jump_export.jl")
+include("rosenbrock.jl")
