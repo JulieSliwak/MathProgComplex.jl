@@ -11,4 +11,4 @@ end
 # write your own tests here
 # include("dat_export.jl")
 include("polynomial_types.jl")
-include("JuMP_export.jl")
+include("jump_export.jl")
