@@ -9,29 +9,35 @@ using MathProgComplex
 
     qcqp = Problem()
 
-    x = MathProgComplex.Variable("x", Real)
+    x = MathProgComplex.Variable("x", Complex)
     y = MathProgComplex.Variable("y", Real)
+    b = MathProgComplex.Variable("b", Bool)
 
     set_objective!(qcqp, x - y)
 
-    add_constraint!(qcqp, "ctr", (x + x^2 + x*y + y^2) << 1)
-    add_constraint!(qcqp, "x bounds", -2 << x << 2)
-    add_constraint!(qcqp, "y bounds", -2 << y << 2)
+    add_constraint!(qcqp, "ctr1", (x + x^2 + x*y + y^2) << 1)
+    add_constraint!(qcqp, "ctr2", (x^3 + (1.0+3im)*conj(x^2)*x*y + y^2) << (1 + 2im))
+    add_constraint!(qcqp, "ctr3", -3im << (5*b + 5im*y) << 1)
+    add_constraint!(qcqp, "x_bounds", -2 << x << 2)
+    add_constraint!(qcqp, "y_bounds", -2 << y << 2)
 
-    point = Point()
-    dat_exportpath = joinpath(Pkg.dir("MathProgComplex"), "tmp_datexport", "myinstance.dat")
+    point = Point([x], [3])
+    dat_exportpath = joinpath(Pkg.dir("MathProgComplex"), "tmp_datexport")
     mkpath(splitdir(dat_exportpath)[1])
 
-    export_to_dat(qcqp, dat_exportpath, point)
-    qcqp2 = import_from_dat(dat_exportpath)
+    export_to_dat(qcqp, dat_exportpath, filename="POP.dat", point=point)
+    
+    qcqp2, point2 = import_from_dat(dat_exportpath, filename="POP.dat")
 
 
-    amplscriptpath = joinpath(Pkg.dir("MathProgComplex"), "src", "export_dat")
+    # amplscriptpath = joinpath(Pkg.dir("MathProgComplex"), "src", "export_dat")
     # run_knitro(dat_exportpath, amplscriptpath)
 
+    @test qcqp.variables == qcqp2.variables
     @test qcqp.objective == qcqp2.objective
 
     @test Set(keys(qcqp.constraints)) == Set(keys(qcqp2.constraints))
+
     for (ctrname, ctr) in qcqp.constraints
         @test qcqp.constraints[ctrname].ub == qcqp2.constraints[ctrname].ub
         @test qcqp.constraints[ctrname].lb == qcqp2.constraints[ctrname].lb

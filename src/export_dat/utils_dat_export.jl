@@ -19,6 +19,14 @@ function get_varslin(exp::Exponent)
   varlin
 end
 
+function collect_requiredmonomials!(p::Polynomial, expos::SortedDict{Exponent, String})
+  for expo in keys(p)
+    if !is_oneline_printable(expo) && !haskey(expos, expo)
+      expos[expo] = "MONO_$(length(expos))"
+    end
+  end
+end
+
 function print_string(io, strng, len; alignright = true, indentedprint=true)
   indentedprint || (len = length(strng))
   if alignright
@@ -143,25 +151,13 @@ function print_poly!(io::IO, p::AbstractPolynomial, cat::String, maxvarlen, maxc
   constval = 0
 
   for (expo, coeff) in p
-    explsum, conjsum = get_sumdegs(expo)
-
-    vars_deg = collect(expo.expo)
-
-    oneline = (length(expo) == 0)
-    oneline = (oneline || ((length(expo) == 2) && ((explsum, conjsum) == (1,1)))) # Hermitian product of two complex variables
-    oneline = (oneline || ((length(expo) == 2) && ((explsum, conjsum) == (2,0)) && isreal(first(vars_deg)[1]) && isreal(last(vars_deg)[1]))) # Product of two different real variables
-    oneline = (oneline || ((length(expo) == 1) && ((explsum, conjsum) == (2,0)) && isreal(first(vars_deg)[1]))) # One squared real variable
-    var = ((length(expo) == 1) && (((explsum, conjsum) == (0,1)) || ((explsum, conjsum) == (1,0)))) # One real or complex variable
-    oneline = (var || oneline)
+    oneline = is_oneline_printable(expo)
 
     if length(expo) == 0  # const value
       constval = coeff
     elseif oneline         # oneline printable monomial
       print_quad_expo(io, expo, cat, coeff, maxvarlen, maxcstrlen)
     else                  # general monomial case
-      if !haskey(expos, expo)
-        expos[expo] = "MONO_$(length(expos))"
-      end
       print_dat_line(io, "MONO", cat, expos[expo], "NONE", real(coeff), imag(coeff), maxvarlen, maxcstrlen)
     end
   end
@@ -170,36 +166,60 @@ function print_poly!(io::IO, p::AbstractPolynomial, cat::String, maxvarlen, maxc
   end
 end
 
+function is_oneline_printable(expo::Exponent)
+  explsum, conjsum = get_sumdegs(expo)
+  vars_deg = collect(expo.expo)
+
+  oneline = (length(expo) == 0)
+  oneline = (oneline || ((length(expo) == 2) && ((explsum, conjsum) == (1,1)))) # Hermitian product of two complex variables
+  oneline = (oneline || ((length(expo) == 2) && ((explsum, conjsum) == (2,0)) && isreal(first(vars_deg)[1]) && isreal(last(vars_deg)[1]))) # Product of two different real variables
+  oneline = (oneline || ((length(expo) == 1) && ((explsum, conjsum) == (2,0)) && isreal(first(vars_deg)[1]))) # One squared real variable
+  var = ((length(expo) == 1) && (((explsum, conjsum) == (0,1)) || ((explsum, conjsum) == (1,0)))) # One real or complex variable
+  oneline = (var || oneline)
+  return oneline
+end
+
 """
-  export_to_dat(pb_optim::Problem, outpath::String, pt::Point = Point())
+  export_to_dat(pb_optim::Problem, outpath; filename="real_minlp_instance.dat", pt=Point(), exportprecond=false)
 
 Write the `pb_optim` problem to the `outpath` folder, with the dispensory initial
 point `pt`. Output files are `real_minlp_instance.dat` and
 `real_minlp_precond_cstrs.dat`.
 """
-function export_to_dat(pb_optim::Problem, outpath::String, pt::Point = Point())
+function export_to_dat(pb_optim::Problem, outpath::String; filename::String="real_minlp_instance.dat", point::Point=Point(), exportprecond=false)
+  expos = SortedDict{Exponent, String}()
+  precond_cstrs = SortedSet{String}()
+  
+
+  ## First pass on problem for defining all monomials necessary for export
+  collect_requiredmonomials!(pb_optim.objective, expos)
+  for (ctrname, ctr) in pb_optim.constraints
+    collect_requiredmonomials!(ctr.p, expos)
+  end
+
+
   ## Get max length varname
   maxvarlen = 4
   for var in pb_optim.variables
-    if length(var[1]) > maxvarlen
-      maxvarlen = length(var[1])
-    end
+    ismatch(r" ", var[1]) && error("export_to_dat(): Variable '$var' is not suitable for dat export - no spaces allowed.")
+    (length(var[1]) > maxvarlen) && (maxvarlen = length(var[1]))
+  end
+  
+  for exponame in values(expos)
+    ismatch(r" ", exponame) && error("export_to_dat(): Variable '$var' is not suitable for dat export - no spaces allowed.")
+    (length(exponame) > maxvarlen) && (maxvarlen = length(exponame))
   end
 
   ## Get max length dat constraint name
   maxcstrlen = 9
   for cstrname in keys(pb_optim.constraints)
-    if length(cstrname) > maxcstrlen
-      maxcstrlen = length(cstrname)
-    end
+    ismatch(r" ", cstrname) && error("export_to_dat(): Constraint '$cstrname' is not suitable for dat export - no spaces allowed.")
+    ((length(cstrname) > maxcstrlen)) && (maxcstrlen = length(cstrname))
   end
 
-  # Container for monomials definition, to be written lastly
-  expos = SortedDict{Exponent, String}()
-  precond_cstrs = SortedSet{String}()
 
   isdir(outpath) || mkpath(outpath)
-  filename = joinpath(outpath, "real_minlp_instance.dat")
+  filename = joinpath(outpath, filename)
   touch(filename)
   outfile = open(filename, "w")
 
@@ -208,7 +228,7 @@ function export_to_dat(pb_optim::Problem, outpath::String, pt::Point = Point())
 
   ## Print variables
   variables = get_variables(pb_optim)
-  print_variables(outfile, variables, pt, maxvarlen, maxcstrlen)
+  print_variables(outfile, variables, point, maxvarlen, maxcstrlen)
 
   ## Print objective
   print_poly!(outfile, pb_optim.objective, "OBJ", maxvarlen, maxcstrlen, expos)
@@ -232,21 +252,24 @@ function export_to_dat(pb_optim::Problem, outpath::String, pt::Point = Point())
   close(outfile)
 
   ## Print constraints with preconditionning
-  filename = joinpath(outpath, "real_minlp_precond_cstrs.dat")
-  touch(filename)
-  outfile = open(filename, "w")
+  if exportprecond
+    filename = joinpath(outpath, "real_minlp_precond_cstrs.dat")
+    touch(filename)
+    outfile = open(filename, "w")
 
-  print_string(outfile, "#cstrname", maxcstrlen)
-  @printf(outfile, "%10s\n", "Precondtype")
-  for cstrname in precond_cstrs
-    if get_constraint(pb_optim, cstrname).precond == :sqrt
-      print_string(outfile, cstrname, maxcstrlen)
-      @printf(outfile, "%10s\n", "SQRT")
-    else
-      warn("export_dat(): Unknown preconditionning for cstr $cstrname.")
+    print_string(outfile, "#cstrname", maxcstrlen)
+    @printf(outfile, "%10s\n", "Precondtype")
+    for cstrname in precond_cstrs
+      if get_constraint(pb_optim, cstrname).precond == :sqrt
+        print_string(outfile, cstrname, maxcstrlen)
+        @printf(outfile, "%10s\n", "SQRT")
+      else
+        warn("export_dat(): Unknown preconditionning for cstr $cstrname.")
+      end
     end
+    close(outfile)
   end
-  close(outfile)
+  return
 end
 
 

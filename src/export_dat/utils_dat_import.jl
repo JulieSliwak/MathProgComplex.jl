@@ -7,13 +7,13 @@ Build the polynomial optimization problem described by the `instancepath` file,
 with the dispensory preconditionning descritpion `precondcstrspath` along with
 the initial point possibly provided in the file (defaults value is null).
 """
-function import_from_dat(instancepath::String; precondcstrspath::String="")
+function import_from_dat(instancepath::String; filename::String="real_minlp_instance.dat", precondfilename::String="")
     init_point = Point()
     variables = SortedDict{String, Variable}()
     exponents = SortedDict{String, Exponent}()
     pb = Problem()
 
-    instance_str = open(instancepath)
+    instance_str = open(joinpath(instancepath, filename))
     l = jump_comments!(instance_str)
 
 
@@ -61,6 +61,16 @@ function import_from_dat(instancepath::String; precondcstrspath::String="")
         line = matchall(r"\S+", l)
     end
 
+    ## Add final monomial
+    if line[1] == "MONO_DEF"
+        exponame = line[2]
+        var = variables[line[3]]
+        if !haskey(exponents, exponame)
+            exponents[exponame] = Exponent()
+        end
+        exponents[exponame] = product(exponents[exponame], Exponent(SortedDict(var=>Degree(parse(line[5]), parse(line[6])))))
+    end
+
     ## Reset stream to the objective defintion
     reset(instance_str)
     l = readline(instance_str)
@@ -69,7 +79,7 @@ function import_from_dat(instancepath::String; precondcstrspath::String="")
     ## Build polynomial objective
     p = Polynomial()
     while line[2] == "OBJ"
-        λ = parse(line[5]) + im*parse(line[6])
+        λ = parse_λ(line[5], line[6])
         var1, var2 = line[3:4]
         if line[1] == "MONO"
             p += λ * exponents[var1]
@@ -89,7 +99,7 @@ function import_from_dat(instancepath::String; precondcstrspath::String="")
     lb = -Inf
     ub = +Inf
     p = Polynomial()
-    λ = parse(line[5]) + im*parse(line[6])
+    λ = parse_λ(line[5], line[6])
     while next_state!=:ReadLine || (!eof(instance_str) && line[1] != "MONO_DEF")
 
         state = next_state
@@ -99,13 +109,18 @@ function import_from_dat(instancepath::String; precondcstrspath::String="")
             line = matchall(r"\S+", l)
 
             var1, var2 = line[3:4]
-            λ = parse(line[5]) + im*parse(line[6])
+            λ = parse_λ(line[5], line[6])
 
             ## Determine whether current ctr should be completed or new ctr should be set
             if line[2] == cur_ctr
                 next_state = :AssembleCtr
             else
                 next_state = :SaveCtr
+            end
+
+            ## If monomial difnition section reached, exit loop
+            if line[1] == "MONO_DEF"
+                next_state = :ReadLine 
             end
 
         elseif state == :AssembleCtr
@@ -140,8 +155,8 @@ function import_from_dat(instancepath::String; precondcstrspath::String="")
     add_constraint!(pb, String(cur_ctr), lb << p << ub)
 
     ## Set preconditioning flag
-    if precondcstrspath != ""
-        precond_str = open(precondcstrspath)
+    if precondfilename != ""
+        precond_str = open(joinpath(instancepath, precondfilename))
 
         l = jump_comments!(precond_str)
         line = matchall(r"\S+", l)
@@ -174,3 +189,23 @@ function jump_comments!(io::IOStream)
     end
     return l
 end
+
+function parse_λ(realpart::T, imagpart::T) where T <: Union{String, SubString}
+    λ = 0
+    if realpart == "Inf"
+        λ += Inf
+    elseif realpart == "-Inf"
+        λ += -Inf
+    else
+        λ += parse(realpart)
+    end
+
+    if imagpart == "Inf"
+        λ += Inf*im
+    elseif imagpart == "-Inf"
+        λ += -Inf*im
+    else
+        λ += parse(imagpart)*im
+    end
+    return λ
+end 
