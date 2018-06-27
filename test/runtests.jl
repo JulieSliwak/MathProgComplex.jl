@@ -9,6 +9,6 @@ else
 end
 
 # write your own tests here
-# include("dat_export.jl")
+include("dat_export.jl")
 include("polynomial_types.jl")
 include("jump_export.jl")
