@@ -43,15 +43,11 @@ struct Point
     end
 end
 
-function setindex!(pt::Point, var::Variable, val::Number)
-  if val != 0
-    setindex!(pt.coords, var, val)
-  end
-  return
-end
-
 function setindex!(pt::Point, val::Number, var::Variable)
-    pt.coords[var] = val
+    if val!=0 || pt.isdense
+        pt.coords[var] = val
+    end
+    return
 end
 
 Point() = Point(SortedDict{Variable, Number}())

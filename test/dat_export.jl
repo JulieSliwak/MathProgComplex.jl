@@ -29,6 +29,8 @@ using MathProgComplex
     
     qcqp2, point2 = import_from_dat(dat_exportpath, filename="POP.dat")
 
+    rm(joinpath(dat_exportpath, "POP.dat"))
+
 
     # amplscriptpath = joinpath(Pkg.dir("MathProgComplex"), "src", "export_dat")
     # run_knitro(dat_exportpath, amplscriptpath)
@@ -43,4 +45,6 @@ using MathProgComplex
         @test qcqp.constraints[ctrname].lb == qcqp2.constraints[ctrname].lb
         @test qcqp.constraints[ctrname].p == qcqp2.constraints[ctrname].p
     end
+
+    @test point == point2
 end
