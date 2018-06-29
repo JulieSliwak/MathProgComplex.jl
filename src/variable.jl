@@ -1,4 +1,4 @@
-export Degree, Variable, show
+export Degree, Variable, show, iscomplex, isreal, isbool
 
 """
     Degree(explvar::Int, conjvar::Int)
@@ -42,8 +42,8 @@ end
 #############################
 ## Type detection utils
 #############################
-isreal(x::Variable) = x.kind <: Real
 iscomplex(x::Variable) = x.kind <: Complex
+isreal(x::Variable) = x.kind <: Real
 isbool(x::Variable) = x.kind <: Bool
 
 #############################

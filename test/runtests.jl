@@ -9,6 +9,7 @@ else
 end
 
 # write your own tests here
+include("basetypes.jl")
 include("dat_export.jl")
 include("polynomial_types.jl")
 include("jump_export.jl")
