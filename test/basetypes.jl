@@ -26,9 +26,7 @@ end
     
     @test zexpo == Exponent(SortedDict(z=>Degree(1,0)))
     @test Exponent(SortedDict(z=>Degree(3,2),
-                              x=>Degree(0,0))) 
-          == 
-          Exponent(SortedDict(z=>Degree(3,2)))
+                              x=>Degree(0,0))) == Exponent(SortedDict(z=>Degree(3,2)))
 
     show(one); println()
     show(expo); println()
