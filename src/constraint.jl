@@ -71,6 +71,13 @@ function ==(p::T, x::Number) where T<:AbstractPolynomial
 end
 
 
+==(c1::Constraint, c2::Constraint) = (c1.p == c2.p) && 
+                                     (c1.ub == c2.ub) && 
+                                     (c1.lb == c2.lb) && 
+                                     (c1.precond == c2.precond)
+
+!=(c1::Constraint, c2::Constraint) = !(c1 == c2)
+
 #############################
 ## Print
 #############################
