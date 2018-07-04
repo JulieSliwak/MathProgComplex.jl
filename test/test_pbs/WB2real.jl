@@ -1,3 +1,5 @@
+using MathProgComplex
+
 
 function build_WB2real()
     WB2 = Problem()
@@ -16,7 +18,15 @@ function build_WB2real()
     add_constraint!(WB2, "BaseCase_2_BALANCE-LOAD_Re", 350.0 + (-96.15384615384615)*VOLT1_Im * VOLT2_Im + (-480.7692307692308)*VOLT1_Im * VOLT2_Re + (480.7692307692308)*VOLT1_Re * VOLT2_Im + (-96.15384615384615)*VOLT1_Re * VOLT2_Re + (96.15384615384615)*VOLT2_Im^2 + (96.15384615384615)*VOLT2_Re^2 == 0.0)
     add_constraint!(WB2, "BaseCase_2_Volt_VOLTM_Re", 0.9025 << (VOLT2_Im^2 + VOLT2_Re^2) << 1.056784)
 
+    exportpath = joinpath(Pkg.dir("MathProgComplex"), "Knitro_runs")
+    !ispath(exportpath) && mkpath(exportpath)
+
+    export_to_dat(WB2, exportpath)
+
+    run_knitro(exportpath)
+
     return WB2
 end
 
 
+build_WB2real()

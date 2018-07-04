@@ -95,7 +95,7 @@ function print_doc(io, filename)
   println(io, "# $filename - exported $(now())")
   println(io, "# Description of a QCQP optimization problem. 3 sections:")
   println(io, "#  - List of all variables in the problem, along with type, name, and possibly complex value.")
-  println(io, "#    Grouped by \"VAR_TYPE\" tag (col 1). Type is \"C\" Complex, \"R\" Real, \"BOOL\" Boolean (col 2). ")
+  println(io, "#    Grouped by \"VAR_TYPE\" tag (col 1). Type is \"C\" Complex, \"REAL\" Real, \"BOOL\" Boolean (col 2). ")
   println(io, "#    Name (col 3). Real and imag part of value (col 5 and 6 resp.).")
   println(io, "#  - Description of the objective function (one quadratic polynomial).")
   println(io, "#    Sum of monomials, grouped by \"OBJ\" (col 2), either:")
@@ -124,7 +124,7 @@ function print_variables(io::IO, variables, pt::Point, maxvarlen, maxcstrlen)
     elseif isbool(var)
       var_type = "BOOL"
     elseif isreal(var)
-      var_type = "R"
+      var_type = "REAL"
     else
       error("Export_to_dat(): unsuported variable type $(var.kind)")
     end
@@ -252,13 +252,13 @@ function export_to_dat(pb_optim::Problem, outpath::String; filename::String="rea
   close(outfile)
 
   ## Print constraints with preconditionning
-  if exportprecond
-    filename = joinpath(outpath, "real_minlp_precond_cstrs.dat")
-    touch(filename)
-    outfile = open(filename, "w")
+  filename = joinpath(outpath, "real_minlp_precond_cstrs.dat")
+  touch(filename)
+  outfile = open(filename, "w")
 
-    print_string(outfile, "#cstrname", maxcstrlen)
-    @printf(outfile, "%10s\n", "Precondtype")
+  print_string(outfile, "#cstrname", maxcstrlen)
+  @printf(outfile, "%10s\n", "Precondtype")
+  if exportprecond
     for cstrname in precond_cstrs
       if get_constraint(pb_optim, cstrname).precond == :sqrt
         print_string(outfile, cstrname, maxcstrlen)
@@ -267,8 +267,9 @@ function export_to_dat(pb_optim::Problem, outpath::String; filename::String="rea
         warn("export_dat(): Unknown preconditionning for cstr $cstrname.")
       end
     end
-    close(outfile)
   end
+  close(outfile)
+
   return
 end
 
