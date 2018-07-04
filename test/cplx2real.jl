@@ -21,5 +21,34 @@
     preal, pimag = cplx2real(expo_cplx)
     @test preal == Polynomial(SortedDict{Exponent, Number}(expo_real=>1.0))
     @test pimag == Polynomial(SortedDict{Exponent, Number}(expo_imag=>1.0))
+end
 
+@testset "cplx2real - Polynomial" begin
+    # cplx2real
+end
+
+@testset "cplx2real - Point" begin
+    z1 = Variable("z1", Complex)
+    z2 = Variable("z2", Complex)
+    x = Variable("x", Real)
+    b = Variable("b", Bool)
+
+    pt_c = Point(SortedDict(z1=>1+2im,
+                            z2=>3im,
+                            x=>3.5,
+                            b=>1))
+
+    z1_Re = Variable("z1_Re", Real)
+    z1_Im = Variable("z1_Im", Real)
+    z2_Im = Variable("z2_Im", Real)
+
+    pt_re = Point(SortedDict(z1_Re=>1,
+                             z1_Im=>2,
+                             z2_Im=>3,
+                             x=>3.5,
+                             b=>1))
+
+    @test cplx2real(pt_c) == pt_re
+
+    @test real2cplx(pt_re) == pt_c
 end

@@ -70,17 +70,7 @@ end
 #############################
 ## Equality, hash
 #############################
-function ==(pt1::Point, pt2::Point)
-  if length(pt1) != length(pt2)
-    return false
-  end
-  for (var1, val1) in pt1
-    if !haskey(pt2, var1) || pt2[var1] != val1
-      return false
-    end
-  end
-  true
-end
+==(pt1::Point, pt2::Point) = (pt1.coords == pt2.coords) && (pt1.isdense == pt2.isdense)
 !=(pt1::Point, pt2::Point) = !(pt1 == pt2)
 
 
