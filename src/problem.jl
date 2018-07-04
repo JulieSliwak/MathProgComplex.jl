@@ -29,7 +29,19 @@ mutable struct Problem
   variables::SortedDict{String, Type}
 end
 
+#############################
+## Constructors
+#############################
 Problem() = Problem(Polynomial(), SortedDict{String, Constraint}(), SortedDict{String, Type}())
+
+
+#############################
+## Equality, hash
+#############################
+==(pb1::Problem, pb2::Problem) = (pb1.objective == pb2.objective) &&
+                                 (pb1.constraints == pb2.constraints) &&
+                                 (pb1.variables == pb2.variables)
+!=(pb1::Problem, pb2::Problem) = !(pb1==pb2)
 
 
 #############################

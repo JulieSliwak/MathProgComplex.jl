@@ -47,6 +47,23 @@ Polynomial() = Polynomial(SortedDict{Exponent, Number}())
 
 
 #############################
+## Equality, hash
+#############################
+function ==(p1::Polynomial, p2::Polynomial)
+  if (length(p1) != length(p2)) || (p1.degree != p2.degree)
+    return false
+  end
+  for (exponent, coeff) in p1
+    if !haskey(p2, exponent) || (coeff != p2.poly[exponent])
+      return false
+    end
+  end
+  true
+end
+!=(pol1::Polynomial, pol2::Polynomial) = !(pol1 == pol2)
+
+
+#############################
 ## Print
 #############################
 function Base.print(io::IO, P::Polynomial)

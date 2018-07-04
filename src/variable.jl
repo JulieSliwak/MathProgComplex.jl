@@ -15,9 +15,17 @@ mutable struct Degree
     conjvar::Int
 end
 
+#############################
+## Equality, hash
+#############################
+==(d1::Degree, d2::Degree) = (d1.explvar==d2.explvar) && (d1.conjvar==d2.conjvar)
+!=(d1::Degree, d2::Degree) = !(d1 == d2)
+hash(deg::Degree, h::UInt) = hash(deg.explvar, hash(deg.conjvar, h))
+
+
 
 """
-    Variable(varname::String, Complex)
+Variable(varname::String, Complex)
 
 Define a mathematical variable `varname` of a certain mathematical kind,
 `Complex` here.
@@ -38,6 +46,14 @@ mutable struct Variable <: AbstractPolynomial
         return new(String(name), kind)
     end
 end
+
+#############################
+## Equality, hash
+#############################
+==(x::Variable, y::Variable) = (x.name==y.name) && (x.kind==y.kind)
+!=(x::Variable, y::Variable) = !(x == y)
+hash(var::Variable, h::UInt) = hash(var.name, hash(var.kind, h))
+
 
 #############################
 ## Type detection utils
