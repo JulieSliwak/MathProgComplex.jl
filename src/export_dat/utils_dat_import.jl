@@ -154,6 +154,8 @@ function import_from_dat(instancepath::String; filename::String="real_minlp_inst
     # Add final constraint
     add_constraint!(pb, String(cur_ctr), lb << p << ub)
 
+    close(instance_str)
+
     ## Set preconditioning flag
     if precondfilename != ""
         precond_str = open(joinpath(instancepath, precondfilename))
@@ -169,6 +171,7 @@ function import_from_dat(instancepath::String; filename::String="real_minlp_inst
             l = readline(precond_str)
             line = matchall(r"\S+", l)
         end
+        close(precond_str)
     end
 
     return pb, point

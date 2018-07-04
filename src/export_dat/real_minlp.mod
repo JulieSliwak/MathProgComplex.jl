@@ -93,7 +93,6 @@ subject to constraint{ctr in CONSTRAINTS diff SQRT_PRECOND_CSTR}:
 
 /* SQRT precond constraints */
 subject to sqrt_constraint{ctr in SQRT_PRECOND_CSTR}:
-	#+(if ctr in CONSTRAINTS_LB then LEFT[LB, ctr, NONE, NONE] else -Infinity)
 	+(if ctr in CONSTRAINTS_LB then sqrt(LEFT[LB, ctr, NONE, NONE]) else -Infinity)
 	<=
 	sqrt(
@@ -116,5 +115,4 @@ subject to sqrt_constraint{ctr in SQRT_PRECOND_CSTR}:
 	)
 	<=
 	+(if ctr in CONSTRAINTS_UB then sqrt(LEFT[UB, ctr, NONE, NONE]) else +Infinity)
-	#+(if ctr in CONSTRAINTS_UB then LEFT[UB, ctr, NONE, NONE] else +Infinity)
-	;
+;
