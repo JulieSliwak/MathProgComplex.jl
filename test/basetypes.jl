@@ -157,6 +157,7 @@ end
     ctrs = SortedDict{String, Constraint}("ctr1" => ((-3+5im) << p1),
                                           "ctr2" => (p1 == 2.5))
     pb = Problem(p1, ctrs, vars)
+    Problem()
 
     io = IOBuffer()
     print(io, pb)

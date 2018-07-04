@@ -39,8 +39,7 @@ function product(p1::Polynomial, p2::Polynomial)
             add_to_dict!(p.poly, expoprod, λ1 * λ2)
         end
     end
-    p.degree.explvar = p1.degree.explvar+p2.degree.explvar
-    p.degree.conjvar = p1.degree.conjvar+p2.degree.conjvar
+    update_degree!(p)
     return p
 end
 
