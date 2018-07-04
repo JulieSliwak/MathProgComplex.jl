@@ -105,8 +105,6 @@ end
 
     C1 = p1 << ub_c
     C2 = ub_c >> p1
-    @show C1
-    @show Constraint(p1, -Inf-Inf*im, ub_c)
     @test C1 == Constraint(p1, -Inf-Inf*im, ub_c)
     @test C2 == Constraint(p1, -Inf-Inf*im, ub_c)
 
