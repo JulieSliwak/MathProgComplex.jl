@@ -20,6 +20,7 @@
 #   return sol_cplx
 # end
 
+export run_knitro
 
 """
 sol = read_Knitro_output(filepath)
@@ -49,7 +50,7 @@ Run knitro on the `real_minlp.run`, `real_minlp.run` template scripts from the
 `src_ampl_path` folder and `pb_path` files ("real_minlp_instance.dat" and
 "real_minlp_precond_cstrs.dat").
 """
-function run_knitro(pb_path::String, src_ampl_path::String)
+function run_knitro(pb_path::String; src_ampl_path::String=joinpath(Pkg.dir("MathProgComplex"), "src", "export_dat"))
     root = pwd()
     date = Dates.format(now(), "yy_u_dd_HH_MM_SS")
     outlog = "Knitro_$(date).log"
@@ -65,8 +66,8 @@ function run_knitro(pb_path::String, src_ampl_path::String)
     end
 
     try
-        run(`cmd /c ampl real_minlp.run '>' $(outlog)`)
-        # run(`cmd /c ampl real_minlp.run `)
+        # run(`cmd /c ampl real_minlp.run '>' $(outlog)`)
+        run(`cmd /c ampl real_minlp.run `)
     catch
         warn("AMPL/Knitro failed, returning.")
     end

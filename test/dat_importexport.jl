@@ -1,4 +1,4 @@
-using MathProgComplex
+using MathProgComplex, JuMP, Ipopt
 
 @testset "dat export import consistency check" begin
     # min x - y
@@ -26,14 +26,10 @@ using MathProgComplex
     mkpath(splitdir(dat_exportpath)[1])
 
     export_to_dat(qcqp, dat_exportpath, filename="POP.dat", point=point)
-    
+
     qcqp2, point2 = import_from_dat(dat_exportpath, filename="POP.dat")
 
     rm(joinpath(dat_exportpath, "POP.dat"))
-
-
-    # amplscriptpath = joinpath(Pkg.dir("MathProgComplex"), "src", "export_dat")
-    # run_knitro(dat_exportpath, amplscriptpath)
 
     @test qcqp.variables == qcqp2.variables
     @test qcqp.objective == qcqp2.objective
@@ -47,4 +43,21 @@ using MathProgComplex
     end
 
     @test point == point2
+
+    rm(dat_exportpath, recursive=true)
+end
+
+@testset "WB5.dat import and Ipopt solve" begin
+    instancepath = joinpath(Pkg.dir("MathProgComplex"), "test", "instances")
+    WB5_cplx, initpt = import_from_dat(instancepath, filename="WB5.dat")
+
+    WB5 = pb_cplx2real(WB5_cplx)
+
+    mysolver = IpoptSolver(print_level = 0)
+    m, variables_jump, ctr_jump, ctr_exp = get_JuMP_cartesian_model(WB5, mysolver)
+    solve(m)
+
+    sol = get_JuMP_solution(m, variables_jump, WB5)
+
+    @test get_objective(WB5, sol) ≈ 1146.478 atol=1e-3
 end

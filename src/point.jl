@@ -43,13 +43,10 @@ struct Point
     end
 end
 
-function setindex!(pt::Point, val::Number, var::Variable)
-    if val!=0 || pt.isdense
-        pt.coords[var] = val
-    end
-    return
-end
 
+#############################
+## Constructors
+#############################
 Point() = Point(SortedDict{Variable, Number}())
 
 function Point(vars::Array{Variable}, vals::Array{<:Number})
@@ -69,6 +66,22 @@ function Point(vars::Array{Variable}, vals::Array{<:Number})
     return pt
 end
 
+
+#############################
+## Equality, hash
+#############################
+==(pt1::Point, pt2::Point) = (pt1.coords == pt2.coords) && (pt1.isdense == pt2.isdense)
+!=(pt1::Point, pt2::Point) = !(pt1 == pt2)
+
+
+
+
+function setindex!(pt::Point, val::Number, var::Variable)
+    if val!=0 || pt.isdense
+        pt.coords[var] = val
+    end
+    return
+end
 
 #############################
 ## Print

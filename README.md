@@ -93,9 +93,9 @@ val_imag = evaluate(p_imag, pt_r) # 0
 - A `Constraint` structure holds a `Polynomial` and complex upper and lower bounds.
 
 - A `Problem` is made up of:
-    - the collection of `Variable`s of the problem (updated internally),
-    - a `Polynomial` objective,
-    - several named `constraint`s.
+  - the collection of `Variable`s of the problem (updated internally),
+  - a `Polynomial` objective,
+  - several named `constraint`s.
 
 #### Implemented methods
 

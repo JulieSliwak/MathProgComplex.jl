@@ -40,8 +40,31 @@ struct Exponent <: AbstractPolynomial
     end
 end
 
+
+#############################
+## Constructors
+#############################
 Exponent() = Exponent(SortedDict{Variable, Degree}())
 Exponent(x::Variable) = Exponent(SortedDict{Variable, Degree}(x=>Degree(1,0)))
+
+
+
+#############################
+## Equality, hash
+#############################
+function ==(exp1::Exponent, exp2::Exponent)
+  (length(exp1.expo) == length(exp2.expo)) || return false
+
+  for (varname, deg) in exp2.expo
+    if !haskey(exp1.expo, varname) || exp1.expo[varname] != deg
+      return false
+    end
+  end
+  return true
+end
+!=(exp1::Exponent, exp2::Exponent) = !(exp1 == exp2)
+hash(expo::Exponent, h::UInt) = hash(expo.degree, hash(expo.expo, h))
+
 
 
 #############################
