@@ -58,10 +58,6 @@ end
     @test String(take!(io)) == "-1 + (5 + 3im)*a + conj(a) * a"
 end
 
-@testset "add_to_dict! tests" begin
-    
-end
-
 @testset "Point type" begin
 
     pt = Point()
@@ -80,8 +76,12 @@ end
 
 
     pt = Point(pointdict)
+    @test pt == Point([z x1 x2 b b1], [1+2im 3.5 0 1 3.5])
+    @test length(pt) == 4
 
-
+    io = IOBuffer()
+    print(io, pt)
+    @test String(take!(io)) == "b  1\nb1 1\nx1 3.5\nz  1 + 2im\n"
 end
 
 @testset "Constraint type" begin
