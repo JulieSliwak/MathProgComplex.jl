@@ -9,6 +9,9 @@
     @test isreal(x) == true
     @test isbool(b) == true
 
+    @test hash(Degree(1,3)) == hash(Degree(1,3))
+    @test hash(Variable("a",Complex)) == hash(Variable("a",Complex))
+
     show(d)
     show(z)
     println()
@@ -18,12 +21,12 @@ end
 @testset "Exponent type" begin
     z = Variable("z", Complex)
     x = Variable("x", Real)
-    
+
     one = Exponent()
     zexpo = Exponent(z)
     expo = Exponent(SortedDict(z=>Degree(3,2),
                                x=>Degree(2,0)))
-    
+
     @test zexpo == Exponent(SortedDict(z=>Degree(1,0)))
     @test Exponent(SortedDict(z=>Degree(3,2),
                               x=>Degree(0,0))) == Exponent(SortedDict(z=>Degree(3,2)))
@@ -49,7 +52,7 @@ end
                                                     expoa=>5+3im,
                                                     expob=>0,
                                                     one=>-1))
-    
+
     io = IOBuffer()
     print(io, p_obj)
     @test String(take!(io)) == "-1 + (5 + 3im)*a + conj(a) * a"
@@ -118,7 +121,8 @@ end
     @test (C1 << ub_c) == Constraint(p1, lb_c, ub_c)
     @test (ub_c >> C2) == Constraint(p1, lb_c, ub_c)
 
-    @test (p1 == ub_c) ==  Constraint(p1, ub_c, ub_c)
+    @test (p1 == ub_c) == Constraint(p1, ub_c, ub_c)
+    @test (p1 == ub_c) != (p1 << ub_c)
 
     io = IOBuffer()
     print(io, Constraint(p1, lb_c, ub_c))
