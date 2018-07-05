@@ -49,7 +49,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
             # Deal with lower inequality
             clique_keys, order = localizingmat_param[cstrname_lo]
             vars, cliquename = collect_cliquesvars(clique_keys, max_cliques)
-            # length(clique_keys) == 1 || error("MomentRelaxation(): constraint $cstrname spans several cliques ($clique_keys).\nNot supported yet.")
+            # length(clique_keys) == 1 || error("build_momentrelaxation(): constraint $cstrname spans several cliques ($clique_keys).\nNot supported yet.")
 
             mmt = MomentMatrix{T}(relax_ctx, vars, order, relax_ctx.symmetries,
                                                           relax_ctx.cstrtypes[cstrname_lo],
@@ -61,7 +61,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
             # Deal with upper inequality
             clique_keys, order = localizingmat_param[cstrname_up]
             vars, cliquename = collect_cliquesvars(clique_keys, max_cliques)
-            # length(clique_keys) == 1 || error("MomentRelaxation(): constraint $cstrname spans several cliques ($clique_keys).\nNot supported yet.")
+            # length(clique_keys) == 1 || error("build_momentrelaxation(): constraint $cstrname spans several cliques ($clique_keys).\nNot supported yet.")
 
             mmt = MomentMatrix{T}(relax_ctx, vars, order, relax_ctx.symmetries,
                                                           relax_ctx.cstrtypes[cstrname_up],
@@ -74,7 +74,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
             # clique_keys_up, order_up = localizingmat_param[cstrname_up]
             # if collect(clique_keys) != collect(clique_keys_up)
             #     warn("clique keys different from lower and upper side of double constraint")
-            #     length(clique_keys_up) == 1 || error("MomentRelaxation(): constraint $cstrname spans several cliques ($clique_keys).\nNot supported yet.")
+            #     length(clique_keys_up) == 1 || error("build_momentrelaxation(): constraint $cstrname spans several cliques ($clique_keys).\nNot supported yet.")
             #     vars, cliquename = collect_cliquesvars(clique_keys_up, max_cliques)
 
             #     mmt = MomentMatrix(relax_ctx, vars, order_up, relax_ctx.symmetries,
@@ -92,7 +92,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
             # either cstrtype == :ineqlo, :ineqhi, :eq
             clique_keys, order = localizingmat_param[get_cstrname(cstrname, cstrtype)]
             vars, cliquename = collect_cliquesvars(clique_keys, max_cliques)
-            # length(clique_keys) == 1 || error("MomentRelaxation(): constraint $cstrname spans several cliques ($clique_keys).\nNot supported yet.")
+            # length(clique_keys) == 1 || error("build_momentrelaxation(): constraint $cstrname spans several cliques ($clique_keys).\nNot supported yet.")
 
             mmt = MomentMatrix{T}(relax_ctx, vars, order, relax_ctx.symmetries,
                                                           relax_ctx.cstrtypes[get_cstrname(cstrname, cstrtype)],
