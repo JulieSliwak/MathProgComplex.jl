@@ -15,6 +15,7 @@ before_install:
   - julia -e 'Pkg.update()' #make sure we get the latest version of METADATA
   - julia -e 'if !("Coverage" in keys(Pkg.installed())) Pkg.add("Coverage") end'
   - julia -e 'if !("Documenter" in keys(Pkg.installed())) Pkg.add("Documenter") end'
+  - julia -e 'if !("OPFInstances" in keys(Pkg.installed())) Pkg.clone("https://github.com/JulieSliwak/OPFInstances.jl.git") end'
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.clone(pwd())'
