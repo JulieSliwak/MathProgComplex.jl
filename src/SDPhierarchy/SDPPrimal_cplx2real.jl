@@ -1,5 +1,5 @@
 
-function SDPInstance_cplx2real(sdp::SDPInstance{T}) where T<:Complex
+function SDPPrimal_cplx2real(sdp::SDPPrimal{T}) where T<:Complex
 
     block_to_vartype = Dict{String, Symbol}()
     sdpblocks = Dict{Tuple{Moment, String, Exponent, Exponent}, Float64}()
@@ -99,11 +99,11 @@ function SDPInstance_cplx2real(sdp::SDPInstance{T}) where T<:Complex
         elseif vartype == :SymC
             block_to_vartype[block] = :Sym
         else
-            error("SDPInstance_cplx2real(): Unhandled matrix type $vartype for $block")
+            error("SDPPrimal_cplx2real(): Unhandled matrix type $vartype for $block")
         end
     end
 
-    return SDPInstance(block_to_vartype, sdpblocks, sdplinsym, sdplin, sdpcst)
+    return SDPPrimal(block_to_vartype, sdpblocks, sdplinsym, sdplin, sdpcst)
 end
 
 

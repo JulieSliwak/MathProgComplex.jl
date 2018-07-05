@@ -4,7 +4,7 @@
 # using DataStructures
 using OPFInstances
 
-export RelaxationContext, Moment, MomentMatrix, SDPDual, SDPInstance
+export RelaxationContext, Moment, MomentMatrix, SDPDual, SDPPrimal
 export SDP_Instance, SDP_Block, SDP_Moment, SDP_Problem
 
 
@@ -86,7 +86,7 @@ include(joinpath("core", "build_momentrelaxation.jl"))
 ###############################################################################
 ## SOS Problem
 ###############################################################################
-mutable struct SDPInstance{T}
+mutable struct SDPPrimal{T}
     block_to_vartype::Dict{String, Symbol}                       # Either :SDP, :Sym, :SDPc, :SymC
     blocks::Dict{Tuple{Moment, String, Exponent, Exponent}, T}   # ((α, β), block_name, γ, δ) -> coeff
     linsym::Dict{Tuple{Moment, String, Exponent}, T}             # ((α, β), block_name, var) -> coeff
@@ -95,8 +95,8 @@ mutable struct SDPInstance{T}
 end
 
 include(joinpath("core", "build_SOSrelaxation.jl"))
-include(joinpath("io", "export_SDPInstance.jl"))
-include("SDPInstance_cplx2real.jl")
+include(joinpath("io", "export_SDPPrimal.jl"))
+include("SDPPrimal_cplx2real.jl")
 
 
 

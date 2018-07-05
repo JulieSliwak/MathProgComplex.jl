@@ -1,6 +1,6 @@
-export read_SDPInstance, set_constraints!, set_vartypes!, set_blocks!, set_linvars!, set_matrices!, set_linear!, set_const!, print
+export read_SDPPrimal, set_constraints!, set_vartypes!, set_blocks!, set_linvars!, set_matrices!, set_linear!, set_const!, print
 
-function read_SDPInstance(path::String)
+function read_SDPPrimal(path::String)
   BLOCKS = readdlm(joinpath(path, "matrix.sdp"), String)
   if isfile(joinpath(path, "lin.sdp")) && length(matchall(r"\n", readstring(joinpath(path, "lin.sdp")))) > 7
     LINEAR = readdlm(joinpath(path, "lin.sdp"), String)

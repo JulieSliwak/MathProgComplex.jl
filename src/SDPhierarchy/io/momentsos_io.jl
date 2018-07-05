@@ -158,7 +158,7 @@ end
 ###############################################################################
 ####  SOS problem construction
 ###############################################################################
-function print_build_SOSrelax(relax_ctx::RelaxationContext, sosrel::SDPInstance)
+function print_build_SOSrelax(relax_ctx::RelaxationContext, sosrel::SDPPrimal)
     relaxparams = relax_ctx.relaxparams
 
     (relaxparams[:opt_outlev] == 0) && return
@@ -217,7 +217,7 @@ function print_build_SOSrelax(relax_ctx::RelaxationContext, sosrel::SDPInstance)
 end
 
 
-function print(io::IO, sdpinst::SDPInstance)
+function print(io::IO, sdpinst::SDPPrimal)
     println(io, " -- SDP Blocks:")
     print(io, sdpinst.blocks)
     println(io, " -- linear part:")

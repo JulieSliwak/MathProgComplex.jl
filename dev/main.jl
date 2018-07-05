@@ -11,8 +11,8 @@ function main()
     problem = buildPOP_WB5()
     relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                         # symmetries=[PhaseInvariance],
-                                        d = 1,
-                                        params = Dict(:opt_outlev=>0,
+                                        d = 2,
+                                        params = Dict(:opt_outlev=>1,
                                                       :opt_outmode=>0,
                                                       :opt_outcsv=>0))
 
@@ -48,7 +48,7 @@ function main()
 
     ########################################
     # Build the moment relaxation problem
-    mmtrel_pb = MomentRelaxation{Float64}(relax_ctx, problem, momentmat_param, localizingmat_param, max_cliques)
+    mmtrel_pb = build_momentrelaxation(relax_ctx, problem, momentmat_param, localizingmat_param, max_cliques)
 
     # println("\n--------------------------------------------------------")
     # println("mmtrel_pb = $mmtrel_pb")
@@ -63,7 +63,7 @@ function main()
     path = joinpath(pwd(), "Mosek_runs", "worksdp")
     mkpath(path)
     export_SDP(sdpinstance, path)
-    sdp_instance = read_SDPInstance(path)
+    sdp_instance = read_SDPPrimal(path)
 
     # println("VAR_TYPES size:     $(size(sdp_instance.VAR_TYPES))")
     # println("BLOCKS size:        $(size(sdp_instance.BLOCKS))")

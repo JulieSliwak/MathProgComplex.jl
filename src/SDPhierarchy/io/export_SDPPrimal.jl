@@ -1,6 +1,6 @@
 export export_SDP
 
-function export_SDP(sdp::SDPInstance, path; indentedprint=true, renamemoments=true)
+function export_SDP(sdp::SDPPrimal, path; indentedprint=true, renamemoments=true)
 
     # Build moment shortname dict if required
     momentdict = build_momentdict(sdp, renamemoments)
@@ -121,7 +121,7 @@ function build_momentdict(sdp, renamemoments::Bool)
     return momentdict
 end
 
-function build_ctrkeysset(sdp::SDPInstance{T}) where T
+function build_ctrkeysset(sdp::SDPPrimal{T}) where T
     ctr_keys = Set{Moment}()
 
     for ((moment, blockname, γ, δ), λ) in sdp.blocks

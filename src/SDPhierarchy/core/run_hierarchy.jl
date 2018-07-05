@@ -109,7 +109,7 @@ end
     Build the sdp problem described at `logpath` into the generic structure interfaced with SDP solvers (Mosek for now).
 """
 function build_mosekpb(logpath::String)
-    sdp_instance = read_SDPInstance(logpath)
+    sdp_instance = read_SDPPrimal(logpath)
 
     sdp = SDP_Problem()
 
@@ -125,12 +125,12 @@ function build_mosekpb(logpath::String)
 end
 
 
-function build_mosekpb(SOS_pb::SDPInstance, logpath::String; indentedprint=false)
+function build_mosekpb(SOS_pb::SDPPrimal, logpath::String; indentedprint=false)
     export_SDP(SOS_pb, logpath, indentedprint=indentedprint)
 
     sdp = build_mosekpb(logpath)
 
-    sdp_instance = read_SDPInstance(logpath)
+    sdp_instance = read_SDPPrimal(logpath)
 
     sdp = SDP_Problem()
 

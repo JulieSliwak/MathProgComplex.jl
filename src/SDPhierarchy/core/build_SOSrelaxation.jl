@@ -85,7 +85,7 @@ function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::SDPDual{T
         # sdpcst[moment] += fαβ
     end
 
-    sosrelaxation = SDPInstance{T}(block_to_vartype, sdpblocks, sdplinsym, sdplin, sdpcst)
+    sosrelaxation = SDPPrimal{T}(block_to_vartype, sdpblocks, sdplinsym, sdplin, sdpcst)
 
     print_build_SOSrelax(relaxctx, sosrelaxation)
     return sosrelaxation
