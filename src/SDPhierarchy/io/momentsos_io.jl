@@ -8,7 +8,7 @@ function print_build_relctx(relax_ctx, pb)
 
     outstream = []
     relaxparams[:opt_outmode]!=1 && push!(outstream, STDOUT)
-    relaxparams[:opt_outmode]≥0  && push!(outstream, open(relaxparams[:opt_outname], "a"))
+    relaxparams[:opt_outmode]>0  && push!(outstream, open(relaxparams[:opt_outname], "a"))
 
     (relaxparams[:opt_outlev] == 0) && return
 
@@ -100,7 +100,7 @@ function print_build_momentrelax(relax_ctx, momentrelaxation, nb_expos)
 
     outstream = []
     relaxparams[:opt_outmode]!=1 && push!(outstream, STDOUT)
-    relaxparams[:opt_outmode]≥0  && push!(outstream, open(relaxparams[:opt_outname], "a"))
+    relaxparams[:opt_outmode]>0  && push!(outstream, open(relaxparams[:opt_outname], "a"))
 
 
     for outstr in outstream
@@ -165,7 +165,7 @@ function print_build_SOSrelax(relax_ctx::RelaxationContext, sosrel::SDPPrimal)
 
     outstream = []
     relaxparams[:opt_outmode]!=1 && push!(outstream, STDOUT)
-    relaxparams[:opt_outmode]≥0  && push!(outstream, open(relaxparams[:opt_outname], "a"))
+    relaxparams[:opt_outmode]>0  && push!(outstream, open(relaxparams[:opt_outname], "a"))
 
     ## Compute indicators
     nb_SDPvars = length(Set([(key[2]) for key in keys(sosrel.blocks)]))
