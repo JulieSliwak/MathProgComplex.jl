@@ -1,14 +1,16 @@
-export MomentRelaxation
+export build_momentrelaxation
 
 """
-    momentrelaxation = MomentRelaxation(relax_ctx, problem, moment_param::Dict{String, Tuple{Set{String}, Int}}, max_cliques::Dict{String, Set{Variable}})
+    momentrelaxation = build_momentrelaxation(relax_ctx, problem, moment_param::Dict{String, Tuple{Set{String}, Int}}, max_cliques::Dict{String, Set{Variable}})
 
     Compute the `momentrelaxation` of `problem` corresponding to the clique decomposition `max_cliques` and parameters `moment_param`.
 """
-function MomentRelaxation{T}(relax_ctx::RelaxationContext, problem::Problem,
-                                                           momentmat_param::Dict{String, Int},
-                                                           localizingmat_param::Dict{String, Tuple{Set{String}, Int}},
-                                                           max_cliques::Dict{String, Set{Variable}}) where T<:Number
+function build_momentrelaxation(relax_ctx::RelaxationContext,
+                                problem::Problem,
+                                momentmat_param::Dict{String, Int},
+                                localizingmat_param::Dict{String, Tuple{Set{String}, Int}},
+                                max_cliques::Dict{String, Set{Variable}};
+                                T=Float64)
 
     var_to_cliques = Dict{Variable, Set{String}}()
     for (clique, vars) in max_cliques
@@ -126,7 +128,7 @@ function MomentRelaxation{T}(relax_ctx::RelaxationContext, problem::Problem,
         length(cliques) > 1 || delete!(expo_to_cliques, expo)
     end
 
-    momentrelaxation = MomentRelaxation{T}(objective, momentmatrices, expo_to_cliques)
+    momentrelaxation = SDPDual{T}(objective, momentmatrices, expo_to_cliques)
 
     print_build_momentrelax(relax_ctx, momentrelaxation, nb_expos)
 

@@ -18,7 +18,7 @@ So far, the ``src_SOShierarchy`` code is able to trnasform a ``Problem`` object 
     moments_params = build_sparsity(relax_ctx, problem, max_cliques)
 
     # Compute partial moment hierarchy
-    mmtrel_pb = MomentRelaxationPb(relax_ctx, problem, moments_params, max_cliques)
+    mmtrel_pb = buld_momentrelaxation(relax_ctx, problem, moments_params, max_cliques)
 
     # Convert to a primal SDP problem
     SDP_body, SDP_rhs = build_SDP(relax_ctx, mmtrel_pb)

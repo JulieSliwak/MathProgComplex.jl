@@ -4,15 +4,9 @@
 # using DataStructures
 using OPFInstances
 
-export RelaxationContext, Moment, MomentMatrix, MomentRelaxation, SDPInstance
+export RelaxationContext, Moment, MomentMatrix, SDPDual, SDPInstance
 export SDP_Instance, SDP_Block, SDP_Moment, SDP_Problem
 
-
-export hithere
-
-function hithere()
-    println("Hithere")
-end
 
 ###############################################################################
 ## Relaxation context, symmetries and cliques
@@ -75,14 +69,14 @@ end
 include(joinpath("base_types", "momentmatrix.jl"))
 
 """
-    momentrel = MomentRelaxation(obj, cstrs)
+    momentrel = SDPDual(obj, cstrs, moment_overlap)
 
     Store a Moment Relaxation problem.
 """
-struct MomentRelaxation{T}
-    objective::Dict{Moment, T}
-    constraints::Dict{Tuple{String, String}, MomentMatrix{T}}
-    moments_overlap::Dict{Exponent, Set{String}}
+struct SDPDual{T}
+    objective::Dict{Moment, T}                                  # A linear comb. of moments, to be maximized
+    constraints::Dict{Tuple{String, String}, MomentMatrix{T}}   # A set of moment matrices, either SDP or Null. A constraint (`key[1]`) can be split on several cliques (`key[2]`)
+    moments_overlap::Dict{Exponent, Set{String}}                # A set of clique per exponent, describing coupling constraints
 end
 
 include(joinpath("core", "build_momentrelaxation.jl"))

@@ -7,10 +7,7 @@ import Base: +, -, *, /, ^, conj, conj!, abs2, norm, real, imag
 import Base: show, print, convert, copy, hash, merge
 import Base: start, next, done, length, setindex!, getindex, haskey, keys, values, deepcopy
 
-export hellothere, AbstractPolynomial
-function hellothere()
-    println("hellothere")
-end
+export AbstractPolynomial
 
 abstract type  AbstractPolynomial end
 
@@ -45,9 +42,6 @@ include(joinpath("export_dat", "utils_dat_import.jl"))
 ## export JuMP
 include(joinpath("export_JuMP", "utils_jump.jl"))
 
-# include("utils_jump.jl")
-
-# include("utils_Poly.jl")
 
 # SDPhierarchy function
 include(joinpath("SDPhierarchy", "SDPhierarchy.jl"))

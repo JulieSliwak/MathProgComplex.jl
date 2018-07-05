@@ -1,6 +1,6 @@
 export build_SOSrelaxation
 
-function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::MomentRelaxation{T}; debug=false) where T<:Number
+function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::SDPDual{T}; debug=false) where T<:Number
     sdpblocks = Dict{Tuple{Moment, String, Exponent, Exponent}, T}()
     sdplinsym = Dict{Tuple{Moment, String, Exponent}, T}()
     sdplin = Dict{Tuple{Moment, Exponent}, T}()

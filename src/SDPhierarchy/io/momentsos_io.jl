@@ -105,8 +105,8 @@ function print_build_momentrelax(relax_ctx, momentrelaxation, nb_expos)
 
     for outstr in outstream
         if relaxparams[:opt_outlev] ≥ 1
-            println(outstr, "\n=== MomentRelaxation(relax_ctx, problem, moment_param::Dict{String, Tuple{Set{String}, Int}}, max_cliques::Dict{String, Set{Variable}})")
-            println(outstr, "Compute the moment and localizing matrices associated with the problem constraints and clique decomposition and return a MomentRelaxation object.")
+            println(outstr, "\n=== build_momentrelaxation(relax_ctx, problem, moment_param::Dict{String, Tuple{Set{String}, Int}}, max_cliques::Dict{String, Set{Variable}})")
+            println(outstr, "Compute the moment and localizing matrices associated with the problem constraints and clique decomposition and return a SDPDual object.")
 
             if relaxparams[:opt_outlev] ≥ 3
                 print(outstr, momentrelaxation)
@@ -123,7 +123,7 @@ function print_build_momentrelax(relax_ctx, momentrelaxation, nb_expos)
 end
 
 
-function print(io::IO, momentrelax::MomentRelaxation{T}) where T
+function print(io::IO, momentrelax::SDPDual{T}) where T
     println(io, "Moment Relaxation Problem:")
     println(io, "→ Objective: ")
     momentlen = maximum(x->length(string(x)), keys(momentrelax.objective))
