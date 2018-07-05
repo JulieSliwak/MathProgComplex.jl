@@ -1,5 +1,7 @@
-include(joinpath(ROOT, "src_PowSysMod", "PowSysMod_body.jl"))
-
+export buildPOP_1v1c, buildPOP_1v2c, buildPOP_1v2, buildPOP_EllJoszMolc
+export buildPOP_WB2, buildPOP_WB5
+export lasserre_ex1, lasserre_ex2, lasserre_ex3, lasserre_ex5
+export get_WB5cliques, get_case9cliques
 
 ############################
 ### Geometric problems
@@ -62,8 +64,9 @@ end
 ############################
 
 function buildPOP_WB2(; v2max = 0.976, rmeqs = false, setnetworkphase=false, addball=false)
-    OPFpbs = load_OPFproblems(MatpowerInput, joinpath("..", "data", "data_Matpower", "matpower", "WB2.m"))
-    problem_c = build_globalpb!(OPFpbs)
+    # OPFpbs = load_OPFproblems(MatpowerInput, joinpath("..", "data", "data_Matpower", "matpower", "WB2.m"))
+    # problem_c = build_globalpb!(OPFpbs)
+    problem_c, pt = import_from_dat(getinstancepath("Matpower", "QCQP", "WB2"))
 
     ## Converting to real ineq. only problem
     !rmeqs || change_eq_to_ineq!(problem_c)
@@ -80,7 +83,7 @@ function buildPOP_WB2(; v2max = 0.976, rmeqs = false, setnetworkphase=false, add
 
         add_constraint!(problem, "BaseCase_2_Volt_VOLTM_Re", sqrt(lastctr.lb) << Variable("BaseCase_2_VOLT_Re", Real) << v2max)
         add_constraint!(problem, "BaseCase_2_Volt_VOLTM_Im", Variable("BaseCase_2_VOLT_Im", Real) == 0)
-    else
+    elseif v2max != 0.976
         problem.constraints["BaseCase_2_Volt_VOLTM_Re"].ub = v2max^2
     end
 
@@ -98,10 +101,12 @@ function buildPOP_WB2(; v2max = 0.976, rmeqs = false, setnetworkphase=false, add
 end
 
 function buildPOP_WB5(; q5min = 1.05, rmeqs = false)
-    OPFpbs = load_OPFproblems(MatpowerInput, joinpath("..", "data", "data_Matpower", "matpower", "WB5.m"))
-    Sgen = OPFpbs["BaseCase"].ds.bus["BUS_5"]["Gen_1"].power_min
-    OPFpbs["BaseCase"].ds.bus["BUS_5"]["Gen_1"].power_min = real(Sgen) + im*q5min
-    problem_c = build_globalpb!(OPFpbs)
+    # OPFpbs = load_OPFproblems(MatpowerInput, joinpath("..", "data", "data_Matpower", "matpower", "WB5.m"))
+    problem_c, pt = import_from_dat(getinstancepath("Matpower", "QCQP", "WB5"))
+
+    # Sgen = OPFpbs["BaseCase"].ds.bus["BUS_5"]["Gen_1"].power_min
+    # OPFpbs["BaseCase"].ds.bus["BUS_5"]["Gen_1"].power_min = real(Sgen) + im*q5min
+    # problem_c = build_globalpb!(OPFpbs)
 
     ## Converting to real ineq. only problem
     !rmeqs || change_eq_to_ineq!(problem_c)
@@ -184,4 +189,73 @@ function lasserre_ex5(;d = 2)
     relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                         d = d)
     return problem, relax_ctx
+end
+
+
+
+function get_WB5cliques(relax_ctx, problem)
+    if !relax_ctx.issparse
+        return get_maxcliques(relax_ctx, problem)
+    else
+        maxcliques = Dict{String, Set{Variable}}()
+        maxcliques["clique1"] = Set{Variable}([
+            Variable("BaseCase_1_VOLT_Im", Real),
+            Variable("BaseCase_1_VOLT_Re", Real),
+            Variable("BaseCase_2_VOLT_Im", Real),
+            Variable("BaseCase_2_VOLT_Re", Real),
+            Variable("BaseCase_3_VOLT_Im", Real),
+            Variable("BaseCase_3_VOLT_Re", Real)])
+        maxcliques["clique2"] = Set{Variable}([
+            Variable("BaseCase_2_VOLT_Im", Real),
+            Variable("BaseCase_2_VOLT_Re", Real),
+            Variable("BaseCase_3_VOLT_Im", Real),
+            Variable("BaseCase_3_VOLT_Re", Real),
+            Variable("BaseCase_4_VOLT_Im", Real),
+            Variable("BaseCase_4_VOLT_Re", Real),
+            Variable("BaseCase_5_VOLT_Im", Real),
+            Variable("BaseCase_5_VOLT_Re", Real)])
+        return maxcliques
+    end
+end
+
+function get_case9cliques(relax_ctx, problem)
+    if !relax_ctx.issparse
+        return get_maxcliques(relax_ctx, problem)
+    else
+        maxcliques = Dict{String, Set{Variable}}()
+        maxcliques["clique1"] = Set{Variable}([
+            Variable("BaseCase_1_VOLT_Im", Real),
+            Variable("BaseCase_1_VOLT_Re", Real),
+            Variable("BaseCase_5_VOLT_Im", Real),
+            Variable("BaseCase_5_VOLT_Re", Real),
+            Variable("BaseCase_4_VOLT_Im", Real),
+            Variable("BaseCase_4_VOLT_Re", Real),
+            Variable("BaseCase_9_VOLT_Im", Real),
+            Variable("BaseCase_9_VOLT_Re", Real),
+            Variable("BaseCase_8_VOLT_Im", Real),
+            Variable("BaseCase_8_VOLT_Re", Real)])
+        maxcliques["clique2"] = Set{Variable}([
+            Variable("BaseCase_2_VOLT_Im", Real),
+            Variable("BaseCase_2_VOLT_Re", Real),
+            Variable("BaseCase_9_VOLT_Im", Real),
+            Variable("BaseCase_9_VOLT_Re", Real),
+            Variable("BaseCase_8_VOLT_Im", Real),
+            Variable("BaseCase_8_VOLT_Re", Real),
+            Variable("BaseCase_7_VOLT_Im", Real),
+            Variable("BaseCase_7_VOLT_Re", Real),
+            Variable("BaseCase_6_VOLT_Im", Real),
+            Variable("BaseCase_6_VOLT_Re", Real)])
+        maxcliques["clique3"] = Set{Variable}([
+            Variable("BaseCase_3_VOLT_Im", Real),
+            Variable("BaseCase_3_VOLT_Re", Real),
+            Variable("BaseCase_7_VOLT_Im", Real),
+            Variable("BaseCase_7_VOLT_Re", Real),
+            Variable("BaseCase_6_VOLT_Im", Real),
+            Variable("BaseCase_6_VOLT_Re", Real),
+            Variable("BaseCase_5_VOLT_Im", Real),
+            Variable("BaseCase_5_VOLT_Re", Real),
+            Variable("BaseCase_4_VOLT_Im", Real),
+            Variable("BaseCase_4_VOLT_Re", Real)])
+        return maxcliques
+    end
 end

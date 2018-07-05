@@ -1,3 +1,5 @@
+export Moment, print, ==
+
 
 function Moment(expo::Exponent, clique::String)
     α, β = Exponent(), Exponent()

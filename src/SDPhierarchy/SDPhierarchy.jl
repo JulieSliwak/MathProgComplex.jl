@@ -1,9 +1,18 @@
-module SDPhierarchy
+# module SDPhierarchy
 
-using MathProgComplex
-using DataStructures
+# using MathProgComplex
+# using DataStructures
+using OPFInstances
 
-export RelaxationContext, Moment, MomentMatrix
+export RelaxationContext, Moment, MomentMatrix, MomentRelaxation, SDPInstance
+export SDP_Instance, SDP_Block, SDP_Moment, SDP_Problem
+
+
+export hithere
+
+function hithere()
+    println("Hithere")
+end
 
 ###############################################################################
 ## Relaxation context, symmetries and cliques
@@ -30,10 +39,10 @@ mutable struct RelaxationContext
                               get_defaultparams())
 end
 
-include("relaxationcontext.jl")
+include(joinpath("core", "build_relaxationcontext.jl"))
 
-include("build_relctx.jl")
-include("build_maxcliques.jl")
+# include("build_relctx.jl")
+include(joinpath("core", "build_decomposition.jl"))
 
 abstract type AbstractSymmetry end
 type PhaseInvariance <: AbstractSymmetry end
@@ -48,7 +57,7 @@ struct Moment
     clique::String
 end
 
-include("moment.jl")
+include(joinpath("base_types", "moment.jl"))
 
 """
     MomentMatrix{T}(mm, vars, order, matrixkind)
@@ -63,7 +72,7 @@ mutable struct MomentMatrix{T}
     matrixkind::Symbol            # Either :SDP or :Sym
 end
 
-include("momentmatrix.jl")
+include(joinpath("base_types", "momentmatrix.jl"))
 
 """
     momentrel = MomentRelaxation(obj, cstrs)
@@ -76,7 +85,7 @@ struct MomentRelaxation{T}
     moments_overlap::Dict{Exponent, Set{String}}
 end
 
-include("build_momentrelaxation.jl")
+include(joinpath("core", "build_momentrelaxation.jl"))
 
 
 
@@ -91,8 +100,8 @@ mutable struct SDPInstance{T}
     cst::Dict{Moment, T}                                         # (α, β) -> coeff
 end
 
-include("build_SOSrelaxation.jl")
-include("export_SDPInstance.jl")
+include(joinpath("core", "build_SOSrelaxation.jl"))
+include(joinpath("io", "export_SDPInstance.jl"))
 include("SDPInstance_cplx2real.jl")
 
 
@@ -147,8 +156,8 @@ type SDP_Problem
                       )
 end
 
-include("run_mosek.jl")
-include("build_SDP_Problem.jl")
+include(joinpath("Mosek", "run_mosek.jl"))
+include(joinpath("io", "build_SDP_Problem.jl"))
 
 
 
@@ -157,10 +166,10 @@ include("build_SDP_Problem.jl")
 ###############################################################################
 
 
-include("run_hierarchy.jl")
+include(joinpath("core", "run_hierarchy.jl"))
 
 include("example_problems.jl")
 include("utils.jl")
-include("momentsos_io.jl")
+include(joinpath("io", "momentsos_io.jl"))
 
-end
+# end

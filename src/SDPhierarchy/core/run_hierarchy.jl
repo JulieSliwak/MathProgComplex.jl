@@ -1,3 +1,5 @@
+export run_hierarchy, build_relaxation, build_mosekpb
+
 
 function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext, logpath; indentedprint=false,
                                                                                 max_cliques::Dict{String, Set{Variable}}=Dict{String, Set{Variable}}(),

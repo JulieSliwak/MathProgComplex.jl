@@ -1,3 +1,5 @@
+export has_symmetry
+
 """
     hassym = has_symmetry(relax_ctx, pb::Problem, symtype::T) where T
 

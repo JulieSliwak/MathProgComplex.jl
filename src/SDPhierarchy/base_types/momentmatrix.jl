@@ -1,3 +1,5 @@
+export MomentMatrix, print, get_exponentclique, product, product!
+
 # """
 #     mm = MomentMatrix(vars::SortedSet{Variable}, d, symmetries)
 

@@ -1,3 +1,5 @@
+export print, init_output, final_output
+
 ###############################################################################
 ####  Relaxation context
 ###############################################################################
@@ -254,12 +256,20 @@ function init_output(relax_ctx::RelaxationContext)
             println(f, "MomentSOS hierarchy, date: ", String(Dates.format(now(), "mm_dd-HH:MM:SS")))
         end
     end
+
+    # Create minimal csv file
+    write_ctxcsv(relax_ctx.relaxparams)
 end
 
 function final_output(relax_ctx::RelaxationContext)
     relaxparams = relax_ctx.relaxparams
 
     # Print CSV file
+    write_ctxcsv(relaxparams)
+end
+
+
+function write_ctxcsv(relaxparams)
     if relaxparams[:opt_outcsv] ≥ 1
         isfile(relaxparams[:opt_outcsvname]) && rm(relaxparams[:opt_outcsvname])
         open(relaxparams[:opt_outcsvname], "w") do f

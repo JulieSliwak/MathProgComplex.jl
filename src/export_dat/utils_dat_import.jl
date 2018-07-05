@@ -7,13 +7,13 @@ Build the polynomial optimization problem described by the `instancepath` file,
 with the dispensory preconditionning descritpion `precondcstrspath` along with
 the initial point possibly provided in the file (defaults value is null).
 """
-function import_from_dat(instancepath::String; filename::String="real_minlp_instance.dat", precondfilename::String="")
+function import_from_dat(instancepath::String, precondfilename::String="")
     point = Point()
     variables = SortedDict{String, Variable}()
     exponents = SortedDict{String, Exponent}()
     pb = Problem()
 
-    instance_str = open(joinpath(instancepath, filename))
+    instance_str = open(instancepath)
     l = jump_comments!(instance_str)
 
 
@@ -158,7 +158,7 @@ function import_from_dat(instancepath::String; filename::String="real_minlp_inst
 
     ## Set preconditioning flag
     if precondfilename != ""
-        precond_str = open(joinpath(instancepath, precondfilename))
+        precond_str = open(joinpath(splitdir(instancepath)[1], precondfilename))
 
         l = jump_comments!(precond_str)
         line = matchall(r"\S+", l)

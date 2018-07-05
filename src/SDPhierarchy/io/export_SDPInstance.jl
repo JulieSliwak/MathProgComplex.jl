@@ -1,3 +1,5 @@
+export export_SDP
+
 function export_SDP(sdp::SDPInstance, path; indentedprint=true, renamemoments=true)
 
     # Build moment shortname dict if required

@@ -1,3 +1,9 @@
+export get_cstrname_lower, get_cstrname_upper, get_cstrname_eq
+export get_momentcstrname, get_blockname, get_cstrname
+export get_normalizedpoly, get_pbcstrname, get_ccmultvar, format_string, shortname_moment
+export change_eq_to_ineq!
+
+
 get_cstrname_lower(cstrname::String) = cstrname*"_lo"
 get_cstrname_upper(cstrname::String) = cstrname*"_hi"
 get_cstrname_eq(cstrname::String) = cstrname*"_eq"

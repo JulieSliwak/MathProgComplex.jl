@@ -1,3 +1,5 @@
+export MomentRelaxation
+
 """
     momentrelaxation = MomentRelaxation(relax_ctx, problem, moment_param::Dict{String, Tuple{Set{String}, Int}}, max_cliques::Dict{String, Set{Variable}})
 
