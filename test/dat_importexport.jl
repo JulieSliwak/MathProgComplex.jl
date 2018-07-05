@@ -27,7 +27,7 @@ using MathProgComplex, JuMP, Ipopt
 
     export_to_dat(qcqp, dat_exportpath, filename="POP.dat", point=point)
 
-    qcqp2, point2 = import_from_dat(dat_exportpath, filename="POP.dat")
+    qcqp2, point2 = import_from_dat(joinpath(dat_exportpath, "POP.dat"))
 
     rm(joinpath(dat_exportpath, "POP.dat"))
 
@@ -49,7 +49,7 @@ end
 
 @testset "WB5.dat import and Ipopt solve" begin
     instancepath = joinpath(Pkg.dir("MathProgComplex"), "test", "instances")
-    WB5_cplx, initpt = import_from_dat(instancepath, filename="WB5.dat")
+    WB5_cplx, initpt = import_from_dat(joinpath(instancepath, "WB5.dat"))
 
     WB5 = pb_cplx2real(WB5_cplx)
 
