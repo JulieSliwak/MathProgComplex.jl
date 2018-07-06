@@ -70,3 +70,33 @@ pb_cplx2real call:
 pb_cplx2real_add call:
   3.410 s (20943891 allocations: 930.85 MiB)
 ```
+
+**Integrated changes**: `Import_from_dat` and `pb_cplx2real` don't use flagged functions.
+
+```bash
+Loading module MathProgComplex
+elapsed time: 8.838510293 seconds
+
+Working on ("C:\\Users\\gbareilles\\.julia\\v0.6\\OPFInstances\\instances\\data_Matpower\\matpower_QCQP", "case300.dat")
+seek_efficiency() = true
+import_from_dat call:
+  565.073 ms (2756061 allocations: 120.08 MiB)
+
+pb_cplx2real call:
+  2.518 s (20943891 allocations: 930.85 MiB)
+```
+
+```bash
+Loading module MathProgComplex
+elapsed time: 8.5333e-5 seconds
+
+Working on ("C:\\Users\\gbareilles\\.julia\\v0.6\\OPFInstances\\instances\\data_Matpower\\matpower_QCQP", "case13659pegase.dat")
+seek_efficiency() = true
+import_from_dat call:
+  33.388 s (139179371 allocations: 5.98 GiB)
+Base.summarysize(pb_c) = 61674351 #bytes
+
+pb_cplx2real call:
+  180.719 s (1032901919 allocations: 44.99 GiB)
+Base.summarysize(pb) = 283239022 #bytes
+```
