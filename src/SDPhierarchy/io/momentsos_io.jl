@@ -258,29 +258,31 @@ function init_output(relax_ctx::RelaxationContext)
     end
 
     # Create minimal csv file
-    write_ctxcsv(relax_ctx.relaxparams)
+    if relaxparams[:opt_outcsv] ≥ 1
+        write_ctxcsv(relax_ctx.relaxparams)
+    end
 end
 
 function final_output(relax_ctx::RelaxationContext)
     relaxparams = relax_ctx.relaxparams
 
     # Print CSV file
-    write_ctxcsv(relaxparams)
+    if relaxparams[:opt_outcsv] ≥ 1
+        write_ctxcsv(relaxparams)
+    end
 end
 
 
 function write_ctxcsv(relaxparams)
-    if relaxparams[:opt_outcsv] ≥ 1
-        isfile(relaxparams[:opt_outcsvname]) && rm(relaxparams[:opt_outcsvname])
-        open(relaxparams[:opt_outcsvname], "w") do f
-            for key in keys(relaxparams)
-                print(f, key, ";")
-            end
-            println(f)
+    isfile(relaxparams[:opt_outcsvname]) && rm(relaxparams[:opt_outcsvname])
+    open(relaxparams[:opt_outcsvname], "w") do f
+        for key in keys(relaxparams)
+            print(f, key, ";")
+        end
+        println(f)
 
-            for val in values(relaxparams)
-                print(f, val, ";")
-            end
+        for val in values(relaxparams)
+            print(f, val, ";")
         end
     end
 end
