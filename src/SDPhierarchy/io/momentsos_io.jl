@@ -231,16 +231,16 @@ function print(io::IO, sdpinst::SDPPrimal)
     end
 end
 
-function print(io::IO, sdpblocks::Dict{Tuple{Moment, String, Exponent, Exponent}, T}; indentedprint=true) where T
+function print(io::IO, sdpblocks::DictType{Tuple{Moment, String, Exponent, Exponent}, T}; indentedprint=true) where T
     print_blocksfile(io, sdpblocks; indentedprint=indentedprint, print_header=false)
 end
 
-function print(io::IO, sdplin::Dict{Tuple{Moment, Exponent}, T}, sdplinsym::Dict{Tuple{Moment, String, Exponent}, T}; indentedprint=true) where T
+function print(io::IO, sdplin::DictType{Tuple{Moment, Exponent}, T}, sdplinsym::DictType{Tuple{Moment, String, Exponent}, T}; indentedprint=true) where T
     print_linfile(io, sdplin, sdplinsym; indentedprint=indentedprint, print_header=false)
 end
 
 
-function print(io::IO, sdpcst::Dict{Moment, T}; indentedprint=true) where T
+function print(io::IO, sdpcst::DictType{Moment, T}; indentedprint=true) where T
     print_cstfile(io, sdpcst; indentedprint=indentedprint, print_header=false)
 end
 

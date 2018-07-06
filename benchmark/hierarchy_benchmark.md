@@ -45,3 +45,31 @@ seek_efficiency() = false
 --- time read_SDPPrimal
   7.919 s (12171381 allocations: 416.78 MiB)
 ```
+
+## Dict, with unefficient accessor (see `add_index!`)
+
+```bash
+Working on ("C:\\Users\\gbareilles\\.julia\\v0.6\\OPFInstances\\instances\\data_Matpower\\matpower_QCQP", "WB2.dat")
+seek_efficiency() = false
+--- time build_sparsity
+  85.333 μs (736 allocations: 40.66 KiB)
+--- time build_momentrelaxation
+  8.798 ms (54364 allocations: 2.54 MiB)
+--- time build_SOSrelaxation
+  2.456 ms (2520 allocations: 79.33 KiB)
+--- time read_SDPPrimal
+  621.538 μs (2794 allocations: 253.88 KiB)
+```
+
+```bash
+Working on ("C:\\Users\\gbareilles\\.julia\\v0.6\\OPFInstances\\instances\\data_Matpower\\matpower_QCQP", "case30pwl.dat")
+seek_efficiency() = false
+--- time build_sparsity
+  3.102 ms (17532 allocations: 889.33 KiB)
+--- time build_momentrelaxation
+  402.155 ms (2188001 allocations: 101.61 MiB)
+--- time build_SOSrelaxation
+  96.471 ms (98799 allocations: 2.87 MiB)
+--- time read_SDPPrimal
+  10.143 ms (156092 allocations: 5.59 MiB)
+```

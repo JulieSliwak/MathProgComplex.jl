@@ -7,12 +7,12 @@ export build_momentrelaxation
 """
 function build_momentrelaxation(relax_ctx::RelaxationContext,
                                 problem::Problem,
-                                momentmat_param::Dict{String, Int},
-                                localizingmat_param::Dict{String, Tuple{Set{String}, Int}},
-                                max_cliques::Dict{String, Set{Variable}};
+                                momentmat_param::DictType{String, Int},
+                                localizingmat_param::DictType{String, Tuple{Set{String}, Int}},
+                                max_cliques::DictType{String, Set{Variable}};
                                 T=Float64)
 
-    var_to_cliques = Dict{Variable, Set{String}}()
+    var_to_cliques = DictType{Variable, Set{String}}()
     for (clique, vars) in max_cliques
         for var in vars
             haskey(var_to_cliques, var) || (var_to_cliques[var] = Set{String}())
@@ -21,7 +21,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
     end
 
     ## Building linear-in-moments objective
-    objective = Dict{Moment, T}()
+    objective = DictType{Moment, T}()
     for (expo, val) in problem.objective
         clique = get_exponentclique(expo, var_to_cliques)
         objective[Moment(expo, clique)] = val
@@ -29,7 +29,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
 
 
     ## Building linear matrix inequalities
-    momentmatrices = Dict{Tuple{String, String}, MomentMatrix{T}}()
+    momentmatrices = DictType{Tuple{String, String}, MomentMatrix{T}}()
 
     ## Build moment matrix
     for (cliquename, vars) in max_cliques
@@ -107,7 +107,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
     end
 
     ## Locate clique overlapping moments
-    expo_to_cliques = Dict{Exponent, Set{String}}()
+    expo_to_cliques = DictType{Exponent, Set{String}}()
 
     # Collect Exponents per clique (moment matrix)
     for ((ctrobj, clique), mmtmat) in momentmatrices

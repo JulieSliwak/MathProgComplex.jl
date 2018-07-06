@@ -197,7 +197,7 @@ function get_WB5cliques(relax_ctx, problem)
     if !relax_ctx.issparse
         return get_maxcliques(relax_ctx, problem)
     else
-        maxcliques = Dict{String, Set{Variable}}()
+        maxcliques = DictType{String, Set{Variable}}()
         maxcliques["clique1"] = Set{Variable}([
             Variable("BaseCase_1_VOLT_Im", Real),
             Variable("BaseCase_1_VOLT_Re", Real),
@@ -222,7 +222,7 @@ function get_case9cliques(relax_ctx, problem)
     if !relax_ctx.issparse
         return get_maxcliques(relax_ctx, problem)
     else
-        maxcliques = Dict{String, Set{Variable}}()
+        maxcliques = DictType{String, Set{Variable}}()
         maxcliques["clique1"] = Set{Variable}([
             Variable("BaseCase_1_VOLT_Im", Real),
             Variable("BaseCase_1_VOLT_Re", Real),

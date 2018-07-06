@@ -62,7 +62,7 @@ end
     NOTE: should be extended to Variable and (String, Variable) later...
 """
 function build_momentdict(sdp, renamemoments::Bool)
-    momentdict = Dict{Exponent, String}()
+    momentdict = DictType{Exponent, String}()
 
     n_moment=0
     n_matvar=0
@@ -140,8 +140,8 @@ function build_ctrkeysset(sdp::SDPPrimal{T}) where T
 end
 
 
-function print_blocksfile(io::IO, sdpblocks::Dict{Tuple{Moment, String, Exponent, Exponent}, T};
-                                                        momentdict::Dict{Exponent, String}=Dict{Exponent, String}(),
+function print_blocksfile(io::IO, sdpblocks::DictType{Tuple{Moment, String, Exponent, Exponent}, T};
+                                                        momentdict::DictType{Exponent, String}=DictType{Exponent, String}(),
                                                         indentedprint=false,
                                                         print_header=true) where T
     if print_header
@@ -191,8 +191,8 @@ function print_blocksfile(io::IO, sdpblocks::Dict{Tuple{Moment, String, Exponent
 end
 
 
-function print_linfile(io::IO, sdplin::Dict{Tuple{Moment, Exponent}, T}, sdplinsym::Dict{Tuple{Moment, String, Exponent}, T};
-                                                                     momentdict::Dict{Exponent, String}=Dict{Exponent, String}(),
+function print_linfile(io::IO, sdplin::DictType{Tuple{Moment, Exponent}, T}, sdplinsym::DictType{Tuple{Moment, String, Exponent}, T};
+                                                                     momentdict::DictType{Exponent, String}=DictType{Exponent, String}(),
                                                                      indentedprint=false,
                                                                      print_header=true) where T
     if print_header
@@ -257,8 +257,8 @@ function print_linfile(io::IO, sdplin::Dict{Tuple{Moment, Exponent}, T}, sdplins
 end
 
 
-function print_cstfile(io::IO, sdpcst::Dict{Moment, T};
-                                momentdict::Dict{Exponent, String}=Dict{Exponent, String}(),
+function print_cstfile(io::IO, sdpcst::DictType{Moment, T};
+                                momentdict::DictType{Exponent, String}=DictType{Exponent, String}(),
                                 ctr_keys::Set{Moment}=Set{Moment}(),
                                 indentedprint=false,
                                 print_header=true) where T
@@ -296,7 +296,7 @@ function print_cstfile(io::IO, sdpcst::Dict{Moment, T};
 end
 
 
-function print_typesfile(io::IO, block_to_vartype::Dict{String, Symbol})
+function print_typesfile(io::IO, block_to_vartype::DictType{String, Symbol})
     println(io, "## Description of the matrix and scalar variables Zi and x[k] for the problem:")
     println(io, "##         max     ∑ A_0i[k,l] × Zi[k,l] + ∑ b_0[k] × x[k] + c_0")
     println(io, "##         s.t.    ∑ A_ji[k,l] × Zi[k,l] + ∑ b_j[k] × x[k] + c_j  ==  0")
@@ -320,7 +320,7 @@ function print_typesfile(io::IO, block_to_vartype::Dict{String, Symbol})
 end
 
 
-function print_namesfile(io::IO, momentdict::Dict{Exponent, String})
+function print_namesfile(io::IO, momentdict::DictType{Exponent, String})
     println(io, "## Description of the scalars c_j for the problem:")
     println(io, "##         max     ∑ A_0i[k,l] × Zi[k,l] + ∑ b_0[k] × x[k] + c_0")
     println(io, "##         s.t.    ∑ A_ji[k,l] × Zi[k,l] + ∑ b_j[k] × x[k] + c_j  ==  0")

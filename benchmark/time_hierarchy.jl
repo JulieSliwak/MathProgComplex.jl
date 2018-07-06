@@ -5,10 +5,10 @@ tic();
 using MathProgComplex
 toc();
 
-function main()
-    # instancepath = getinstancepath("Matpower", "QCQP", "case30pwl")
+function main(instance = case30pwl)
+    instancepath = getinstancepath("Matpower", "QCQP", instance)
     # instancepath = getinstancepath("Matpower", "QCQP", "case89pegase")
-    instancepath = getinstancepath("Matpower", "QCQP", "case300")
+    # instancepath = getinstancepath("Matpower", "QCQP", "case300")
     println("\nWorking on $(splitdir(instancepath))")
 
     seek_efficiency!(false)
@@ -90,4 +90,6 @@ end
 
 
 # main_work()
-main()
+# main("case30pwl")
+main("case89pegase")
+# main("case300")

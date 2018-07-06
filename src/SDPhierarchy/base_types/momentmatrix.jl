@@ -11,11 +11,11 @@ function MomentMatrix{T}(relax_ctx::RelaxationContext, vars::Set{Variable},
                                                        symmetries::Set{DataType},
                                                        matrixkind::Symbol;
                                                        default_clique::String="",
-                                                       var_to_cliques::Dict{Variable, Set{String}}=Dict{Variable, Set{String}}()) where T<:Number
+                                                       var_to_cliques::DictType{Variable, Set{String}}=DictType{Variable, Set{String}}()) where T<:Number
 
-    mm = Dict{Tuple{Exponent, Exponent}, Dict{Moment, T}}()
+    mm = DictType{Tuple{Exponent, Exponent}, DictType{Moment, T}}()
 
-    @assert default_clique!="" || var_to_cliques!=Dict{Variable, Set{String}}()
+    @assert default_clique!="" || var_to_cliques!=DictType{Variable, Set{String}}()
 
     ## Computing exponents for available variables
     realexpos = compute_exponents(vars, d)
@@ -35,11 +35,11 @@ function MomentMatrix{T}(relax_ctx::RelaxationContext, vars::Set{Variable},
 
                 # Get exponent clique
                 expo_clique = default_clique
-                if var_to_cliques!=Dict{Variable, Set{String}}()
+                if var_to_cliques != DictType{Variable, Set{String}}()
                     expo_clique = get_exponentclique(expo, var_to_cliques)
                 end
 
-                mm[(cexp, rexp)] = Dict{Moment, T}(Moment(expo, expo_clique)=>convert(T, 1))
+                mm[(cexp, rexp)] = DictType{Moment, T}(Moment(expo, expo_clique)=>convert(T, 1))
             end
         end
     end
@@ -128,9 +128,9 @@ function product(momentpoly::Dict{Moment, M}, p::Polynomial, var_to_cliques::Dic
         for (moment, val2) in momentpoly
             resmoment = product(moment, expo, var_to_cliques)
 
-            # haskey(resmpoly, resmoment) || (resmpoly[resmoment] = convert(M, 0.0))
-            # resmpoly[resmoment] += val1*val2
-            addindex!(resmpoly, val1*val2, resmoment)
+            haskey(resmpoly, resmoment) || (resmpoly[resmoment] = convert(M, 0.0))
+            resmpoly[resmoment] += val1*val2
+            # addindex!(resmpoly, val1*val2, resmoment)
 
             isnull(resmpoly[resmoment]) && delete!(resmpoly, resmoment)
         end

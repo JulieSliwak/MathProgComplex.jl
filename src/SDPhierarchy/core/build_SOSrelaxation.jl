@@ -1,11 +1,11 @@
 export build_SOSrelaxation
 
 function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::SDPDual{T}; debug=false) where T<:Number
-    sdpblocks = Dict{Tuple{Moment, String, Exponent, Exponent}, T}()
-    sdplinsym = Dict{Tuple{Moment, String, Exponent}, T}()
-    sdplin = Dict{Tuple{Moment, Exponent}, T}()
-    sdpcst = Dict{Moment, T}()
-    block_to_vartype = Dict{String, Symbol}()
+    sdpblocks = DictType{Tuple{Moment, String, Exponent, Exponent}, T}()
+    sdplinsym = DictType{Tuple{Moment, String, Exponent}, T}()
+    sdplin = DictType{Tuple{Moment, Exponent}, T}()
+    sdpcst = DictType{Moment, T}()
+    block_to_vartype = DictType{String, Symbol}()
 
     ## Build blocks dict
     for ((cstrname, cliquename), mmt) in mmtrelax_pb.constraints
@@ -38,10 +38,10 @@ function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::SDPDual{T
                     key = (moment, block_name, product(γ, δ))
                     val = -λ * (γ!=δ ? 2 : 1)
 
-                    addindex!(sdplinsym, val, key)
+                    # addindex!(sdplinsym, val, key)
 
-                    # haskey(sdplinsym, key) || (sdplinsym[key] = 0)
-                    # sdplinsym[key] += val
+                    haskey(sdplinsym, key) || (sdplinsym[key] = 0)
+                    sdplinsym[key] += val
                 else
                     error("build_SOSrelaxation(): Unhandled matrix kind $(mmt.matrixkind) for ($cstrname, $cliquename)")
                 end
@@ -75,14 +75,14 @@ function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::SDPDual{T
         # Determine which moment to affect the current coefficient.
 
         # Constraints are fα - ∑ Bi.Zi = 0
-        addindex!(sdpcst, fαβ, moment)
+        # addindex!(sdpcst, fαβ, moment)
 
-        # if !haskey(sdpcst, moment)
-        #     sdpcst[moment] = 0.0
-        # end
+        if !haskey(sdpcst, moment)
+            sdpcst[moment] = 0.0
+        end
 
-        # # Constraints are fα - ∑ Bi.Zi = 0
-        # sdpcst[moment] += fαβ
+        # Constraints are fα - ∑ Bi.Zi = 0
+        sdpcst[moment] += fαβ
     end
 
     sosrelaxation = SDPPrimal{T}(block_to_vartype, sdpblocks, sdplinsym, sdplin, sdpcst)

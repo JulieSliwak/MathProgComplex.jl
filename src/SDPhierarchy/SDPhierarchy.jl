@@ -8,6 +8,8 @@ export RelaxationContext, Moment, MomentMatrix, SDPDual, SDPPrimal
 export SDP_Instance, SDP_Block, SDP_Moment, SDP_Problem
 
 
+const DictType = Dict
+
 ###############################################################################
 ## Relaxation context, symmetries and cliques
 ###############################################################################
@@ -60,7 +62,7 @@ include(joinpath("base_types", "moment.jl"))
     **Note** that the matrix is indexed by a tuple of exponents, *the first of which contains only conjugated variables*, et second only real ones.
 """
 mutable struct MomentMatrix{T}
-    mm::Dict{Tuple{Exponent, Exponent}, Dict{Moment, T}}
+    mm::DictType{Tuple{Exponent, Exponent}, DictType{Moment, T}}
     vars::Set{Variable}
     order::Int
     matrixkind::Symbol            # Either :SDP or :Sym
@@ -74,9 +76,9 @@ include(joinpath("base_types", "momentmatrix.jl"))
     Store a Moment Relaxation problem.
 """
 struct SDPDual{T}
-    objective::Dict{Moment, T}                                  # A linear comb. of moments, to be maximized
-    constraints::Dict{Tuple{String, String}, MomentMatrix{T}}   # A set of moment matrices, either SDP or Null. A constraint (`key[1]`) can be split on several cliques (`key[2]`)
-    moments_overlap::Dict{Exponent, Set{String}}                # A set of clique per exponent, describing coupling constraints
+    objective::DictType{Moment, T}                                  # A linear comb. of moments, to be maximized
+    constraints::DictType{Tuple{String, String}, MomentMatrix{T}}   # A set of moment matrices, either SDP or Null. A constraint (`key[1]`) can be split on several cliques (`key[2]`)
+    moments_overlap::DictType{Exponent, Set{String}}                # A set of clique per exponent, describing coupling constraints
 end
 
 include(joinpath("core", "build_momentrelaxation.jl"))
@@ -87,11 +89,11 @@ include(joinpath("core", "build_momentrelaxation.jl"))
 ## SOS Problem
 ###############################################################################
 mutable struct SDPPrimal{T}
-    block_to_vartype::Dict{String, Symbol}                       # Either :SDP, :Sym, :SDPc, :SymC
-    blocks::Dict{Tuple{Moment, String, Exponent, Exponent}, T}   # ((α, β), block_name, γ, δ) -> coeff
-    linsym::Dict{Tuple{Moment, String, Exponent}, T}             # ((α, β), block_name, var) -> coeff
-    lin::Dict{Tuple{Moment, Exponent}, T}                        # ((α, β), var) -> coeff
-    cst::Dict{Moment, T}                                         # (α, β) -> coeff
+    block_to_vartype::DictType{String, Symbol}                       # Either :SDP, :Sym, :SDPc, :SymC
+    blocks::DictType{Tuple{Moment, String, Exponent, Exponent}, T}   # ((α, β), block_name, γ, δ) -> coeff
+    linsym::DictType{Tuple{Moment, String, Exponent}, T}             # ((α, β), block_name, var) -> coeff
+    lin::DictType{Tuple{Moment, Exponent}, T}                        # ((α, β), var) -> coeff
+    cst::DictType{Moment, T}                                         # (α, β) -> coeff
 end
 
 include(joinpath("core", "build_SOSrelaxation.jl"))

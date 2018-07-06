@@ -2,7 +2,7 @@ export run_hierarchy, build_relaxation, build_mosekpb
 
 
 function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext, logpath; indentedprint=false,
-                                                                                max_cliques::Dict{String, Set{Variable}}=Dict{String, Set{Variable}}(),
+                                                                                max_cliques::DictType{String, Set{Variable}}=DictType{String, Set{Variable}}(),
                                                                                 save_pbs=false)
 
     open(joinpath(logpath, "pb_opt.log"), "w") do fout
@@ -11,7 +11,7 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext, logpath; 
 
     ########################################
     # Construction du sparsity pattern, extension chordale, cliques maximales.
-    if max_cliques == Dict{String, Set{Variable}}()
+    if max_cliques == DictType{String, Set{Variable}}()
         max_cliques = get_maxcliques(relax_ctx, problem)
     end
     relax_ctx.relaxparams[:opt_nb_cliques] = length(max_cliques)
@@ -78,11 +78,11 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext, logpath; 
     return primobj, dualobj
 end
 
-function build_relaxation(problem::Problem, relax_ctx::RelaxationContext; max_cliques::Dict{String, Set{Variable}} = Dict{String, Set{Variable}}())
+function build_relaxation(problem::Problem, relax_ctx::RelaxationContext; max_cliques::DictType{String, Set{Variable}} = DictType{String, Set{Variable}}())
 
     ########################################
     # Construction du sparsity pattern, extension chordale, cliques maximales.
-    if max_cliques == Dict{String, Set{Variable}}()
+    if max_cliques == DictType{String, Set{Variable}}()
         max_cliques = get_maxcliques(relax_ctx, problem)
     end
 

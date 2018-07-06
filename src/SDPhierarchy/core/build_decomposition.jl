@@ -5,12 +5,12 @@ export build_sparsity, get_variables, get_locctrcliques, get_maxcliques, collect
 
     Build the sparsitty pattern and variables decomposition for laying out the moment or SOS hierarchy
 """
-function build_sparsity(relax_ctx::RelaxationContext, problem::Problem, max_cliques::Dict{String, Set{Variable}})
+function build_sparsity(relax_ctx::RelaxationContext, problem::Problem, max_cliques::DictType{String, Set{Variable}})
 
     ((relax_ctx.issparse == false) && (length(max_cliques) > 1)) && error("build_sparsity(): Relaxation is not sparse, one clique is expected (not $(length(max_cliques)))")
 
     # Build localizing constraints order and variable set.
-    localizingmat_param = Dict{String, Tuple{Set{String}, Int}}()
+    localizingmat_param = DictType{String, Tuple{Set{String}, Int}}()
     for (ctrname, ctr) in problem.constraints
         ctrtype = get_cstrtype(ctr)
         ctrcliques = get_locctrcliques(ctr.p, max_cliques)
@@ -42,7 +42,7 @@ function build_sparsity(relax_ctx::RelaxationContext, problem::Problem, max_cliq
     end
 
     # Build moment constraints order and variable set.
-    momentmat_param = Dict{String, Int}()
+    momentmat_param = DictType{String, Int}()
     for (cliquename, cliquevars) in max_cliques
         cur_d::Int = -1
         for (ctrname, (ctrcliques, _)) in localizingmat_param
@@ -80,11 +80,11 @@ end
 
     Find a minimal set of cliques gathering all variables from polynomial `p`.
 """
-function get_locctrcliques(p::Polynomial, max_cliques::Dict{String, Set{Variable}})
+function get_locctrcliques(p::Polynomial, max_cliques::DictType{String, Set{Variable}})
     ctrvars = get_variables(p)
 
     # Build constraint variables to cliques dict
-    var_to_cliques = Dict{Variable, Set{String}}()
+    var_to_cliques = DictType{Variable, Set{String}}()
     for (clique, cliquevars) in max_cliques
         for var in intersect(cliquevars, ctrvars)
             if !haskey(var_to_cliques, var)
@@ -122,12 +122,12 @@ function get_locctrcliques(p::Polynomial, max_cliques::Dict{String, Set{Variable
         # Hopefully all variables are treated that way. Else repeat this process by choosing a clique. Again, which one ?
         if length(unaffected_vars) != 0
             # warn("get_locctrcliques(): length(unaffected_vars) = $(length(unaffected_vars))") # TODO: better logging system...
-            cliques_from_unaffvar = Dict{String, Int}()
+            cliques_from_unaffvar = DictType{String, Int}()
             for var in unaffected_vars
                 for clique in var_to_cliques[var]
-                    # haskey(cliques_from_unaffvar, clique) || (cliques_from_unaffvar[clique] = 0)
-                    # cliques_from_unaffvar[clique] += 1
-                    addindex!(cliques_from_unaffvar, 1, clique)
+                    haskey(cliques_from_unaffvar, clique) || (cliques_from_unaffvar[clique] = 0)
+                    cliques_from_unaffvar[clique] += 1
+                    # addindex!(cliques_from_unaffvar, 1, clique)
                 end
             end
             cur_clique, cur_pop = first(cliques_from_unaffvar)[1], first(cliques_from_unaffvar)[2]
@@ -148,7 +148,7 @@ end
 
 function get_maxcliques(relax_ctx, problem)
     vars = Set{Variable}([Variable(name, kind) for (name, kind) in problem.variables])
-    return Dict{String, Set{Variable}}("clique1"=>vars)
+    return DictType{String, Set{Variable}}("clique1"=>vars)
 end
 
 
@@ -158,7 +158,7 @@ end
 
     Collect variables of `cliques_keys` cliques, described in `max_cliques`
 """
-function collect_cliquesvars(clique_keys::Set{String}, max_cliques::Dict{String, Set{Variable}})
+function collect_cliquesvars(clique_keys::Set{String}, max_cliques::DictType{String, Set{Variable}})
     # Collect variables involved in constraint
     vars = Set{Variable}()
     blocname = ""
@@ -169,7 +169,7 @@ function collect_cliquesvars(clique_keys::Set{String}, max_cliques::Dict{String,
     return vars, blocname[1:end-1]
 end
 
-function print(io::IO, max_cliques::Dict{String, Set{Variable}})
+function print(io::IO, max_cliques::DictType{String, Set{Variable}})
     for cliquename in sort(collect(keys(max_cliques)))
         vars = max_cliques[cliquename]
 
