@@ -73,3 +73,16 @@ seek_efficiency() = false
 --- time read_SDPPrimal
   10.143 ms (156092 allocations: 5.59 MiB)
 ```
+
+```bash
+Working on ("C:\\Users\\gbareilles\\.julia\\v0.6\\OPFInstances\\instances\\data_Matpower\\matpower_QCQP", "case89pegase.dat")
+seek_efficiency() = false
+--- time build_sparsity
+  19.615 ms (79122 allocations: 3.74 MiB)
+--- time build_momentrelaxation
+  3.232 s (14779992 allocations: 689.18 MiB)
+--- time build_SOSrelaxation
+  805.976 ms (752901 allocations: 21.29 MiB)
+--- time read_SDPPrimal
+  95.983 ms (1212713 allocations: 41.68 MiB)
+```
