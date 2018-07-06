@@ -15,12 +15,16 @@ function main()
     println("import_from_dat call:")
     @btime import_from_dat($instancepath);
 
-    seek_efficiency!(false)
-    pb_cplx2real(pb_c)
-    seek_efficiency!(false)
+
+    # seek_efficiency!(true)
+    # pb_cplx2real_add(pb_c)
+    # seek_efficiency!(false)
 
     println("\npb_cplx2real call:")
     @btime pb_cplx2real($pb_c);
+
+    println("\npb_cplx2real_add call:")
+    @btime pb_cplx2real_add($pb_c);
 
     return
 end
