@@ -1,3 +1,4 @@
+export seek_efficiency, seek_efficiency!
 
 """
     add_to_dict!(dict::SortedDict{Any, V}, key, val::V; isdense=false) where V<:Number
@@ -14,4 +15,24 @@ function add_to_dict!(dict::SortedDict{U, V}, key::U, val::T; isdense = false) w
     if (dict[key]==0) && !isdense
         delete!(dict, key)
     end
+end
+
+"""
+    seek_efficiency()
+
+    Get the `seek_efficiency` flag.
+    If set to true, warnings will be display by inefficient functions: use of
+    `deepcopy`, `add` instead of add!...
+"""
+seek_efficiency() = SEEK_EFFICIENCY[1]
+
+"""
+    seek_efficiency!(arg)
+
+    Set the `seek_efficiency` flag.
+    If set to true, warnings will be display by inefficient functions: use of
+    `deepcopy`, `add` instead of add!...
+"""
+function seek_efficiency!(arg::Bool)
+    SEEK_EFFICIENCY[1] = arg
 end
