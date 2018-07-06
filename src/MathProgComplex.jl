@@ -11,7 +11,7 @@ export AbstractPolynomial
 
 abstract type  AbstractPolynomial end
 
-const SEEK_EFFICIENCY = [true]      # if true, unefficient function will display a warning when used.
+const SEEK_EFFICIENCY = [false]      # if true, unefficient function will display a warning when used.
                                     # get/set with seek_efficiency, seek_efficiency!
 
 include("utils_internal.jl")

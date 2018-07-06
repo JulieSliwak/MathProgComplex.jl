@@ -15,7 +15,7 @@ function add!(p::Polynomial, p1::Polynomial)
 end
 
 function add(p1::Polynomial, p2::Polynomial)
-    seek_efficiency() && warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__)
+    seek_efficiency() && (warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__); println(stacktrace()))
     p = deepcopy(p1)
     add!(p, p2)
     return p
@@ -65,7 +65,7 @@ function add!(pt1::Point, pt2::Point)
 end
 
 function add(pt1::Point, pt2::Point)
-    seek_efficiency() && warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__)
+    seek_efficiency() && (warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__); println(stacktrace()))
     pt_coord = deepcopy(pt1.coords)
     pt = Point(pt_coord)
     add!(pt, pt2)
