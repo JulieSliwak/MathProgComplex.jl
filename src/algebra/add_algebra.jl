@@ -19,23 +19,27 @@ function add!(p::Polynomial, p1::Polynomial)
 end
 
 function add(p1::Polynomial, p2::Polynomial)
-    seek_efficiency() && (warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__); println(stacktrace()))
-    p = deepcopy(p1)
+    p = Polynomial()
+    add!(p, p1)
     add!(p, p2)
     return p
 end
 
 function +(p::T) where T<:AbstractPolynomial
+    seek_efficiency() && (warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__); println(stacktrace()))
     return convert(Polynomial, p)
 end
 
 function +(p1::T, p2::U) where T<:AbstractPolynomial where U<:AbstractPolynomial
+    seek_efficiency() && (warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__); println(stacktrace()))
     return add(convert(Polynomial, p1), convert(Polynomial, p2))
 end
 function +(p1::Number, p2::T) where T<:AbstractPolynomial
+    seek_efficiency() && (warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__); println(stacktrace()))
     return add(convert(Polynomial, p1), convert(Polynomial, p2))
 end
 function +(p1::T, p2::Number) where T<:AbstractPolynomial
+    seek_efficiency() && (warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__); println(stacktrace()))
     return add(convert(Polynomial, p1), convert(Polynomial, p2))
 end
 
@@ -80,8 +84,14 @@ function add(pt1::Point, pt2::Point)
     return pt
 end
 
-+(pt1::Point, pt2::Point) = add(pt1, pt2)
--(pt1::Point, pt2::Point) = pt1 + (-1)*pt2
+function +(pt1::Point, pt2::Point)
+    seek_efficiency() && (warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__); println(stacktrace()))
+    add(pt1, pt2)
+end
+
+function -(pt1::Point, pt2::Point)
+    return pt1 + (-1)*pt2
+end
 
 function merge(x::Point ...)
     pt_res = Point()
