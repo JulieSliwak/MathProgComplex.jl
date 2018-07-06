@@ -1,5 +1,4 @@
 export cplx2real, pb_cplx2real, real2cplx
-export pb_cplx2real_add
 
 
 varname_cplx2real(varname::String) = (varname*"_Re",varname*"_Im")
@@ -51,56 +50,6 @@ function pb_cplx2real(pb_C::Problem)
 end
 
 
-function pb_cplx2real_add(pb_C::Problem)
-  # println("---- pb_cplx2real_add ----")
-  pb = Problem()
-  # println("variables")
-  # tic()
-  for (varName, varType) in get_variables(pb_C)
-    if varType <: Complex
-      varName_real, varName_imag = varname_cplx2real(varName)
-      add_variable!(pb, Variable(varName_real, Real))
-      add_variable!(pb, Variable(varName_imag, Real))
-    else
-      add_variable!(pb, Variable(varName, varType))
-    end
-  end
-  # toc()
-  # println("objective")
-  # tic()
-  (realPart, imagPart) = cplx2real_add(pb_C.objective)
-  set_objective!(pb, realPart)
-  # toc()
-  # println("constraints")
-  # println("nb = ", length(get_constraints(pb_C)))
-  # tic()
-  constraints = get_constraints(pb_C)
-  for (cstrName, cstr) in constraints
-    realPart, imagPart = cplx2real_add(cstr.p)
-    cstrName_real, cstrName_imag = varname_cplx2real(cstrName)
-
-
-    if length(realPart) != 0
-      # Set bounds to proper infty, easier to detect... TODO : Missing attribute ctr_kind ?
-      lb = real(cstr.lb)==-Inf ? -Inf-im*Inf : real(cstr.lb)
-      ub = real(cstr.ub)== Inf ? +Inf+im*Inf : real(cstr.ub)
-      cstrreal = lb << realPart << ub
-      cstr.precond != :none && (cstrreal.precond = cstr.precond)
-      add_constraint!(pb, cstrName_real, cstrreal)
-    end
-    if length(imagPart) != 0
-      lb = imag(cstr.lb)==-Inf ? -Inf-im*Inf : imag(cstr.lb)
-      ub = imag(cstr.ub)== Inf ? +Inf+im*Inf : imag(cstr.ub)
-      cstrimag = lb << imagPart << ub
-      cstr.precond != :none && (cstrimag.precond = cstr.precond)
-      add_constraint!(pb, cstrName_imag, cstrimag)
-    end
-  end
-  # toc()
-  # println("--------------------")
-  return pb
-end
-
 # Conversion of all complex variables to real ones in the Poly structures
 
 """
@@ -115,7 +64,6 @@ function cplx2real(expo::Exponent)
 	realPart = Polynomial(); add!(realPart, 1)
 	imagPart = Polynomial(); add!(imagPart, 0)
 	return cplx2real_rec(vars, inds, realPart, imagPart, length(expo)+1, Degree(0,0))
-	# return cplx2real_rec(vars, inds, Polynomial()+1, Polynomial()+0, length(expo)+1, Degree(0,0))
 end
 
 """
@@ -153,13 +101,11 @@ function cplx2real_rec(vars::Array{Variable}, degs::Array{Degree}, realPart::Pol
 				realPart_new = var_R * realPart; add!(realPart_new, -var_I * imagPart)
 				imagPart_new = var_R * imagPart; add!(imagPart_new,  var_I * realPart)
 				return cplx2real_rec(vars, degs, realPart_new, imagPart_new, cur_ind, Degree(cur_deg.explvar-1, cur_deg.conjvar))
-				# return cplx2real_rec(vars, degs, var_R * realPart - var_I * imagPart, var_R * imagPart + var_I * realPart, cur_ind, Degree(cur_deg.explvar-1, cur_deg.conjvar))
 			elseif cur_deg.conjvar > 0
 				cur_deg.explvar == 0 || warn("cur_deg.explvar should be 0 (and not $(cur_deg.explvar)), set to this value")
 				realPart_new = var_R * realPart; add!(realPart_new,  var_I * imagPart)
 				imagPart_new = var_R * imagPart; add!(imagPart_new, -var_I * realPart)
 				return cplx2real_rec(vars, degs, realPart_new, imagPart_new, cur_ind, Degree(0, cur_deg.conjvar-1))
-				# return cplx2real_rec(vars, degs, var_R * realPart + var_I * imagPart, var_R * imagPart - var_I * realPart, cur_ind, Degree(0, cur_deg.conjvar-1))
 			end
 		elseif isbool(var)
 			return cplx2real_rec(vars, degs, var*realPart, var*imagPart, cur_ind, Degree(0,0))
@@ -178,20 +124,6 @@ end
 """
 function cplx2real(pol::Polynomial)
 	realPart = Polynomial()
-	imagPart = Polynomial()
-
-	for (expo, λ) in pol
-		realexpo, imagexpo = cplx2real(expo)
-
-		realPart += realexpo*real(λ) - imagexpo*imag(λ)
-		imagPart += imagexpo*real(λ) + realexpo*imag(λ)
-	end
-	return (realPart, imagPart)
-end
-
-
-function cplx2real_add(pol::Polynomial)
-  realPart = Polynomial()
   imagPart = Polynomial()
 
   for (expo, λ) in pol
