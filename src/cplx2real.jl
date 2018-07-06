@@ -112,7 +112,10 @@ end
 """
 function cplx2real(expo::Exponent)
 	vars, inds = collect(keys(expo.expo)), collect(values(expo.expo))
-	return cplx2real_rec(vars, inds, Polynomial()+1, Polynomial()+0, length(expo)+1, Degree(0,0))
+	realPart = Polynomial(); add!(realPart, 1)
+	imagPart = Polynomial(); add!(imagPart, 0)
+	return cplx2real_rec(vars, inds, realPart, imagPart, length(expo)+1, Degree(0,0))
+	# return cplx2real_rec(vars, inds, Polynomial()+1, Polynomial()+0, length(expo)+1, Degree(0,0))
 end
 
 """
@@ -147,10 +150,16 @@ function cplx2real_rec(vars::Array{Variable}, degs::Array{Degree}, realPart::Pol
 			var_real, var_imag = varname_cplx2real(var.name)
 			var_R, var_I = Variable(var_real, Real), Variable(var_imag, Real)
 			if cur_deg.explvar > 0
-				return cplx2real_rec(vars, degs, var_R * realPart - var_I * imagPart, var_R * imagPart + var_I * realPart, cur_ind, Degree(cur_deg.explvar-1, cur_deg.conjvar))
+				realPart_new = var_R * realPart; add!(realPart_new, -var_I * imagPart)
+				imagPart_new = var_R * imagPart; add!(imagPart_new,  var_I * realPart)
+				return cplx2real_rec(vars, degs, realPart_new, imagPart_new, cur_ind, Degree(cur_deg.explvar-1, cur_deg.conjvar))
+				# return cplx2real_rec(vars, degs, var_R * realPart - var_I * imagPart, var_R * imagPart + var_I * realPart, cur_ind, Degree(cur_deg.explvar-1, cur_deg.conjvar))
 			elseif cur_deg.conjvar > 0
 				cur_deg.explvar == 0 || warn("cur_deg.explvar should be 0 (and not $(cur_deg.explvar)), set to this value")
-				return cplx2real_rec(vars, degs, var_R * realPart + var_I * imagPart, var_R * imagPart - var_I * realPart, cur_ind, Degree(0, cur_deg.conjvar-1))
+				realPart_new = var_R * realPart; add!(realPart_new,  var_I * imagPart)
+				imagPart_new = var_R * imagPart; add!(imagPart_new, -var_I * realPart)
+				return cplx2real_rec(vars, degs, realPart_new, imagPart_new, cur_ind, Degree(0, cur_deg.conjvar-1))
+				# return cplx2real_rec(vars, degs, var_R * realPart + var_I * imagPart, var_R * imagPart - var_I * realPart, cur_ind, Degree(0, cur_deg.conjvar-1))
 			end
 		elseif isbool(var)
 			return cplx2real_rec(vars, degs, var*realPart, var*imagPart, cur_ind, Degree(0,0))
@@ -188,8 +197,10 @@ function cplx2real_add(pol::Polynomial)
   for (expo, λ) in pol
     realexpo, imagexpo = cplx2real(expo)
 
-    add!(realPart, realexpo*real(λ) - imagexpo*imag(λ))
-    add!(imagPart, imagexpo*real(λ) + realexpo*imag(λ))
+	add!(realPart,   realexpo*real(λ))
+	add!(realPart, - imagexpo*imag(λ))
+	add!(imagPart,   imagexpo*real(λ))
+	add!(imagPart,   realexpo*imag(λ))
   end
   return (realPart, imagPart)
 end

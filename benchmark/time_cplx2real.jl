@@ -16,10 +16,6 @@ function main()
     @btime import_from_dat($instancepath);
 
 
-    # seek_efficiency!(true)
-    # pb_cplx2real_add(pb_c)
-    # seek_efficiency!(false)
-
     println("\npb_cplx2real call:")
     @btime pb_cplx2real($pb_c);
 
@@ -29,4 +25,21 @@ function main()
     return
 end
 
+function main_work()
+    instancepath = getinstancepath("Matpower", "QCQP", "WB2")
+    println("\nWorking on $(splitdir(instancepath))")
+
+    # seek_efficiency!(true)
+    pb_c, pt = import_from_dat(instancepath)
+
+    seek_efficiency!(true)
+    @show seek_efficiency()
+    pb_cplx2real_add(pb_c)
+    seek_efficiency!(false)
+
+    return
+end
+
+
+# main_work()
 main()

@@ -5,6 +5,10 @@ function add!(p::Polynomial, p1::T) where T<:AbstractPolynomial
     return add!(p, convert(Polynomial, p1))
 end
 
+function add!(p::Polynomial, p1::Number)
+    return add!(p, convert(Polynomial, p1))
+end
+
 function add!(p::Polynomial, p1::Polynomial)
     for (cur_expo, λ) in p1
         λ != 0 || continue
@@ -19,6 +23,10 @@ function add(p1::Polynomial, p2::Polynomial)
     p = deepcopy(p1)
     add!(p, p2)
     return p
+end
+
+function +(p::T) where T<:AbstractPolynomial
+    return convert(Polynomial, p)
 end
 
 function +(p1::T, p2::U) where T<:AbstractPolynomial where U<:AbstractPolynomial
