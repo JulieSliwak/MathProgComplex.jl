@@ -83,11 +83,11 @@ function import_from_dat(instancepath::String, precondfilename::String="")
         var1, var2 = line[3:4]
         if line[1] == "MONO"
             add!(p, λ * exponents[var1])
-            # p += λ * exponents[var1]
         else
-            quad_term = λ * (var1!="NONE" ? conj(variables[var1]) : 1) * (var2!="NONE" ? variables[var2] : 1)
-            add!(p, quad_term)
-            # p += λ * (var1!="NONE" ? conj(variables[var1]) : 1) * (var2!="NONE" ? variables[var2] : 1)
+            quad_expo = Exponent()
+            (var1!="NONE") && product!(quad_expo, conj(variables[var1]))
+            (var2!="NONE") && product!(quad_expo, variables[var2])
+            add!(p, Polynomial(SortedDict{Exponent, Number}(quad_expo=>λ)))
         end
         l = readline(instance_str)
         line = matchall(r"\S+", l)
@@ -123,17 +123,17 @@ function import_from_dat(instancepath::String, precondfilename::String="")
 
             ## If monomial difnition section reached, exit loop
             if line[1] == "MONO_DEF"
-                next_state = :ReadLine 
+                next_state = :ReadLine
             end
 
         elseif state == :AssembleCtr
             if line[1] == "MONO"
                 add!(p, λ * exponents[var1])
-                # p += λ * exponents[var1]
             elseif line[1] ∈ SortedSet(["CONST", "LIN", "QUAD"])
-                mono = λ * (var1!="NONE" ? conj(variables[var1]) : 1) * (var2!="NONE" ? variables[var2] : 1)
-                add!(p, mono)
-                # p += λ * (var1!="NONE" ? conj(variables[var1]) : 1) * (var2!="NONE" ? variables[var2] : 1)
+                quad_expo = Exponent()
+                (var1!="NONE") && product!(quad_expo, conj(variables[var1]))
+                (var2!="NONE") && product!(quad_expo, variables[var2])
+                add!(p, Polynomial(SortedDict{Exponent, Number}(quad_expo=>λ)))
             elseif line[1] == "UB"
                 ub = λ
             elseif line[1] == "LB"

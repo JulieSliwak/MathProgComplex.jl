@@ -98,19 +98,30 @@ function cplx2real_rec(vars::Array{Variable}, degs::Array{Degree}, realPart::Pol
 			var_real, var_imag = varname_cplx2real(var.name)
 			var_R, var_I = Variable(var_real, Real), Variable(var_imag, Real)
 			if cur_deg.explvar > 0
-				realPart_new = var_R * realPart; add!(realPart_new, -var_I * imagPart)
-				imagPart_new = var_R * imagPart; add!(imagPart_new,  var_I * realPart)
+				realPart_new = product(var_R, realPart)
+				add!(realPart_new, product(-1, product(var_I, imagPart)))
+
+				imagPart_new = product(var_R, imagPart)
+				add!(imagPart_new,  product(var_I, realPart))
+
 				return cplx2real_rec(vars, degs, realPart_new, imagPart_new, cur_ind, Degree(cur_deg.explvar-1, cur_deg.conjvar))
 			elseif cur_deg.conjvar > 0
 				cur_deg.explvar == 0 || warn("cur_deg.explvar should be 0 (and not $(cur_deg.explvar)), set to this value")
-				realPart_new = var_R * realPart; add!(realPart_new,  var_I * imagPart)
-				imagPart_new = var_R * imagPart; add!(imagPart_new, -var_I * realPart)
+				realPart_new = product(var_R, realPart)
+				add!(realPart_new,  product(var_I, imagPart))
+
+				imagPart_new = product(var_R, imagPart)
+				add!(imagPart_new, product(-1, product(var_I, realPart)))
+
 				return cplx2real_rec(vars, degs, realPart_new, imagPart_new, cur_ind, Degree(0, cur_deg.conjvar-1))
 			end
 		elseif isbool(var)
 			return cplx2real_rec(vars, degs, var*realPart, var*imagPart, cur_ind, Degree(0,0))
 		else
-			return cplx2real_rec(vars, degs, Exponent(SortedDict(var=>cur_deg))*realPart, Exponent(SortedDict(var=>cur_deg))*imagPart, cur_ind, Degree(0,0))
+			return cplx2real_rec(vars, degs, product(Exponent(SortedDict(var=>cur_deg)), realPart),
+											 product(Exponent(SortedDict(var=>cur_deg)), imagPart),
+											 cur_ind,
+											 Degree(0,0))
 		end
 	end
 end
@@ -129,10 +140,10 @@ function cplx2real(pol::Polynomial)
   for (expo, λ) in pol
     realexpo, imagexpo = cplx2real(expo)
 
-	add!(realPart,   realexpo*real(λ))
-	add!(realPart, - imagexpo*imag(λ))
-	add!(imagPart,   imagexpo*real(λ))
-	add!(imagPart,   realexpo*imag(λ))
+	add!(realPart, product(realexpo,   real(λ)))
+	add!(realPart, product(imagexpo, - imag(λ)))
+	add!(imagPart, product(imagexpo,   real(λ)))
+	add!(imagPart, product(realexpo,   imag(λ)))
   end
   return (realPart, imagPart)
 end

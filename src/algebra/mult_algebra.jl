@@ -21,6 +21,19 @@ function product!(expod::Exponent, expod1::Exponent)
     return expod
 end
 
+function product!(expod::Exponent, var::Variable)
+    if !haskey(expod, var)
+        expod.expo[var] = Degree(0,0)
+    end
+    expod.expo[var].explvar += 1
+    if (expod.expo[var].explvar, expod.expo[var].conjvar) == (0,0)
+        delete!(expod, var)
+    end
+
+    update_degree!(expod)
+    return expod
+end
+
 function product(exp1::Exponent, exp2::Exponent)
     expod = Exponent()
     product!(expod, exp1)
@@ -43,14 +56,27 @@ function product(p1::Polynomial, p2::Polynomial)
     return p
 end
 
-function *(p1::T, p2::U) where T<:AbstractPolynomial where U<:AbstractPolynomial
+function product(p1::T, p2::U) where T<:AbstractPolynomial where U<:AbstractPolynomial
     return product(convert(Polynomial, p1), convert(Polynomial, p2))
 end
-function *(p1::Number, p2::T) where T<:AbstractPolynomial
+function product(p1::Number, p2::T) where T<:AbstractPolynomial
     return product(convert(Polynomial, p1), convert(Polynomial, p2))
 end
-function *(p1::T, p2::Number) where T<:AbstractPolynomial
+function product(p1::T, p2::Number) where T<:AbstractPolynomial
     return product(convert(Polynomial, p1), convert(Polynomial, p2))
+end
+
+
+function *(λ::Number, expo::Exponent)
+    return Polynomial(SortedDict{Exponent, Number}(expo=>λ))
+end
+function *(expo::Exponent, λ::Number)
+    return Polynomial(SortedDict{Exponent, Number}(expo=>λ))
+end
+
+function *(p1::T, p2::U) where T<:Union{Number, AbstractPolynomial} where U<:Union{Number, AbstractPolynomial}
+    seek_efficiency() && (warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__); println(stacktrace()))
+    return product(p1, p2)
 end
 
 
@@ -82,14 +108,15 @@ end
 
 ## Point
 function *(pt1::Point, λ::Number)
-  pt = Point()
-  if λ == 0
+    seek_efficiency() && (warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__); println(stacktrace()))
+    pt = Point()
+    if λ == 0
+        return pt
+    end
+    for (var, val) in pt1
+        pt[var] = λ*val
+    end
     return pt
-  end
-  for (var, val) in pt1
-    pt[var] = λ*val
-  end
-  return pt
 end
 *(λ::Number, pt1::Point) = pt1*λ
 
