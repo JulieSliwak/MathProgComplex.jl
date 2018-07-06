@@ -26,17 +26,17 @@ function main()
 end
 
 function main_work()
-    instancepath = getinstancepath("Matpower", "QCQP", "WB2")
+    instancepath = getinstancepath("Matpower", "QCQP", "case300")
     println("\nWorking on $(splitdir(instancepath))")
 
     # seek_efficiency!(true)
-    pb_c, pt = import_from_dat(instancepath)
 
     seek_efficiency!(true)
     @show seek_efficiency()
-    pb_cplx2real_add(pb_c)
+    pb_c, pt = import_from_dat(instancepath)
     seek_efficiency!(false)
 
+    pb_cplx2real_add(pb_c)
     return
 end
 

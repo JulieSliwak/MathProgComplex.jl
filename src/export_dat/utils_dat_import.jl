@@ -82,9 +82,12 @@ function import_from_dat(instancepath::String, precondfilename::String="")
         λ = parse_λ(line[5], line[6])
         var1, var2 = line[3:4]
         if line[1] == "MONO"
-            p += λ * exponents[var1]
+            add!(p, λ * exponents[var1])
+            # p += λ * exponents[var1]
         else
-            p += λ * (var1!="NONE" ? conj(variables[var1]) : 1) * (var2!="NONE" ? variables[var2] : 1)
+            quad_term = λ * (var1!="NONE" ? conj(variables[var1]) : 1) * (var2!="NONE" ? variables[var2] : 1)
+            add!(p, quad_term)
+            # p += λ * (var1!="NONE" ? conj(variables[var1]) : 1) * (var2!="NONE" ? variables[var2] : 1)
         end
         l = readline(instance_str)
         line = matchall(r"\S+", l)
@@ -125,9 +128,12 @@ function import_from_dat(instancepath::String, precondfilename::String="")
 
         elseif state == :AssembleCtr
             if line[1] == "MONO"
-                p += λ * exponents[var1]
+                add!(p, λ * exponents[var1])
+                # p += λ * exponents[var1]
             elseif line[1] ∈ SortedSet(["CONST", "LIN", "QUAD"])
-                p += λ * (var1!="NONE" ? conj(variables[var1]) : 1) * (var2!="NONE" ? variables[var2] : 1)
+                mono = λ * (var1!="NONE" ? conj(variables[var1]) : 1) * (var2!="NONE" ? variables[var2] : 1)
+                add!(p, mono)
+                # p += λ * (var1!="NONE" ? conj(variables[var1]) : 1) * (var2!="NONE" ? variables[var2] : 1)
             elseif line[1] == "UB"
                 ub = λ
             elseif line[1] == "LB"
@@ -211,4 +217,4 @@ function parse_λ(realpart::T, imagpart::T) where T <: Union{String, SubString}
         λ += parse(imagpart)*im
     end
     return λ
-end 
+end

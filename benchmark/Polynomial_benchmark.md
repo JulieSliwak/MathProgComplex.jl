@@ -4,6 +4,8 @@
 
 Results obtained with `benchamrk/time_cplx2real.jl` code, and the `@btime` macro from `BenchamrkTools` (multiple evaluations).
 
+Improvements consist in removing calls to functions flagged with inefficiency.
+
 ### Start code
 
 ```bash
@@ -50,4 +52,21 @@ pb_cplx2real call:
 
 pb_cplx2real_add call:
   3.290 s (20943891 allocations: 930.85 MiB)
+```
+
+### Improvements to import_from_dat
+
+```bash
+Loading module MathProgComplex
+elapsed time: 8.712407267 seconds
+
+Working on ("C:\\Users\\gbareilles\\.julia\\v0.6\\OPFInstances\\instances\\data_Matpower\\matpower_QCQP", "case300.dat")
+import_from_dat call:
+  562.101 ms (2756058 allocations: 120.07 MiB)
+
+pb_cplx2real call:
+  14.265 s (29214497 allocations: 1.46 GiB)
+
+pb_cplx2real_add call:
+  3.410 s (20943891 allocations: 930.85 MiB)
 ```
