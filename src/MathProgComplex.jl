@@ -11,6 +11,10 @@ export AbstractPolynomial
 
 abstract type  AbstractPolynomial end
 
+const SEEK_EFFICIENCY = [true]      # if true, unefficient function will display a warning when used.
+                                    # get/set with seek_efficiency, seek_efficiency!
+
+include("utils_internal.jl")
 
 include("variable.jl")
 include("exponent.jl")
@@ -23,7 +27,6 @@ include("point.jl")
 include("cplx2real.jl")
 include("evaluate.jl")
 include("iterators.jl")
-include("utils_internal.jl")
 include("utils_Poly.jl")
 include("problem_accessors.jl")
 

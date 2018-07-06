@@ -15,6 +15,7 @@ function add!(p::Polynomial, p1::Polynomial)
 end
 
 function add(p1::Polynomial, p2::Polynomial)
+    seek_efficiency() && warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__)
     p = deepcopy(p1)
     add!(p, p2)
     return p
@@ -58,25 +59,26 @@ end
 
 
 function add!(pt1::Point, pt2::Point)
-  for (var, val) in pt2.coords
-    add_coord!(pt1, var, val)
-  end
+    for (var, val) in pt2.coords
+        add_coord!(pt1, var, val)
+    end
 end
 
 function add(pt1::Point, pt2::Point)
-  pt_coord = deepcopy(pt1.coords)
-  pt = Point(pt_coord)
-  add!(pt, pt2)
-  return pt
+    seek_efficiency() && warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__)
+    pt_coord = deepcopy(pt1.coords)
+    pt = Point(pt_coord)
+    add!(pt, pt2)
+    return pt
 end
 
 +(pt1::Point, pt2::Point) = add(pt1, pt2)
 -(pt1::Point, pt2::Point) = pt1 + (-1)*pt2
 
 function merge(x::Point ...)
-  pt_res = Point()
-  for pt in x
-    add!(pt_res, pt)
-  end
-  return pt_res
+    pt_res = Point()
+    for pt in x
+        add!(pt_res, pt)
+    end
+    return pt_res
 end
