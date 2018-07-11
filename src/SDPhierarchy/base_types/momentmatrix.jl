@@ -87,7 +87,7 @@ end
     Determine which clique expo fits in, that is which cliques contain all variables of expo.
     Error if no such clique are found.
 """
-function get_exponentclique(expo::Exponent, var_to_cliques::Dict{Variable, Set{String}})
+function get_exponentclique(expo::Exponent, var_to_cliques::DictType{Variable, Set{String}})
     cliques = Set{String}()
 
     ## If expo is one, return default clique
@@ -110,19 +110,19 @@ end
 # ##########################
 
 ## AbstractPolynomial types
-function product!(mm::MomentMatrix{M}, p::T, var_to_cliques::Dict{Variable, Set{String}}) where T<:Union{AbstractPolynomial, Number} where M<:Number
+function product!(mm::MomentMatrix{M}, p::T, var_to_cliques::DictType{Variable, Set{String}}) where T<:Union{AbstractPolynomial, Number} where M<:Number
     for (key, momentpoly) in mm.mm
         mm.mm[key] = product(momentpoly, p, var_to_cliques)
     end
     return nothing
 end
 
-function product(momentpoly::Dict{Moment, M}, p::T, var_to_cliques::Dict{Variable, Set{String}}) where T<:Union{AbstractPolynomial, Number} where M<:Number
+function product(momentpoly::DictType{Moment, M}, p::T, var_to_cliques::DictType{Variable, Set{String}}) where T<:Union{AbstractPolynomial, Number} where M<:Number
     return product(momentpoly, convert(Polynomial, p), var_to_cliques)
 end
 
-function product(momentpoly::Dict{Moment, M}, p::Polynomial, var_to_cliques::Dict{Variable, Set{String}}) where M<:Number
-    resmpoly = Dict{Moment, M}()
+function product(momentpoly::DictType{Moment, M}, p::Polynomial, var_to_cliques::DictType{Variable, Set{String}}) where M<:Number
+    resmpoly = DictType{Moment, M}()
 
     for (expo, val1) in p
         for (moment, val2) in momentpoly
@@ -139,7 +139,7 @@ function product(momentpoly::Dict{Moment, M}, p::Polynomial, var_to_cliques::Dic
     return resmpoly
 end
 
-function product(moment::Moment, expo::Exponent, var_to_cliques::Dict{Variable, Set{String}})
+function product(moment::Moment, expo::Exponent, var_to_cliques::DictType{Variable, Set{String}})
     resexpo = product(moment.conj_part, moment.expl_part)
     product!(resexpo, expo)
 

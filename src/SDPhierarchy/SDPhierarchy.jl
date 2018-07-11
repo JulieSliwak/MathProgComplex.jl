@@ -8,7 +8,7 @@ export RelaxationContext, Moment, MomentMatrix, SDPDual, SDPPrimal
 export SDP_Instance, SDP_Block, SDP_Moment, SDP_Problem
 
 
-const DictType = Dict
+const DictType = OrderedDict
 
 ###############################################################################
 ## Relaxation context, symmetries and cliques

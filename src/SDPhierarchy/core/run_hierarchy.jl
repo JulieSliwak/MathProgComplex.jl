@@ -51,11 +51,7 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext, logpath; 
 
     primobj = dualobj = NaN
     try
-        if (relax_ctx.relaxparams[:opt_outmode]!=1) && (relax_ctx.relaxparams[:opt_outlev] ≥ 1)
-            printlog = true
-        else
-            printlog = false
-        end
+        printlog = ((relax_ctx.relaxparams[:opt_outmode]!=1) && (relax_ctx.relaxparams[:opt_outlev] ≥ 1))
 
         primobj, dualobj = solve_mosek(sdp::SDP_Problem, primal, dual; logname = joinpath(logpath, "Mosek_run.log"),
                                                                        printlog = printlog,
@@ -64,6 +60,7 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext, logpath; 
 
     catch err
         relax_ctx.relaxparams[:slv_prosta] = err.msg
+        relax_ctx.relaxparams[:slv_solsta] = "_"
     end
 
     params_file = joinpath(logpath, "maxcliques_relaxctx.txt")

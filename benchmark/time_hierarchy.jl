@@ -9,10 +9,11 @@ function main(instance = case30pwl)
     instancepath = getinstancepath("Matpower", "QCQP", instance)
     # instancepath = getinstancepath("Matpower", "QCQP", "case89pegase")
     # instancepath = getinstancepath("Matpower", "QCQP", "case300")
-    println("\nWorking on $(splitdir(instancepath))")
+    println("\n\nWorking on $(splitdir(instancepath))")
 
     seek_efficiency!(false)
     @show seek_efficiency()
+    @show MathProgComplex.DictType
 
     pb_c, pt = import_from_dat(instancepath)
     problem = pb_cplx2real(pb_c)
@@ -69,7 +70,7 @@ function main(instance = case30pwl)
 
     # primobj, dualobj = solve_mosek(sdp::SDP_Problem, primal, dual, sol_info=relax_ctx.relaxparams)
 
-    # final_output(relax_ctx)
+    # # final_output(relax_ctx)
 
     return
 end
@@ -80,6 +81,8 @@ function main_work()
 
     seek_efficiency!(true)
     @show seek_efficiency()
+    @show MathProgComplex.DictType
+
     pb_c, pt = import_from_dat(instancepath)
 
     pb_cplx2real(pb_c)
@@ -90,6 +93,7 @@ end
 
 
 # main_work()
-# main("case30pwl")
+main("WB2")
+main("case30pwl")
 main("case89pegase")
-# main("case300")
+main("case300")
