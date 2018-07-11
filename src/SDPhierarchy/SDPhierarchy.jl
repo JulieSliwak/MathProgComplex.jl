@@ -153,7 +153,10 @@ type SDP_Problem
 end
 
 include(joinpath("Mosek", "run_mosek.jl"))
-include(joinpath("io", "build_SDP_Problem.jl"))
+
+include(joinpath("SDP_Instance", "common.jl"))
+include(joinpath("SDP_Instance", "build_from_sdpfile.jl"))
+include(joinpath("SDP_Instance", "build_from_SDPPrimal.jl"))
 
 
 

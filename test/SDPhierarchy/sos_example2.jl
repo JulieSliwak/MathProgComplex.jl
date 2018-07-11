@@ -21,7 +21,8 @@ using MathProgComplex
         ispath(logpath) && rm(logpath, recursive=true); mkpath(logpath)
         ## Order 1
         relax_ctx = set_relaxation(problem; hierarchykind=:Real,
-                                            d = 1)
+                                            d = 1,
+                                            params = Dict(:opt_outlev=>0))
 
         primobj, dualobj =run_hierarchy(problem, relax_ctx, logpath)
         @test primobj ≈ -3 atol=1e-6

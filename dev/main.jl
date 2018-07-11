@@ -1,4 +1,6 @@
 using MathProgComplex, DataStructures
+include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "SDP_Instance", "build_from_SDPPrimal.jl"))
+
 
 function main()
 
@@ -11,7 +13,7 @@ function main()
     problem = buildPOP_WB5()
     relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                         # symmetries=[PhaseInvariance],
-                                        d = 2,
+                                        d = 1,
                                         params = Dict(:opt_outlev=>1,
                                                       :opt_outmode=>0,
                                                       :opt_outcsv=>0))
@@ -48,47 +50,36 @@ function main()
 
     ########################################
     # Build the moment relaxation problem
-    mmtrel_pb = build_momentrelaxation(relax_ctx, problem, momentmat_param, localizingmat_param, max_cliques)
+    momentrel = build_momentrelaxation(relax_ctx, problem, momentmat_param, localizingmat_param, max_cliques)
 
-    # println("\n--------------------------------------------------------")
-    # println("mmtrel_pb = $mmtrel_pb")
+    println("\n--------------------------------------------------------")
+    println("momentrel = $momentrel")
+    println("--------------------------------------------------------")
 
     ########################################
     # Convert to a primal SDP problem
-    sdpinstance = build_SOSrelaxation(relax_ctx, mmtrel_pb)
+    # sosrel = build_SOSrelaxation(relax_ctx, momentrel)
 
     # println("\n--------------------------------------------------------")
-    # println("sdpinstance = \n$sdpinstance")
+    # println("sosrel = \n$sosrel")
+    # println("--------------------------------------------------------")
 
-    path = joinpath(pwd(), "Mosek_runs", "worksdp")
-    mkpath(path)
-    export_SDP(sdpinstance, path)
-    sdp_instance = read_SDPPrimal(path)
+    # path = joinpath(pwd(), "Mosek_runs", "worksdp")
+    # mkpath(path)
+    # export_SDP(sosrel, path)
 
-    # println("VAR_TYPES size:     $(size(sdp_instance.VAR_TYPES))")
-    # println("BLOCKS size:        $(size(sdp_instance.BLOCKS))")
-    # println("LINEAR size:        $(size(sdp_instance.LINEAR))")
-    # println("CONST size:         $(size(sdp_instance.CONST))")
 
-    sdp = SDP_Problem()
+    # # sdp_instance = build_SDP_Instance_from_sdpfiles(path)
 
-    set_constraints!(sdp, sdp_instance)
-    set_vartypes!(sdp, sdp_instance)
-    set_blocks!(sdp, sdp_instance)
-    set_linvars!(sdp, sdp_instance)
+    # sdp_instance = build_SDP_Instance_from_SDPPrimal(sosrel)
 
-    set_matrices!(sdp, sdp_instance)
-    set_linear!(sdp, sdp_instance)
-    set_const!(sdp, sdp_instance)
 
-    # println(sdp)
+    # primal = SortedDict{Tuple{String,String,String}, Float64}()
+    # dual = SortedDict{Tuple{String, String, String}, Float64}()
 
-    primal = SortedDict{Tuple{String,String,String}, Float64}()
-    dual = SortedDict{Tuple{String, String, String}, Float64}()
+    # primobj, dualobj = solve_mosek(sdp_instance::SDP_Problem, primal, dual, sol_info=relax_ctx.relaxparams)
 
-    primobj, dualobj = solve_mosek(sdp::SDP_Problem, primal, dual, sol_info=relax_ctx.relaxparams)
-
-    final_output(relax_ctx)
+    # final_output(relax_ctx)
     # # println("Primal solution")
     # # for ((blockname, var1, var2), val) in primal
     # # @printf("%15s %5s %5s %f\n", blockname, var1, var2, val)

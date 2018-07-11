@@ -195,11 +195,13 @@ function get_defaultparams()
                         :pb_nctr_ineqdouble=>-1,
                         :pb_maxpolydeg=>-1,
                         :pb_isphaseinv=>false,
-                        :slv_mmtrel_t=>-1.0,                    # Relaxation time and memory consumption
+                        :slv_mmtrel_t=>-1.0,                    # Moment relaxation time and memory consumption
                         :slv_mmtrel_bytes=>-1,
-                        :slv_sosrel_t=>-1.0,
+                        :slv_sosrel_t=>-1.0,                    # Conversion from moment to SOS relaxation
                         :slv_sosrel_bytes=>-1,
-                        :slv_mskstruct_t=>-1.0,
+                        :slv_fileexport_t=>-1,                  # Export to .sdp of solved problem
+                        :slv_fileexport_bytes=>-1,
+                        :slv_mskstruct_t=>-1.0,                 # Construction of the SDP_Problem struct
                         :slv_mskstruct_bytes=>-1,
                         :slv_prosta=>"",                        # SDP solution values
                         :slv_solsta=>"",
@@ -214,7 +216,9 @@ function get_defaultparams()
                         :opt_globalorder=>-1,
                         :opt_sym_phaseinv=>false,
                         :opt_nb_cliques=>-1,
-                        :opt_msk_maxtime=>-1,                   # Default -1 is no time limit
+                        :opt_exportsdp=>0,                      # 0: no, 1: export specified problem to :opt_exportsdppath
+                        :opt_exportsdppath=>"SDP_Problem",
+                        :opt_msk_maxtime=>-1,                   # Default -1 is no time limit; unit is seconds
                         :opt_outmode=>0,                        # 0: screen, 1: file, 2: both
                         :opt_outlev=>1,                         # 0: none, 1:summary at moment relaxation, sos relaxation, 2: detailled information, 3: full problems
                         :opt_outname=>"momentsos.log",

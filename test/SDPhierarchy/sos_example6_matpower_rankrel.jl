@@ -3,7 +3,7 @@ using Base.Test, MathProgComplex, OPFInstances
 ## Beware, rank relaxation value is for problem without objective constant term
 
 @testset "WB2 real formulation - order 1" begin
-    sols = OrderedDict( "WB2"            => (2, 885.71,   905.73, true),
+    sols = OrderedDict( ["WB2"            => (2, 885.71,   905.73, true),
                         # "WB3"            => (1, 417.25,   417.25, false),
                         "LMBM3"          => (1, 386.42,   386.42, false),
                         "WB5"            => (2, 954.82,   1146.4, true),
@@ -11,9 +11,9 @@ using Base.Test, MathProgComplex, OPFInstances
                         "case9"          => (2, 373.8,    1458.8, true),
                         "case9mod"       => (2, 234.6,    1320.4, true),
                         "case14"         => (2, 721.5,    5371.5, true),
-                        # "case22loop"     => (1, 4538.8,   4538.8, false), ## Absent in data repo...
-                        "case30"         => (2, 268.915,  316.49, true),
-                        "case39"         => (1, 1887.2,   1887.2, false)) #,
+                        # "case22loop"     => (1, 4538.8,   4538.8, false), ## Absent from data repo...
+                        "case30"         => (2, 268.915,  316.49, true)]) #,
+                        # "case39"         => (1, 1887.2,   1887.2, false)) #,
                         # "case39mod1"     => (2, 773.36,   942.34, true),
                         # "case39mod2"     => (1, 940.34,   940.34, false),
                         # "case57"         => (1, 25338,    25338,  false),
@@ -45,7 +45,8 @@ using Base.Test, MathProgComplex, OPFInstances
         println("Saving file at $logpath")
 
         relax_ctx = set_relaxation(problem; hierarchykind=:Real,
-                                            d = 1)
+                                            d = 1,
+                                            params = Dict(:opt_outlev=>0))
 
         primobj, dualobj = run_hierarchy(problem, relax_ctx, logpath, save_pbs=true);
         @show (primobj, dualobj, obj_rankrel, obj_opt, cstobj)
