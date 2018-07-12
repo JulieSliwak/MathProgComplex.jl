@@ -26,15 +26,15 @@ end
 """
 function isless(exp1::Exponent, exp2::Exponent)
     # return isless(exp1.expo, exp2.expo)
-  exp1_explsum, exp1_conjsum = get_sumdegs(exp1)
-  exp2_explsum, exp2_conjsum = get_sumdegs(exp2)
-  # exp1_explsum==0 || exp1_conjsum==0 || warn("isless(::Exponent, Exponent): exp1 has expl and conj vars, order may be ill defined...") # TODO
-  # exp2_explsum==0 || exp2_conjsum==0 || warn("isless(::Exponent, Exponent): exp2 has expl and conj vars, order may be ill defined...")
-  exp1_deg = exp1_explsum + exp1_conjsum
-  exp2_deg = exp2_explsum + exp2_conjsum
-  if exp1_deg < exp2_deg
-    return true
-  elseif exp1_deg == exp2_deg
+  # exp1_explsum, exp1_conjsum = get_sumdegs(exp1)
+  # exp2_explsum, exp2_conjsum = get_sumdegs(exp2)
+  # # exp1_explsum==0 || exp1_conjsum==0 || warn("isless(::Exponent, Exponent): exp1 has expl and conj vars, order may be ill defined...") # TODO
+  # # exp2_explsum==0 || exp2_conjsum==0 || warn("isless(::Exponent, Exponent): exp2 has expl and conj vars, order may be ill defined...")
+  # exp1_deg = exp1_explsum + exp1_conjsum
+  # exp2_deg = exp2_explsum + exp2_conjsum
+  # if exp1_deg < exp2_deg
+  #   return true
+  # elseif exp1_deg == exp2_deg
     state1 = start(exp1)
     state2 = start(exp2)
     while !done(exp1, state1) && !done(exp2, state2)
@@ -52,7 +52,7 @@ function isless(exp1::Exponent, exp2::Exponent)
     elseif !done(exp1, state1) && done(exp2, state2)
         return false
     end
-end
+# end
   #   vars = SortedSet(keys(exp1))
   #   union!(vars, keys(exp2))
   #   for var in vars
