@@ -3,3 +3,4 @@
 *.jl.mem
 Knitro_runs
 Mosek_runs
+*.log
