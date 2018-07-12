@@ -4,13 +4,9 @@ include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "SDP_Instanc
 
 function main()
 
-    # problem = buildPOP_WB2(v2max=1.022, setnetworkphase=false)
-    # relax_ctx = set_relaxation(problem; hierarchykind=:Real,
-    #                                     # symmetries=[PhaseInvariance],
-    #                                     d = 1)
-
     # problem = buildPOP_WB2(setnetworkphase=false)
     problem = buildPOP_WB2()
+
     relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                         # symmetries=[PhaseInvariance],
                                         d = 1,
@@ -18,7 +14,10 @@ function main()
                                                       :opt_outmode=>0,
                                                       :opt_outcsv=>0))
 
+    problem, relax_ctx = lasserre_ex5(d=1)
+
     # println("\n--------------------------------------------------------")
+
     # println("problem = \n$problem")
 
     # println("\n--------------------------------------------------------")
@@ -71,15 +70,15 @@ function main()
 
     sdp_instance = build_SDP_Instance_from_sdpfiles(path)
 
-    println("\n--------------------------------------------------------")
-    println(sdp_instance)
-    println("--------------------------------------------------------")
+    # println("\n--------------------------------------------------------")
+    # println(sdp_instance)
+    # println("--------------------------------------------------------")
 
     sdp_instance = build_SDP_Instance_from_SDPPrimal(sosrel)
 
-    println("\n--------------------------------------------------------")
-    println(sdp_instance)
-    println("--------------------------------------------------------")
+    # println("\n--------------------------------------------------------")
+    # println(sdp_instance)
+    # println("--------------------------------------------------------")
 
     sdp_instance = build_SDP_Instance_from_SDPDual(momentrel)
 
@@ -91,7 +90,8 @@ function main()
     primal = SortedDict{Tuple{String,String,String}, Float64}()
     dual = SortedDict{Tuple{String, String, String}, Float64}()
 
-    primobj, dualobj = solve_mosek(sdp_instance::SDP_Problem, primal, dual, sol_info=relax_ctx.relaxparams)
+    primobj, dualobj = solve_mosek(sdp_instance::SDP_Problem, primal, dual, sol_info=relax_ctx.relaxparams,
+                                                                            debug=true)
 
     # final_output(relax_ctx)
     # # println("Primal solution")

@@ -364,6 +364,7 @@ function dump_mosek_model(task)
       @printf("%5i  %5i  %5i  %5i  %f\n", subai[i], subaj[i], subak[i], subal[i], valajkl[i])
   end
 
+  numcon = length(Set(subai))
   boundkeys, lbs, ubs = getconboundslice(task, 1, numcon+1)
   @show boundkeys
   @show lbs

@@ -90,24 +90,3 @@ function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::SDPDual{T
     print_build_SOSrelax(relaxctx, sosrelaxation)
     return sosrelaxation
 end
-
-
-# """
-#     α, β = split_expo(expo::Exponent)
-
-#     Split the exponent into two exponents of conjugated and explicit variables in the complex case.
-#     Real case is not supported yet.
-# """
-# function split_expo(relaxctx::RelaxationContext, expo::Exponent)
-#     α, β = Exponent(), Exponent()
-
-#     for (var, deg) in expo
-#         product!(α, Exponent(Dict(var=>Degree(0, deg.conjvar))))
-#         product!(β, Exponent(Dict(var=>Degree(deg.explvar, 0))))
-#     end
-
-#     if (relaxctx.hierarchykind == :Real) && (α.degree != Degree(0,0))
-#         error("split_expo(): Inconsistent degree $α, $β found for $(relaxctx.hierarchykind) hierarchy.")
-#     end
-#     return α, β
-# end

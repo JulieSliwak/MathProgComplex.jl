@@ -99,7 +99,7 @@ function get_exponentclique(expo::Exponent, var_to_cliques::DictType{Variable, S
     cliques = Set{String}()
 
     ## If expo is one, return default clique
-    expo == Exponent() && return "clique_un"
+    expo == Exponent() && return "clique1"
 
     union!(cliques, var_to_cliques[first(expo)[1]])
     for (var, deg) in expo

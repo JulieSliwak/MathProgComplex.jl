@@ -1,3 +1,5 @@
+export get_sumdegs
+
 """
     exponents = get_exponents(variables, dmax::Int)
 
