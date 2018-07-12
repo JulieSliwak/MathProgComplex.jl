@@ -26,7 +26,7 @@ end
 
 
 ###############################################################################
-####  Relaxation context
+####  SDPDual
 ###############################################################################
 function print(io::IO, momentrelax::SDPDual{T}) where T
     println(io, "Moment Relaxation Problem:")
@@ -61,7 +61,9 @@ function print(io::IO, momentrelax::SDPDual{T}) where T
 end
 
 
-
+###############################################################################
+####  SDPPrimal
+###############################################################################
 function print(io::IO, sdpinst::SDPPrimal)
     println(io, " -- SDP Blocks:")
     print(io, sdpinst.blocks)
@@ -91,30 +93,33 @@ function print(io::IO, sdpcst::DictType{Moment, T}; indentedprint=true) where T
 end
 
 
+###############################################################################
+####  SDP_Problem
+###############################################################################
 function print(io::IO, sdp::SDP_Problem)
-  for cstr in sort(keys(sdp.name_to_sdpblock))
+  for cstr in keys(sdp.name_to_sdpblock)
     block = sdp.name_to_sdpblock[cstr]
     println(io, "  sdp   : $cstr -> $block")
   end
 
   println(io, "  objk  : $(sdp.obj_keys)")
 
-  for name in sort(keys(sdp.name_to_ctr))
+  for name in keys(sdp.name_to_ctr)
     ctr = sdp.name_to_ctr[name]
     println(io, "  ctr   : $name \t $ctr")
   end
 
-  for name in sort(keys(sdp.matrices))
+  for name in keys(sdp.matrices)
     mat = sdp.matrices[name]
     println(io, "  matrix: $name \t $mat")
   end
 
-  for name in sort(keys(sdp.linear))
+  for name in keys(sdp.linear)
     lin = sdp.linear[name]
     println(io, "  lin   : $name \t $lin")
   end
 
-  for name in sort(keys(sdp.cst_ctr))
+  for name in keys(sdp.cst_ctr)
     cst = sdp.cst_ctr[name]
     println(io, "  cst   : $name \t $cst")
   end
