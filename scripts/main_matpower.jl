@@ -1,9 +1,16 @@
-using MathProgComplex, DataStructures, OPFInstances
+using MathProgComplex, DataStructures, OPFInstances, BenchmarkTools
 using JuMP, KNITRO
 
 function main()
 
-    problem_c, pt = import_from_dat(getinstancepath("Matpower", "QCQP", "case9"))
+    instancepath = getinstancepath("Matpower", "QCQP", "case9")
+
+    println("import_from_dat time:")
+    @btime import_from_dat($instancepath)
+    problem_c, pt = import_from_dat(instancepath)
+
+    println("pb_cplx2real time:")
+    @btime problem = pb_cplx2real($problem_c)
     problem = pb_cplx2real(problem_c)
 
     solver = KnitroSolver(KTR_PARAM_OUTLEV=3,
@@ -17,6 +24,8 @@ function main()
                         KTR_PARAM_PRESOLVE=0,
                         KTR_PARAM_HONORBNDS=0)
 
+    println("get_JuMP_cartesian_model time:")
+    @btime get_JuMP_cartesian_model($problem, $solver)
     m, JuMPvars = get_JuMP_cartesian_model(problem, solver)
     solve(m)
 
