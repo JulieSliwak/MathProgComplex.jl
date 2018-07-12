@@ -170,5 +170,6 @@ include(joinpath("core", "run_hierarchy.jl"))
 include("example_problems.jl")
 include("utils.jl")
 include(joinpath("io", "momentsos_io.jl"))
+include(joinpath("io", "print.jl"))
 
 # end

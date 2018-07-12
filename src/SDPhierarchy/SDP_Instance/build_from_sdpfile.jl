@@ -18,10 +18,11 @@ function build_SDP_Instance_from_sdpfiles(path::String)
   # Build structural information and string to id maps
   set_vartypes!(sdp_inst, sdp_read)
 
-  set_constraints!(sdp_pb)
-  set_blocks!(sdp_pb)
-  set_scalvars!(sdp_pb)
+  set_blocks!(sdp_inst)
+  set_scalvars!(sdp_inst)
 
+
+  set_constraints!(sdp_inst)
 
   return sdp_inst
 end
@@ -52,16 +53,16 @@ function set_matrices!(sdp::SDP_Problem, instance::SDP_Instance; debug=false)
     # Sort variables for triangular matrix storage
     var1, var2 = min(var1, var2), max(var1, var2)
 
-    if haskey(sdp.name_to_sdpblock, block_name)
-      if !haskey(sdp.matrices, (ctr_name, block_name, var1, var2))
-        sdp.matrices[(ctr_name, block_name, var1, var2)] = parse(coeff)
-      else
-        error("set_matrices!(): sdp.matrices already has key ($ctr_name, $block_name, $var1, $var2) with val $(sdp.matrices[(ctr_name, block_name, var1, var2)]), $(parse(coeff))")
-      end
-
+    # if haskey(sdp.name_to_sdpblock, block_name)
+    if !haskey(sdp.matrices, (ctr_name, block_name, var1, var2))
+      sdp.matrices[(ctr_name, block_name, var1, var2)] = parse(coeff)
     else
-      error("set_matrices!(): Unhandled matrix var $block_name")
+      error("set_matrices!(): sdp.matrices already has key ($ctr_name, $block_name, $var1, $var2) with val $(sdp.matrices[(ctr_name, block_name, var1, var2)]), $(parse(coeff))")
     end
+
+    # else
+    #   error("set_matrices!(): Unhandled matrix var $block_name")
+    # end
   end
 
   if debug

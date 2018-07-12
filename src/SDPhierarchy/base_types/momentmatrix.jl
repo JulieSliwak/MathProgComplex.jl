@@ -79,6 +79,14 @@ function print(io::IO, mm::MomentMatrix{T}) where T<:Number
     print(io, " $(mm.matrixkind)")
 end
 
+start(mmtmat::MomentMatrix) = start(mmtmat.mm)
+next(mmtmat::MomentMatrix, state) = next(mmtmat.mm, state)
+done(mmtmat::MomentMatrix, state) = done(mmtmat.mm, state)
+length(mmtmat::MomentMatrix) = length(mmtmat.mm)
+haskey(mmtmat::MomentMatrix, key) = haskey(mmtmat.mm, key)
+keys(mmtmat::MomentMatrix) = keys(mmtmat.mm)
+values(mmtmat::MomentMatrix) = values(mmtmat.mm)
+getindex(mmtmat::MomentMatrix, expo1::Exponent, expo2::Exponent) = poly.mm[expo1, expo2]
 
 
 """
