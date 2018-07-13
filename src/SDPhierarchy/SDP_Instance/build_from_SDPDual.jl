@@ -1,4 +1,6 @@
-function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
+# export build_SDP_Instance_from_SDPDual
+
+function build_SDP_Instance_from_SDPDual(sdpdual::MPC.SDPDual)
     sdp_pb = SDP_Problem()
 
     ## First. Deal fully with moment matrices
@@ -165,7 +167,7 @@ end
     Split the exponent into two exponents of conjugated and explicit variables in the complex case.
     Real case is not supported yet.
 """
-function split_moment(moment::Moment)
+function split_moment(moment::MPC.Moment)
     α, β = Exponent(), Exponent()
 
     if moment.conj_part != Exponent()
@@ -214,7 +216,7 @@ set_blockvartypes!(sdp_pb::SDP_Problem)
 
 # Set attributes `name_to_sdpblock` and `id_to_sdpblock` given a primal sdp.
 """
-function set_blockvartypes!(sdp_pb::SDP_Problem)
+function set_blockvartypes!(sdp_pb::MPC.SDP_Problem)
     n_sdp = 0
 
     blocknames = SortedSet([k[2] for k in keys(sdp_pb.matrices)])
@@ -229,7 +231,7 @@ function set_blockvartypes!(sdp_pb::SDP_Problem)
 end
 
 
-function set_blocks!(sdp_pb::SDP_Problem, sdpdual::SDPDual)
+function set_blocks!(sdp_pb::MPC.SDP_Problem, sdpdual::MPC.SDPDual)
     # Collecting moments from each moment constraint
     for ((ctrname, cliquename), matrix) in sdpdual.constraints
 
@@ -258,22 +260,6 @@ function set_blocks!(sdp_pb::SDP_Problem, sdpdual::SDPDual)
     end
 end
 
-function set_blocks!(sdp_pb::SDP_Problem)
-    for (ctr_name, blockname, var1, var2) in keys(sdp_pb.matrices)
-        # sanity check
-        @assert haskey(sdp_pb.name_to_sdpblock, blockname)
-
-        cur_block = sdp_pb.name_to_sdpblock[blockname]
-
-        # Adding vars and ids to SDP block
-        if !haskey(cur_block.var_to_id, var1)
-            cur_block.var_to_id[var1] = length(cur_block.var_to_id) + 1
-        end
-        if !haskey(cur_block.var_to_id, var2)
-            cur_block.var_to_id[var2] = length(cur_block.var_to_id) + 1
-        end
-    end
-end
 
 # mutable struct MomentMatrix{T}
 #     mm::DictType{Tuple{Exponent, Exponent}, DictType{Moment, T}}

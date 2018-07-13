@@ -199,22 +199,38 @@ function get_WB5cliques(relax_ctx, problem)
         return get_maxcliques(relax_ctx, problem)
     else
         maxcliques = DictType{String, Set{Variable}}()
+        # maxcliques["clique1"] = Set{Variable}([
+        #     Variable("BaseCase_1_VOLT_Im", Real),
+        #     Variable("BaseCase_1_VOLT_Re", Real),
+        #     Variable("BaseCase_2_VOLT_Im", Real),
+        #     Variable("BaseCase_2_VOLT_Re", Real),
+        #     Variable("BaseCase_3_VOLT_Im", Real),
+        #     Variable("BaseCase_3_VOLT_Re", Real)])
+        # maxcliques["clique2"] = Set{Variable}([
+        #     Variable("BaseCase_2_VOLT_Im", Real),
+        #     Variable("BaseCase_2_VOLT_Re", Real),
+        #     Variable("BaseCase_3_VOLT_Im", Real),
+        #     Variable("BaseCase_3_VOLT_Re", Real),
+        #     Variable("BaseCase_4_VOLT_Im", Real),
+        #     Variable("BaseCase_4_VOLT_Re", Real),
+        #     Variable("BaseCase_5_VOLT_Im", Real),
+        #     Variable("BaseCase_5_VOLT_Re", Real)])
         maxcliques["clique1"] = Set{Variable}([
-            Variable("BaseCase_1_VOLT_Im", Real),
-            Variable("BaseCase_1_VOLT_Re", Real),
-            Variable("BaseCase_2_VOLT_Im", Real),
-            Variable("BaseCase_2_VOLT_Re", Real),
-            Variable("BaseCase_3_VOLT_Im", Real),
-            Variable("BaseCase_3_VOLT_Re", Real)])
+            Variable("VOLT_1_Im", Real),
+            Variable("VOLT_1_Re", Real),
+            Variable("VOLT_2_Im", Real),
+            Variable("VOLT_2_Re", Real),
+            Variable("VOLT_3_Im", Real),
+            Variable("VOLT_3_Re", Real)])
         maxcliques["clique2"] = Set{Variable}([
-            Variable("BaseCase_2_VOLT_Im", Real),
-            Variable("BaseCase_2_VOLT_Re", Real),
-            Variable("BaseCase_3_VOLT_Im", Real),
-            Variable("BaseCase_3_VOLT_Re", Real),
-            Variable("BaseCase_4_VOLT_Im", Real),
-            Variable("BaseCase_4_VOLT_Re", Real),
-            Variable("BaseCase_5_VOLT_Im", Real),
-            Variable("BaseCase_5_VOLT_Re", Real)])
+            Variable("VOLT_2_Im", Real),
+            Variable("VOLT_2_Re", Real),
+            Variable("VOLT_3_Im", Real),
+            Variable("VOLT_3_Re", Real),
+            Variable("VOLT_4_Im", Real),
+            Variable("VOLT_4_Re", Real),
+            Variable("VOLT_5_Im", Real),
+            Variable("VOLT_5_Re", Real)])
         return maxcliques
     end
 end
@@ -225,38 +241,38 @@ function get_case9cliques(relax_ctx, problem)
     else
         maxcliques = DictType{String, Set{Variable}}()
         maxcliques["clique1"] = Set{Variable}([
-            Variable("BaseCase_1_VOLT_Im", Real),
-            Variable("BaseCase_1_VOLT_Re", Real),
-            Variable("BaseCase_5_VOLT_Im", Real),
-            Variable("BaseCase_5_VOLT_Re", Real),
-            Variable("BaseCase_4_VOLT_Im", Real),
-            Variable("BaseCase_4_VOLT_Re", Real),
-            Variable("BaseCase_9_VOLT_Im", Real),
-            Variable("BaseCase_9_VOLT_Re", Real),
-            Variable("BaseCase_8_VOLT_Im", Real),
-            Variable("BaseCase_8_VOLT_Re", Real)])
+            Variable("VOLT_1_Im", Real),
+            Variable("VOLT_1_Re", Real),
+            Variable("VOLT_5_Im", Real),
+            Variable("VOLT_5_Re", Real),
+            Variable("VOLT_4_Im", Real),
+            Variable("VOLT_4_Re", Real),
+            Variable("VOLT_9_Im", Real),
+            Variable("VOLT_9_Re", Real),
+            Variable("VOLT_8_Im", Real),
+            Variable("VOLT_8_Re", Real)])
         maxcliques["clique2"] = Set{Variable}([
-            Variable("BaseCase_2_VOLT_Im", Real),
-            Variable("BaseCase_2_VOLT_Re", Real),
-            Variable("BaseCase_9_VOLT_Im", Real),
-            Variable("BaseCase_9_VOLT_Re", Real),
-            Variable("BaseCase_8_VOLT_Im", Real),
-            Variable("BaseCase_8_VOLT_Re", Real),
-            Variable("BaseCase_7_VOLT_Im", Real),
-            Variable("BaseCase_7_VOLT_Re", Real),
-            Variable("BaseCase_6_VOLT_Im", Real),
-            Variable("BaseCase_6_VOLT_Re", Real)])
+            Variable("VOLT_2_Im", Real),
+            Variable("VOLT_2_Re", Real),
+            Variable("VOLT_9_Im", Real),
+            Variable("VOLT_9_Re", Real),
+            Variable("VOLT_8_Im", Real),
+            Variable("VOLT_8_Re", Real),
+            Variable("VOLT_7_Im", Real),
+            Variable("VOLT_7_Re", Real),
+            Variable("VOLT_6_Im", Real),
+            Variable("VOLT_6_Re", Real)])
         maxcliques["clique3"] = Set{Variable}([
-            Variable("BaseCase_3_VOLT_Im", Real),
-            Variable("BaseCase_3_VOLT_Re", Real),
-            Variable("BaseCase_7_VOLT_Im", Real),
-            Variable("BaseCase_7_VOLT_Re", Real),
-            Variable("BaseCase_6_VOLT_Im", Real),
-            Variable("BaseCase_6_VOLT_Re", Real),
-            Variable("BaseCase_5_VOLT_Im", Real),
-            Variable("BaseCase_5_VOLT_Re", Real),
-            Variable("BaseCase_4_VOLT_Im", Real),
-            Variable("BaseCase_4_VOLT_Re", Real)])
+            Variable("VOLT_3_Im", Real),
+            Variable("VOLT_3_Re", Real),
+            Variable("VOLT_7_Im", Real),
+            Variable("VOLT_7_Re", Real),
+            Variable("VOLT_6_Im", Real),
+            Variable("VOLT_6_Re", Real),
+            Variable("VOLT_5_Im", Real),
+            Variable("VOLT_5_Re", Real),
+            Variable("VOLT_4_Im", Real),
+            Variable("VOLT_4_Re", Real)])
         return maxcliques
     end
 end

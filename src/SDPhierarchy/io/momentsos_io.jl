@@ -119,7 +119,7 @@ function print_build_SOSrelax(relax_ctx::RelaxationContext, sosrel::SDPPrimal)
     size_SDPvars = length(Set([(key[2], key[3], key[4]) for key in keys(sosrel.blocks)]))
     nb_symvars = length(Set([(key[2]) for key in keys(sosrel.linsym)]))
     size_symvars = length(Set([(key[2], key[3]) for key in keys(sosrel.linsym)]))
-    nb_scalvars = length(Set([key[3] for key in keys(sosrel.lin)]))
+    nb_scalvars = length(Set([key[2] for key in keys(sosrel.lin)]))
 
     momentset = Set{Moment}([key[1] for key in keys(sosrel.blocks)])
     union!(momentset, Set([key[1] for key in keys(sosrel.linsym)]))

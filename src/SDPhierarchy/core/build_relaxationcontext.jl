@@ -36,9 +36,7 @@ function set_relaxation(pb::Problem; ismultiordered::Bool=false,
 
     rel_ctx_setsymetries!(relax_ctx, pb, symmetries)
 
-
-    log_POPcharact!(relax_ctx, pb)
-
+    relax_ctx.issparse = issparse
     relaxparams[:opt_issparse] = issparse
     relaxparams[:opt_hierarchykind] = hierarchykind
     relaxparams[:opt_multiordered] = ismultiordered
@@ -53,6 +51,7 @@ function set_relaxation(pb::Problem; ismultiordered::Bool=false,
         end
     end
 
+    log_POPcharact!(relax_ctx, pb)
     init_output(relax_ctx)
 
     print_build_relctx(relax_ctx, pb)
