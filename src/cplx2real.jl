@@ -62,7 +62,6 @@ end
 function cplx2real(expo::Exponent, λ::Number)
 	a=real(λ)
 	b=imag(λ)
-
 	if expo.degree.explvar  == 1 && expo.degree.conjvar  == 1
 		if length(expo.expo)==1
 			realPart = Polynomial(); add!(realPart, 0)
@@ -104,15 +103,13 @@ function cplx2real(expo::Exponent, λ::Number)
 			#    i(a.x1.y2-a.x2.y1+b.x1.x2+b.y1.y2)
 			x1x2 = SortedDict{Variable, Degree}(x1=>Degree(1,0), x2=>Degree(1,0))
 			y1y2 = SortedDict{Variable, Degree}(y1=>Degree(1,0), y2=>Degree(1,0))
-			x1y2 = SortedDict{Variable, Degree}(x1=>Degree(1,0), x2=>Degree(1,0))
+			x1y2 = SortedDict{Variable, Degree}(x1=>Degree(1,0), y2=>Degree(1,0))
 			x2y1 = SortedDict{Variable, Degree}(x2=>Degree(1,0), y1=>Degree(1,0))
 
-			realPart = Polynomial(SortedDict{Exponent, Number}(Exponent(x1x2)=>a, Exponent(y1y2)=>b, Exponent(x1y2)=>-b, Exponent(x2y1)=>b))
+			realPart = Polynomial(SortedDict{Exponent, Number}(Exponent(x1x2)=>a, Exponent(y1y2)=>a, Exponent(x1y2)=>-b, Exponent(x2y1)=>b))
 			imagPart = Polynomial(SortedDict{Exponent, Number}(Exponent(x1x2)=>b, Exponent(y1y2)=>b, Exponent(x1y2)=>a, Exponent(x2y1)=>-a))
 			return realPart, imagPart
 		end
-		# vars, inds = collect(keys(expo.expo)), collect(values(expo.expo))
-		# return cplx2real_rec(vars, inds, realPart, imagPart, length(expo)+1, Degree(0,0))
 	elseif expo.degree.explvar  == 0 && expo.degree.conjvar  == 0
 		realPart = Polynomial(); add!(realPart, a)
 		imagPart = Polynomial(); add!(imagPart, b)
@@ -124,6 +121,8 @@ function cplx2real(expo::Exponent, λ::Number)
 		vars, inds = collect(keys(expo.expo)), collect(values(expo.expo))
 		return cplx2real_rec(vars, inds, realPart, imagPart, length(expo)+1, Degree(0,0))
 	end
+	# realPart = Polynomial(); add!(realPart, 1)
+	# imagPart = Polynomial(); add!(imagPart, 0)
 	# vars, inds = collect(keys(expo.expo)), collect(values(expo.expo))
 	# return cplx2real_rec(vars, inds, realPart, imagPart, length(expo)+1, Degree(0,0))
 
@@ -148,6 +147,7 @@ Initial arrays `vars` and `degs` are read only.
 - cur_deg::Degree
 """
 function cplx2real_rec(vars::Array{Variable}, degs::Array{Degree}, realPart::Polynomial, imagPart::Polynomial, cur_ind::Int, cur_deg::Degree)
+	# println("toto")
 	## Final case:
 	if cur_ind == 1 && cur_deg == Degree(0,0)
 		return (realPart, imagPart)
@@ -199,21 +199,12 @@ end
 function cplx2real(pol::Polynomial)
   realPart = Polynomial()
   imagPart = Polynomial()
-
-  # println("pol is size ", length(pol.poly))
   for (expo, λ) in pol
-	if expo.degree.explvar  == 1 && expo.degree.conjvar  == 1
+	if (expo.degree.explvar  == 1 && expo.degree.conjvar  == 1 )||( expo.degree.explvar  == 0 && expo.degree.conjvar  == 0)
 		realexpo, imagexpo = cplx2real(expo, λ)
+
 		add!(realPart, realexpo)
 		add!(imagPart, imagexpo)
-
-		    # for (cur_expo, λ) in p1
-		    #     λ != 0 || continue
-		    #     add_to_dict!(p.poly, cur_expo, λ)
-		    # end
-		    # p.degree.explvar = max(p.degree.explvar, p1.degree.explvar)
-		    # p.degree.conjvar = max(p.degree.conjvar, p1.degree.conjvar)
-
 	else
 	    realexpo, imagexpo = cplx2real(expo, λ)
 
