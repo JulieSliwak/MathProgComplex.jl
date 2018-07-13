@@ -37,7 +37,6 @@ end
 
 include(joinpath("core", "build_relaxationcontext.jl"))
 
-# include("build_relctx.jl")
 include(joinpath("core", "build_decomposition.jl"))
 
 abstract type AbstractSymmetry end
@@ -152,7 +151,7 @@ type SDP_Problem
                       )
 end
 
-include(joinpath("Mosek", "run_mosek.jl"))
+include(joinpath("solvers", "run_mosek.jl"))
 
 include(joinpath("SDP_Instance", "common.jl"))
 include(joinpath("SDP_Instance", "build_from_sdpfile.jl"))
