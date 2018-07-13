@@ -205,7 +205,15 @@ function cplx2real(pol::Polynomial)
 	if expo.degree.explvar  == 1 && expo.degree.conjvar  == 1
 		realexpo, imagexpo = cplx2real(expo, λ)
 		add!(realPart, realexpo)
-		add!(realPart, imagexpo)
+		add!(imagPart, imagexpo)
+
+		    # for (cur_expo, λ) in p1
+		    #     λ != 0 || continue
+		    #     add_to_dict!(p.poly, cur_expo, λ)
+		    # end
+		    # p.degree.explvar = max(p.degree.explvar, p1.degree.explvar)
+		    # p.degree.conjvar = max(p.degree.conjvar, p1.degree.conjvar)
+
 	else
 	    realexpo, imagexpo = cplx2real(expo, λ)
 
