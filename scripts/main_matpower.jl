@@ -5,8 +5,8 @@ using JuMP, KNITRO
 
 function main()
     tic()
-    # problem_c, pt = import_from_dat(getinstancepath("Matpower", "QCQP", "case1354pegase"))
-    problem_c, pt = import_from_dat(getinstancepath("Matpower", "QCQP", "case9"))
+    problem_c, pt = import_from_dat(getinstancepath("Matpower", "QCQP", "case1354pegase"))
+    #problem_c, pt = import_from_dat(getinstancepath("Matpower", "QCQP", "case9"))
     println("import_from_dat : ", toq())
     tic()
     @profile pb_cplx2real(problem_c)
