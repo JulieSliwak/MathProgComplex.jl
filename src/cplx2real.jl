@@ -63,6 +63,15 @@ function cplx2real(expo::Exponent)
 	vars, inds = collect(keys(expo.expo)), collect(values(expo.expo))
 	realPart = Polynomial(); add!(realPart, 1)
 	imagPart = Polynomial(); add!(imagPart, 0)
+	for var, ind in expo.expo
+		for d in 1:ind
+
+			# realPart += var_real * realPart - var_imag * imagPart
+			# imagPart += var_real * imagPart + var_imag * realPart
+			realPart = mult()
+		end
+
+	end
 	return cplx2real_rec(vars, inds, realPart, imagPart, length(expo)+1, Degree(0,0))
 end
 
@@ -134,7 +143,7 @@ end
 	`pol` variables.
 """
 function cplx2real(pol::Polynomial)
-	realPart = Polynomial()
+  realPart = Polynomial()
   imagPart = Polynomial()
 
   for (expo, λ) in pol

@@ -2,7 +2,7 @@ using MathProgComplex, DataStructures, OPFInstances
 
 function main()
 
-    problem_c, pt = import_from_dat(getinstancepath("Matpower", "QCQP", "case9"))
+    problem_c, pt = import_from_dat(getinstancepath("Matpower", "QCQP", "case1354pegase"))
     problem = pb_cplx2real(problem_c)
 
     relax_ctx = set_relaxation(problem; hierarchykind=:Real,
