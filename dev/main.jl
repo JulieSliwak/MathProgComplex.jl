@@ -5,14 +5,14 @@ include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "SDP_Instanc
 function main()
 
     # problem = buildPOP_WB2(setnetworkphase=false)
-    problem = buildPOP_WB2()
 
-    relax_ctx = set_relaxation(problem; hierarchykind=:Real,
-                                        # symmetries=[PhaseInvariance],
-                                        d = 1,
-                                        params = Dict(:opt_outlev=>1,
-                                                      :opt_outmode=>0,
-                                                      :opt_outcsv=>0))
+    # problem = buildPOP_WB2()
+    # relax_ctx = set_relaxation(problem; hierarchykind=:Real,
+    #                                     # symmetries=[PhaseInvariance],
+    #                                     d = 1,
+    #                                     params = Dict(:opt_outlev=>1,
+    #                                                   :opt_outmode=>0,
+    #                                                   :opt_outcsv=>0))
 
     problem, relax_ctx = lasserre_ex5(d=1)
 
@@ -80,7 +80,7 @@ function main()
     # println(sdp_instance)
     # println("--------------------------------------------------------")
 
-    sdp_instance = build_SDP_Instance_from_SDPDual(momentrel)
+    # sdp_instance = build_SDP_Instance_from_SDPDual(momentrel)
 
     println("\n--------------------------------------------------------")
     println(sdp_instance)
@@ -94,19 +94,25 @@ function main()
                                                                             debug=true)
 
     # final_output(relax_ctx)
-    # # println("Primal solution")
-    # # for ((blockname, var1, var2), val) in primal
-    # # @printf("%15s %5s %5s %f\n", blockname, var1, var2, val)
-    # # end
 
-    # # println("\nDual solution NEGATED")
-    # # for var in problem.variables
-    # #     ctrname = get_momentcstrname()
-    # #     var1 = var[1]
-    # #     var2 = "1"
-    # #     val = dual[(ctrname, var1, var2)]
-    # #     println("($(ctrname), $(var1), $(var2)) = $(-val)")
-    # # end
+    println("Primal solution")
+    for ((blockname, var1, var2), val) in primal
+    @printf("%15s %10s %10s %f\n", blockname, var1, var2, val)
+    end
+
+    println("Dual solution")
+    for ((blockname, var1, var2), val) in dual
+    @printf("%15s %10s %10s %f\n", blockname, var1, var2, val)
+    end
+
+    # println("\nDual solution NEGATED")
+    # for var in problem.variables
+    #     ctrname = get_momentcstrname()
+    #     var1 = var[1]
+    #     var2 = "1"
+    #     val = dual[(ctrname, var1, var2)]
+    #     println("($(ctrname), $(var1), $(var2)) = $(-val)")
+    # end
 
     # println("Objectives : $primobj, $dualobj")
 end

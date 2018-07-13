@@ -40,7 +40,6 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
         α_str, β_str = format_string(α), format_string(β)
         var1, var2 = min(α_str, β_str), max(α_str, β_str)
 
-        @show moment, split_moment(moment)
         @assert haskey(sdp_pb.name_to_sdpblock, block_name)
         @assert haskey(sdp_pb.name_to_sdpblock[block_name].var_to_id, var1)
         @assert haskey(sdp_pb.name_to_sdpblock[block_name].var_to_id, var2)
@@ -71,7 +70,6 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
                     α_str, β_str = format_string(α), format_string(β)
                     var1, var2 = min(α_str, β_str), max(α_str, β_str)
 
-                    info("$moment    -> $block_name, $α, $β")
                     @assert haskey(sdp_pb.name_to_sdpblock, block_name)
                     @assert haskey(sdp_pb.name_to_sdpblock[block_name].var_to_id, var1)
                     @assert haskey(sdp_pb.name_to_sdpblock[block_name].var_to_id, var2)
@@ -82,7 +80,6 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
 
                 # If the matrix is SDP, add link to auxiliary SDP var
                 if matrix.matrixkind == :SDP
-                    warn("SDP, ctr:         ($ctr_name, $block_name, $var1, $var2)")
                     block_name = S_name
                     var1 = min(γ_str, δ_str)
                     var2 = max(γ_str, δ_str)
@@ -106,7 +103,6 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
     n_sdp = length(sdp_pb.name_to_sdpblock)
     for ((ctr_name, blockname, var1, var2), f_αβ) in sdp_pb.matrices
         if blockname ∉ momentvars
-            @show ctr_name, blockname, var1, var2
             if !haskey(sdp_pb.name_to_sdpblock, blockname)
                 n_sdp += 1
                 block = SDP_Block(n_sdp, blockname)
@@ -117,7 +113,6 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
                 block = sdp_pb.name_to_sdpblock[blockname]
             end
 
-            warn(" * var1=$var1  var2=$var2 : $(block.var_to_id)")
             @assert !haskey(block.var_to_id, var1)
             @assert !haskey(block.var_to_id, var2)
             if !haskey(block.var_to_id, var1)
@@ -141,10 +136,6 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
     # set_blockvartypes!(sdp_pb)
 
     # set_blocks!(sdp_pb, sdpdual)
-
-    warn("*******************************")
-    println(sdp_pb)
-    warn("*******************************")
 
     # MathProgComplex.set_blocks!(sdp_pb)
 

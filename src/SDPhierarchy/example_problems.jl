@@ -185,6 +185,7 @@ function lasserre_ex5(;d = 2)
     add_constraint!(problem, "crt1", (1-(x1-1)^2) >> 0)
     add_constraint!(problem, "crt2", (1-(x1-x2)^2) >> 0)
     add_constraint!(problem, "crt3", (1-(x2-3)^2) >> 0)
+    # add_constraint!(problem, "crtball", (x1^2+x2^2) << 5^2)
 
     relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                         d = d)
