@@ -19,11 +19,6 @@ end
 #############################
 ## Exponent
 #############################
-"""
-  isless(exp1, exp2)
-
-  BEWARE: Order is valid for fully real or conjugated exponents. Mixed case is not treated.
-"""
 function isless(exp1::Exponent, exp2::Exponent)
     exp1_deg = sum(get_sumdegs(exp1))
     exp2_deg = sum(get_sumdegs(exp2))
