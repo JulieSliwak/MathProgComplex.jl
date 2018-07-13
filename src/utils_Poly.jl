@@ -61,7 +61,7 @@ end
 """
 function get_sumdegs(expo::Exponent)
     explsum = conjsum = 0
-    for deg in keys(expo)
+    for deg in values(expo)
         explsum += deg.explvar
         conjsum += deg.conjvar
     end
