@@ -60,19 +60,50 @@ end
 	`expo` variables. Done recursively with the `cplx2real_rec` function.
 """
 function cplx2real(expo::Exponent)
-	vars, inds = collect(keys(expo.expo)), collect(values(expo.expo))
 	realPart = Polynomial(); add!(realPart, 1)
 	imagPart = Polynomial(); add!(imagPart, 0)
-	for var, ind in expo.expo
-		for d in 1:ind
+	if expo.degree.explvar  == 1 && expo.degree.conjvar  == 1
+		if length(expo.expo)==1
+			z1 = first(expo.expo)
+			# println("Square : ", z1[1])
+			x1 = Variable(z1[1].name*"_Re", Real)
+			y1 = Variable(z1[1].name*"_Im", Real)
+			dictReal = SortedDict{Variable, Degree}(x1=>Degree(2,0))
+			dictImag = SortedDict{Variable, Degree}(y1=>Degree(2,0))
+			# conj(z1) * z1 = x1^2+y1^2
+			return Polynomial(SortedDict{Exponent, Number}(Exponent(dictReal)=>1.0, Exponent(dictImag)=>1.0)), imagPart
+		else
+			if first(expo.expo)[2].conjvar==1
+				z1 = first(expo.expo)
+				z2 = last(expo.expo)
+			else
+				z2 = first(expo.expo)
+				z1 = last(expo.expo)
+			end
+			# println("Bilinear : ", z1, ", ", z2)
+			x1 = Variable(z1[1].name*"_Re", Real)
+			y1 = Variable(z1[1].name*"_Im", Real)
+			x2 = Variable(z2[1].name*"_Re", Real)
+			y2 = Variable(z2[1].name*"_Im", Real)
+			# conj(z1) * z2  = (x1-iy1)*(x2+iy2) = x1.x2 + y1.y2 + i(x1.y2-x2.y1)
+			dictReal_x1x2 = SortedDict{Variable, Degree}(x1=>Degree(1,0), x2=>Degree(1,0))
+			dictReal_y1y2 = SortedDict{Variable, Degree}(y1=>Degree(1,0), y2=>Degree(1,0))
+			dictImag_x1y2 = SortedDict{Variable, Degree}(x1=>Degree(1,0), x2=>Degree(1,0))
+			dictImag_x2y1 = SortedDict{Variable, Degree}(x2=>Degree(1,0), y1=>Degree(1,0))
 
-			# realPart += var_real * realPart - var_imag * imagPart
-			# imagPart += var_real * imagPart + var_imag * realPart
-			realPart = mult()
+			return Polynomial(SortedDict{Exponent, Number}(Exponent(dictReal_x1x2)=>1.0, Exponent(dictReal_y1y2)=>1.0)), Polynomial(SortedDict{Exponent, Number}(Exponent(dictImag_x1y2)=>1.0, Exponent(dictImag_x2y1)=>-1.0))
 		end
-
+		# vars, inds = collect(keys(expo.expo)), collect(values(expo.expo))
+		# return cplx2real_rec(vars, inds, realPart, imagPart, length(expo)+1, Degree(0,0))
+	elseif expo.degree.explvar  == 0 && expo.degree.conjvar  == 0
+		return realPart, imagPart
+	else
+		vars, inds = collect(keys(expo.expo)), collect(values(expo.expo))
+		return cplx2real_rec(vars, inds, realPart, imagPart, length(expo)+1, Degree(0,0))
 	end
-	return cplx2real_rec(vars, inds, realPart, imagPart, length(expo)+1, Degree(0,0))
+	# vars, inds = collect(keys(expo.expo)), collect(values(expo.expo))
+	# return cplx2real_rec(vars, inds, realPart, imagPart, length(expo)+1, Degree(0,0))
+
 end
 
 """
