@@ -49,7 +49,7 @@ function get_normalizedpoly(cstr::Constraint, cstrtype::Symbol)
 end
 
 function get_pbcstrname(cstrname::String)
-    if ismatch(r".+(\_lo|\_hi|\_eq)", cstrname)
+    if ismatch(r".+(\_lo|\_up|\_eq)", cstrname)
         return cstrname[1:end-3]
     else
         return cstrname
