@@ -51,7 +51,12 @@ using Base.Test, MathProgComplex, OPFInstances
         primobj, dualobj = run_hierarchy(problem, relax_ctx, logpath, save_pbs=true);
         @show (primobj, dualobj, obj_rankrel, obj_opt, cstobj)
 
-        @test primobj ≈ obj_rankrel + cstobj atol=(1e-4*abs(obj_rankrel + cstobj))
-        @test dualobj ≈ primobj atol=(mosek_optgap*min(abs(primobj), abs(dualobj)))
+        dualgaptol::Float64 = mosek_optgap*min(abs(primobj), abs(dualobj))
+        objtol::Float64 = 1e-4*abs(obj_rankrel + cstobj)
+
+        objandctr::Float64 = obj_rankrel + cstobj
+
+        @test primobj ≈ objandctr atol=objtol
+        @test dualobj ≈ primobj atol=dualgaptol
     end
 end
