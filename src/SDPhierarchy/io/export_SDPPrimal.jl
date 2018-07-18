@@ -122,7 +122,7 @@ function build_momentdict(sdp, renamemoments::Bool)
 end
 
 function build_ctrkeysset(sdp::SDPPrimal{T}) where T
-    ctr_keys = Set{Moment}()
+    ctr_keys = Set{CtrName}()
 
     for ((moment, blockname, γ, δ), λ) in sdp.blocks
         push!(ctr_keys, moment)
@@ -140,7 +140,7 @@ function build_ctrkeysset(sdp::SDPPrimal{T}) where T
 end
 
 
-function print_blocksfile(io::IO, sdpblocks::DictType{Tuple{Moment, String, Exponent, Exponent}, T};
+function print_blocksfile(io::IO, sdpblocks::DictType{Tuple{CtrName, String, Exponent, Exponent}, T};
                                                         momentdict::DictType{Exponent, String}=DictType{Exponent, String}(),
                                                         indentedprint=false,
                                                         print_header=true) where T
@@ -191,7 +191,7 @@ function print_blocksfile(io::IO, sdpblocks::DictType{Tuple{Moment, String, Expo
 end
 
 
-function print_linfile(io::IO, sdplin::DictType{Tuple{Moment, Exponent}, T}, sdplinsym::DictType{Tuple{Moment, String, Exponent}, T};
+function print_linfile(io::IO, sdplin::DictType{Tuple{CtrName, Exponent}, T}, sdplinsym::DictType{Tuple{CtrName, String, Exponent}, T};
                                                                      momentdict::DictType{Exponent, String}=DictType{Exponent, String}(),
                                                                      indentedprint=false,
                                                                      print_header=true) where T
@@ -257,9 +257,9 @@ function print_linfile(io::IO, sdplin::DictType{Tuple{Moment, Exponent}, T}, sdp
 end
 
 
-function print_cstfile(io::IO, sdpcst::DictType{Moment, T};
+function print_cstfile(io::IO, sdpcst::DictType{CtrName, T};
                                 momentdict::DictType{Exponent, String}=DictType{Exponent, String}(),
-                                ctr_keys::Set{Moment}=Set{Moment}(),
+                                ctr_keys::Set{CtrName}=Set{CtrName}(),
                                 indentedprint=false,
                                 print_header=true) where T
     if print_header

@@ -1,16 +1,20 @@
 export build_SOSrelaxation
 
 function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::SDPDual{T}; debug=false) where T<:Number
-    sdpblocks = DictType{Tuple{Moment, String, Exponent, Exponent}, T}()
-    sdplinsym = DictType{Tuple{Moment, String, Exponent}, T}()
-    sdplin = DictType{Tuple{Moment, Exponent}, T}()
-    sdpcst = DictType{Moment, T}()
+    sdpblocks = DictType{Tuple{CtrName, String, Exponent, Exponent}, T}()
+    sdplinsym = DictType{Tuple{CtrName, String, Exponent}, T}()
+    sdplin = DictType{Tuple{CtrName, Exponent}, T}()
+    sdpcst = DictType{CtrName, T}()
     block_to_vartype = DictType{String, Symbol}()
 
     ## Build blocks dict
     for ((cstrname, cliquename), mmt) in mmtrelax_pb.constraints
         block_name = get_blockname(cstrname, cliquename, mmtrelax_pb)
-        block_to_vartype[block_name] = mmt.matrixkind
+        if mmt.matrixkind == :Null
+            block_to_vartype[block_name] = (relaxctx.hierarchykind == :Real)?:Sym:SymC
+        else
+            block_to_vartype[block_name] = mmt.matrixkind
+        end
 
         for ((γ, δ), poly) in mmt.mm
             for (moment, λ) in poly
@@ -32,7 +36,7 @@ function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::SDPDual{T
                     debug && (@assert !haskey(sdpblocks, key))
 
                     sdpblocks[key] = -λ
-                elseif mmt.matrixkind == :Sym || mmt.matrixkind == :SymC
+                elseif mmt.matrixkind == :Null
                     ## TODO: look into ht_keyindex2!, ht_keyindex for avoiding two dict table lookup
                     # Maybe implement this operation (if haskey add, else set) using 'setindex!(h::Dict{K,V}, v0, key::K) where V where K' as inspiration
                     key = (moment, block_name, product(γ, δ))

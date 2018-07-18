@@ -84,7 +84,7 @@ function relctx_setSDPmulttypes!(relax_ctx, pb::Problem, hierarchykind)
             ctrtypes[cstrname_lo] = (hierarchykind==:Complex ? :SDPC : :SDP)
             ctrtypes[cstrname_up] = (hierarchykind==:Complex ? :SDPC : :SDP)
         elseif cstrtype == :eq
-            ctrtypes[get_cstrname(cstrname, cstrtype)] = (hierarchykind==:Complex ? :SymC : :Sym)
+            ctrtypes[get_cstrname(cstrname, cstrtype)] = :Null
         else
             ctrtypes[get_cstrname(cstrname, cstrtype)] = (hierarchykind==:Complex ? :SDPC : :SDP)
         end

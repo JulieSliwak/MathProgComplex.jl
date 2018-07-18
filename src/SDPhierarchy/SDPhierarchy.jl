@@ -64,7 +64,7 @@ mutable struct MomentMatrix{T}
     mm::DictType{Tuple{Exponent, Exponent}, DictType{Moment, T}}
     vars::Set{Variable}
     order::Int
-    matrixkind::Symbol            # Either :SDP or :Sym
+    matrixkind::Symbol            # Either :SDP, :SDPC or :Null
 end
 
 include(joinpath("base_types", "momentmatrix.jl"))
@@ -87,17 +87,19 @@ include(joinpath("core", "build_momentrelaxation.jl"))
 ###############################################################################
 ## SOS Problem
 ###############################################################################
+const CtrName = Moment
+
 mutable struct SDPPrimal{T}
-    block_to_vartype::DictType{String, Symbol}                       # Either :SDP, :Sym, :SDPc, :SymC
-    blocks::DictType{Tuple{Moment, String, Exponent, Exponent}, T}   # ((α, β), block_name, γ, δ) -> coeff
-    linsym::DictType{Tuple{Moment, String, Exponent}, T}             # ((α, β), block_name, var) -> coeff
-    lin::DictType{Tuple{Moment, Exponent}, T}                        # ((α, β), var) -> coeff
-    cst::DictType{Moment, T}                                         # (α, β) -> coeff
+    block_to_vartype::DictType{String, Symbol}                          # Either :SDP, :Sym, :SDPC, :SymC
+    blocks::DictType{Tuple{CtrName, String, Exponent, Exponent}, T}     # (constraintname, block_name, γ, δ) -> coeff
+    linsym::DictType{Tuple{CtrName, String, Exponent}, T}               # (constraintname, block_name, var) -> coeff
+    lin::DictType{Tuple{CtrName, Exponent}, T}                          # (constraintname, var) -> coeff
+    cst::DictType{CtrName, T}                                           #  constraintname -> coeff
 end
 
 include(joinpath("core", "build_SOSrelaxation.jl"))
 include(joinpath("io", "export_SDPPrimal.jl"))
-include("SDPPrimal_cplx2real.jl")
+# include("SDPPrimal_cplx2real.jl")
 
 
 

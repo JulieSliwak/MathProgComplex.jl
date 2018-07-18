@@ -259,24 +259,3 @@ function set_blocks!(sdp_pb::MPC.SDP_Problem, sdpdual::MPC.SDPDual)
         end
     end
 end
-
-
-# mutable struct MomentMatrix{T}
-#     mm::DictType{Tuple{Exponent, Exponent}, DictType{Moment, T}}
-#     vars::Set{Variable}
-#     order::Int
-#     matrixkind::Symbol            # Either :SDP or :Sym
-# end
-
-# include(joinpath("base_types", "momentmatrix.jl"))
-
-# """
-#     momentrel = SDPDual(obj, cstrs, moment_overlap)
-
-#     Store a Moment Relaxation problem.
-# """
-# struct SDPDual{T}
-#     objective::DictType{Moment, T}                                  # A linear comb. of moments, to be maximized
-#     constraints::DictType{Tuple{String, String}, MomentMatrix{T}}   # A set of moment matrices, either SDP or Null. A constraint (`key[1]`) can be split on several cliques (`key[2]`)
-#     moments_overlap::DictType{Exponent, Set{String}}                # A set of clique per exponent, describing coupling constraints
-# end
