@@ -18,12 +18,25 @@ function add!(p::Polynomial, p1::Polynomial)
     p.degree.conjvar = max(p.degree.conjvar, p1.degree.conjvar)
 end
 
+
+function add(p::Polynomial, p1::Number)
+    pres = Polynomial()
+    add!(pres, p)
+    add!(pres, p1)
+    return pres
+end
+
+function add(p1::Number, p::Polynomial)
+    return add(p, p1)
+end
+
 function add(p1::Polynomial, p2::Polynomial)
     p = Polynomial()
     add!(p, p1)
     add!(p, p2)
     return p
 end
+
 
 function +(p::T) where T<:AbstractPolynomial
     seek_efficiency() && (warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__); println(stacktrace()))

@@ -55,7 +55,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
                                                           relax_ctx.cstrtypes[cstrname_lo],
                                                           var_to_cliques = var_to_cliques)
             # print_with_color(:green, "$cstrname, :Lo\n") ##NOTE: find better logging system.
-            product!(mmt, cstr.p - cstr.lb, var_to_cliques)
+            product!(mmt, get_normalizedpoly(cstr, :ineqlo), var_to_cliques)
             momentmatrices[(cstrname_lo, cliquename)] = mmt
 
             # Deal with upper inequality
@@ -67,7 +67,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
                                                           relax_ctx.cstrtypes[cstrname_up],
                                                           var_to_cliques = var_to_cliques)
             # print_with_color(:green, "$cstrname, :Up\n") ##NOTE: find better logging system.
-            product!(mmt, cstr.ub - cstr.p, var_to_cliques)
+            product!(mmt, get_normalizedpoly(cstr, :ineqhi), var_to_cliques)
             momentmatrices[(cstrname_up, cliquename)] = mmt
 
             # # Deal with upper inequality, no recomputing of variables or moment matrix if possible
