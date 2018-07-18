@@ -5,7 +5,7 @@ export change_eq_to_ineq!
 
 
 get_cstrname_lower(cstrname::String) = cstrname*"_lo"
-get_cstrname_upper(cstrname::String) = cstrname*"_hi"
+get_cstrname_upper(cstrname::String) = cstrname*"_up"
 get_cstrname_eq(cstrname::String) = cstrname*"_eq"
 
 get_momentcstrname() = "moment_cstr"
@@ -28,7 +28,7 @@ function get_cstrname(cstrname::String, cstrtype::Symbol)
     elseif cstrtype == :ineqlo
         return cstrname
         # return get_cstrname_lower(cstrname)
-    elseif cstrtype == :ineqhi
+    elseif cstrtype == :inequp
         return cstrname
         # return get_cstrname_upper(cstrname)
     else
@@ -41,7 +41,7 @@ function get_normalizedpoly(cstr::Constraint, cstrtype::Symbol)
         return cstr.p - cstr.lb
     elseif cstrtype == :ineqlo
         return cstr.p - cstr.lb
-    elseif cstrtype == :ineqhi
+    elseif cstrtype == :inequp
         return cstr.ub - cstr.p
     else
         error("get_normalizedpoly(): Unhandeld type $cstrtype.")

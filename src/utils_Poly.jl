@@ -73,13 +73,13 @@ end
 """
     cstrtype = get_cstrtype(cstr::Constraint)
 
-    Return a cstraint type among `:eq`, `:ineqhi`, `:ineqlo`, `:ineqdouble`.
+    Return a cstraint type among `:eq`, `:inequp`, `:ineqlo`, `:ineqdouble`.
 """
 function get_cstrtype(cstr::Constraint)
     if cstr.lb == cstr.ub && isfinite(cstr.ub)
         return :eq
     elseif (cstr.lb == -Inf-im*Inf) && (cstr.ub != Inf+im*Inf)
-        return :ineqhi
+        return :inequp
     elseif (cstr.lb != -Inf-im*Inf) && (cstr.ub == Inf+im*Inf)
         return :ineqlo
     elseif (cstr.lb != -Inf-im*Inf) && (cstr.ub != Inf+im*Inf)

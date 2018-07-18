@@ -67,7 +67,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
                                                           relax_ctx.cstrtypes[cstrname_up],
                                                           var_to_cliques = var_to_cliques)
             # print_with_color(:green, "$cstrname, :Up\n") ##NOTE: find better logging system.
-            product!(mmt, get_normalizedpoly(cstr, :ineqhi), var_to_cliques)
+            product!(mmt, get_normalizedpoly(cstr, :inequp), var_to_cliques)
             momentmatrices[(cstrname_up, cliquename)] = mmt
 
             # # Deal with upper inequality, no recomputing of variables or moment matrix if possible
@@ -78,18 +78,18 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
             #     vars, cliquename = collect_cliquesvars(clique_keys_up, max_cliques)
 
             #     mmt = MomentMatrix(relax_ctx, vars, order_up, relax_ctx.symmetries,
-            #                                                   relax_ctx.cstrtypes[cstrname_hi],
+            #                                                   relax_ctx.cstrtypes[cstrname_up],
             #                                                   var_to_cliques = var_to_cliques)
             # elseif order_up != order
             #     warn("order different from lower and upper side of double constraint")
             #     mmt = MomentMatrix(relax_ctx, vars, order_up, relax_ctx.symmetries,
-            #                                                   relax_ctx.cstrtypes[cstrname_hi],
+            #                                                   relax_ctx.cstrtypes[cstrname_up],
             #                                                   var_to_cliques = var_to_cliques)
             # end
 
 
         else
-            # either cstrtype == :ineqlo, :ineqhi, :eq
+            # either cstrtype == :ineqlo, :inequp, :eq
             clique_keys, order = localizingmat_param[get_cstrname(cstrname, cstrtype)]
             vars, cliquename = collect_cliquesvars(clique_keys, max_cliques)
             # length(clique_keys) == 1 || error("build_momentrelaxation(): constraint $cstrname spans several cliques ($clique_keys).\nNot supported yet.")

@@ -45,7 +45,7 @@ end
     relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                         d = i,
                                         issparse = true,
-                                        params = Dict(:opt_outlev=>1))
+                                        params = Dict(:opt_outlev=>0))
 
     max_cliques = get_case9cliques(relax_ctx, problem)
     @assert length(max_cliques) == 3
