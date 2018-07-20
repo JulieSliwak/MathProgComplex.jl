@@ -22,9 +22,9 @@ end
 
 function set_matrices!(sdp_pb::SDP_Problem, sdpprimal::SDPPrimal)
     for ((moment, block, γ, δ), coeff) in sdpprimal.blocks
-        γ_str, δ_str = string(γ), string(δ)
+        γ_str, δ_str = format_string(γ), format_string(δ)
 
-        ctr_name = (string(moment.conj_part), string(moment.expl_part), moment.clique)
+        ctr_name = (format_string(moment.conj_part), format_string(moment.expl_part), moment.clique)
         block_name = block
         row_name = min(γ_str, δ_str)
         col_name = max(γ_str, δ_str)
@@ -41,7 +41,7 @@ end
 function set_linear!(sdp_pb::SDP_Problem, sdpprimal::SDPPrimal)
     # Building symmetric terms into linear terms
     for ((moment, block, var), coeff) in sdpprimal.linsym
-        ctr_name = (string(moment.conj_part), string(moment.expl_part), moment.clique)
+        ctr_name = (format_string(moment.conj_part), format_string(moment.expl_part), moment.clique)
         var_name = format_string(var, block)
 
         # sanity check
@@ -54,7 +54,7 @@ function set_linear!(sdp_pb::SDP_Problem, sdpprimal::SDPPrimal)
 
     # Building scalar linear terms
     for ((moment, var), coeff) in sdpprimal.lin
-        ctr_name = (string(moment.conj_part), string(moment.expl_part), moment.clique)
+        ctr_name = (format_string(moment.conj_part), format_string(moment.expl_part), moment.clique)
         var_name = format_string(var)
 
         # sanity check
@@ -67,7 +67,7 @@ end
 
 function set_const!(sdp_pb::SDP_Problem, sdpprimal::SDPPrimal)
     for (moment, coeff) in sdpprimal.cst
-        ctr_name = (string(moment.conj_part), string(moment.expl_part), moment.clique)
+        ctr_name = (format_string(moment.conj_part), format_string(moment.expl_part), moment.clique)
 
         # sanity check
         @assert !haskey(sdp_pb.cst_ctr, ctr_name)
