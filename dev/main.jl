@@ -1,14 +1,21 @@
 using DataStructures, SCS, Mosek, OPFInstances
 
 import MathProgComplex
+import JuMP
 
 !isdefined(:MPC) && (const MPC = MathProgComplex)
 
-include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "SDP_Instance", "build_from_SDPDual.jl"))
+# include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "SDP_Instance", "build_from_SDPDual.jl"))
+include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "solvers", "JuMP.jl"))
 
 function main()
     # problem = buildPOP_WB2(setnetworkphase=false)
-    problem_c, pt = MPC.import_from_dat(getinstancepath("Matpower", "QCQP", "WB2"))
+
+    workpath = joinpath("Mosek_runs", "worksdp")
+    ispath(workpath) && rm(workpath, recursive=true)
+    mkpath(workpath)
+
+    problem_c, pt = MPC.import_from_dat(getinstancepath("Matpower", "QCQP", "WB5"))
     problem = MPC.pb_cplx2real(problem_c)
 
     println(problem)
@@ -68,11 +75,11 @@ function main()
 
     # path = joinpath(pwd(), "Mosek_runs", "worksdp")
     # mkpath(path)
-    # MPC.export_SDP(sosrel, path, renamemoments=false)
 
     # sdp_instance = MPC.build_SDP_Instance_from_sdpfiles(path)
 
     sdp_instance = MPC.build_SDP_Instance_from_SDPPrimal(sosrel)
+    MPC.export_SDPPrimal(sosrel, workpath, renamemoments=false)
 
     # sdp_instance = build_SDP_Instance_from_SDPDual(momentrel)
 
@@ -102,6 +109,19 @@ function main()
     # end
 
     println("Objectives : $primobj, $dualobj")
+
+    moseksolver = MosekSolver()
+    m = JuMP_from_SDP_Problem(sdp_instance, moseksolver)
+
+    JuMP.solve(m)
+
+    objective = JuMP.getobjectivevalue(m)
+
+    println()
+    println("primobj    ", primobj)
+    println("dualobj    ", dualobj)
+    println("objective  ", objective)
+    return 
 end
 
 main()
