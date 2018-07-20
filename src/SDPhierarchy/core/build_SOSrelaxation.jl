@@ -23,9 +23,9 @@ function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::SDPDual{T
                 debug && (@assert expo.degree.conjvar == moment.conj_part.degree.conjvar)
                 # Check the current monomial has correct degree
                 if (relaxctx.hierarchykind==:Complex) && ((moment.expl_part.degree.explvar > relaxctx.di[cstrname]) || (moment.conj_part.degree.conjvar > relaxctx.di[cstrname]))
-                    warn("build_SOSrelaxation(): Found exponent pair of degree $(expo.degree) > $(relaxctx.di[cstrname]) for Complex hierarchy.\n($(expo), at $((γ, δ)) of MM matrix)")
+                    warn("build_SOSrelaxation(): Found exponent pair of degree $(moment.expl_part.degree.explvar), $(moment.conj_part.degree.conjvar) > $(relaxctx.di[cstrname]) for Complex hierarchy.\n($(moment), at $((γ, δ)) of $(cstrname) matrix)")
                 elseif (relaxctx.hierarchykind==:Real) && ((moment.expl_part.degree.explvar > 2*relaxctx.di[cstrname]) || (moment.conj_part.degree.conjvar != 0))
-                    warn("build_SOSrelaxation(): Found exponent pair of degree $(expo.degree) > 2*$(relaxctx.di[cstrname]) for Real hierarchy.\n($(expo), at $((γ, δ)) of MM matrix)")
+                    warn("build_SOSrelaxation(): Found exponent pair of degree $(moment.expl_part.degree.explvar), $(moment.conj_part.degree.conjvar) > $(relaxctx.di[cstrname]), 0 for Real hierarchy.\n($(moment), at $((γ, δ)) of $(cstrname) matrix)")
                 end
                 !isnan(λ) || warn("build_SOSrelaxation(): isNaN ! constraint $cstrname - clique $blocname - mm entry $((γ, δ)) - moment $(moment)")
 

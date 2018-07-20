@@ -169,7 +169,8 @@ function solve_mosek(problem::SDP_Problem, primal::SortedDict{Tuple{String,Strin
                                            logname = "",
                                            printlog = true,
                                            msk_maxtime = -1,            #Default -1 means no time limit
-                                           sol_info = OrderedDict())
+                                           sol_info = OrderedDict(),
+                                           optsense = :max)
   empty!(primal)
   empty!(dual)
   primobj = NaN
@@ -210,7 +211,8 @@ function solve_mosek(problem::SDP_Problem, primal::SortedDict{Tuple{String,Strin
       putconboundslice(task,1,numcon+1, bkc,blc,buc)
 
       # Minimize
-      putobjsense(task,MSK_OBJECTIVE_SENSE_MAXIMIZE)
+      optimsense = ((optsense==:max)?MSK_OBJECTIVE_SENSE_MAXIMIZE:MSK_OBJECTIVE_SENSE_MINIMIZE)
+      putobjsense(task, optimsense)
 
       # Set constraints SDP vars coeffs
       putbarablocktriplet(task, length(barai), barai, baraj, barak, baral, baraijkl)

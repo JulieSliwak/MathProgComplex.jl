@@ -108,16 +108,16 @@ function relctx_setdi!(relax_ctx, pb::Problem, di, d)
             cur_ki = relax_ctx.ki[cstrname_lo]
             (0 ≤ cur_order-ceil(cur_ki/2)) || warn("RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value ceil($cur_ki/2).")
             # (cur_ki <= cur_order) || warn("RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value $cur_ki, hierarchy may be multiordered.")
-            di_relax[cstrname_lo] = cur_order
-            di_relax[cstrname_up] = cur_order
-            # di_relax[cstrname_lo] = max(cur_order, ceil(cur_ki/2))
-            # di_relax[cstrname_up] = max(cur_order, ceil(cur_ki/2))
+            # di_relax[cstrname_lo] = cur_order
+            # di_relax[cstrname_up] = cur_order
+            di_relax[cstrname_lo] = max(cur_order, ceil(cur_ki/2))
+            di_relax[cstrname_up] = max(cur_order, ceil(cur_ki/2))
         else # :eq, :ineqlo, :inequp
             cur_ki = relax_ctx.ki[get_cstrname(cstrname, cstrtype)]
             (0 ≤ cur_order-ceil(cur_ki/2)) || warn("RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value ceil($cur_ki/2).")
             # (cur_ki <= cur_order) || warn("RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value $cur_ki, hierarchy may be multiordered.")
-            di_relax[get_cstrname(cstrname, cstrtype)] = cur_order
-            # di_relax[get_cstrname(cstrname, cstrtype)] = max(cur_order, ceil(cur_ki/2))
+            # di_relax[get_cstrname(cstrname, cstrtype)] = cur_order
+            di_relax[get_cstrname(cstrname, cstrtype)] = max(cur_order, ceil(cur_ki/2))
         end
     end
 
