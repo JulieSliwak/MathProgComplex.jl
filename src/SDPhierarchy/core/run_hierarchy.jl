@@ -44,7 +44,7 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext, logpath; 
         ispath(logpath) && rm(logpath, recursive=true)
         mkpath(logpath)
 
-        sdp, t, bytes, gctime, memallocs = @timed export_SDP(sdpinstance, logpath, indentedprint=indentedprint);
+        sdp, t, bytes, gctime, memallocs = @timed export_SDPPrimal(sdpinstance, logpath, indentedprint=indentedprint);
         relax_ctx.relaxparams[:slv_fileexport_t] = t
         relax_ctx.relaxparams[:slv_fileexport_bytes] = bytes
     end
@@ -133,7 +133,7 @@ end
 
 
 function build_mosekpb(SOS_pb::SDPPrimal, logpath::String; indentedprint=false)
-    export_SDP(SOS_pb, logpath, indentedprint=indentedprint)
+    export_SDPPrimal(SOS_pb, logpath, indentedprint=indentedprint)
 
     sdp = build_mosekpb(logpath)
 

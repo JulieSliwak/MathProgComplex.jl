@@ -10,7 +10,6 @@ export get_WB5cliques, get_case9cliques
 function buildPOP_1v1c()
     z = Variable("z", Complex)
     problem = Problem()
-    add_variable!(problem, z)
     set_objective!(problem, -real(z))
     add_constraint!(problem, "ineq", abs2(z) << 4)
     return problem
@@ -19,7 +18,6 @@ end
 function buildPOP_1v2c()
     z = Variable("z", Complex)
     problem = Problem()
-    add_variable!(problem, z)
     set_objective!(problem, imag(z))
     add_constraint!(problem, "ineq_brn", abs2(z) << 1)
     θ = π/3
@@ -28,12 +26,11 @@ function buildPOP_1v2c()
 end
 
 function buildPOP_1v2()
-    x1 = Variable("x1", Real)
-    x2 = Variable("x2", Real)
+    x1 = Variable("x", Real)
+    x2 = Variable("y", Real)
     problem = Problem()
-    add_variable!(problem, x1); add_variable!(problem, x2)
     set_objective!(problem, -1.0*x1)
-    add_constraint!(problem, "ineq", (x1^2+x2^2) << 1)
+    add_constraint!(problem, "ineq", (x1^2+x2^2) << 4)
     θ1 = π/3
     add_constraint!(problem, "eq_rot1", (cos(θ1)*x1+sin(θ1)*x2) == 0)
     # θ2 = -π/3
@@ -50,7 +47,6 @@ function buildPOP_EllJoszMolc()
     z1 = Variable("z1", Complex)
     z2 = Variable("z2", Complex)
     problem = Problem()
-    add_variable!(problem, z1); add_variable!(problem, z2);
     set_objective!(problem, 3-abs2(z1)-0.5*im*z1*conj(z2)^2+0.5im*z2^2*conj(z1))
     add_constraint!(problem, "eq1", (abs2(z1)-0.25*z1^2-0.25*conj(z1)^2) == 1)
     add_constraint!(problem, "eq2", (abs2(z1)+abs2(z2)) == 3)

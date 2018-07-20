@@ -46,7 +46,7 @@ function main()
 
     path = joinpath(pwd(), "Mosek_runs", "worksdp")
     mkpath(path)
-    export_SDP(sosrel, path)
+    export_SDPPrimal(sosrel, path)
 
     sdp_instance = build_SDP_Instance_from_sdpfiles(path)
 
