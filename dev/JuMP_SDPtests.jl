@@ -1,18 +1,20 @@
 using JuMP, Mosek
+import MathProgComplex
 
 m = Model(solver=MosekSolver())
 
 @variable(m, Xs1[1:3,1:3], SDP)
 @variable(m, Xs2[1:1,1:1], SDP)
+@variable(m, Xs3[1:1,1:1], SDP)
 
 # moment constraint one
 @constraint(m, Xs1[1,1] == 1)
 
-# Ball constraint
-@constraint(m, Xs1[2,2] + Xs1[3,3] + Xs2[1,1] == 4)
+@constraint(m, Xs2[1,1] + Xs1[2,2] + Xs1[3,3] == 4)
+@constraint(m, Xs3[1,1] - Xs1[2,1] - Xs1[3,1] == 0)
 
 # Find upper bound
-@objective(m, Max, Xs1[1,2])
+@objective(m, Max, -Xs1[1,3])
 
 println(m)
 solve(m)
@@ -21,26 +23,28 @@ println("Maximum value is ", getobjective(m))
 println("\nSolution is:")
 @show getvalue(Xs1)
 @show getvalue(Xs2)
+@show getvalue(Xs3)
 
 @show getdual(Xs1)
 @show getdual(Xs2)
+@show getdual(Xs3)
 
 ############ Plain Mosek:
 
 printstream(msg::String) = print(msg)
 
-barvardim = [3, 1]
+barvardim = [3, 1, 1]
 
-numcon = 2
-bkc = [Mosek.Boundkey(2), Mosek.Boundkey(2)]
-blc = [1, 4]
-buc = [1, 4]
+numcon = 3
+bkc = [Mosek.Boundkey(2), Mosek.Boundkey(2), Mosek.Boundkey(2)]
+blc = [1, 4, 0]
+buc = [1, 4, 0]
 
-barai    = [1, 2, 2, 2]
-baraj    = [1, 1, 1, 2]
-barak    = [1, 2, 3, 1]
-baral    = [1, 2, 3, 1]
-baraijkl = [1, 1, 1, 1]
+barai    = [1, 2, 2, 2, 3, 3, 3]
+baraj    = [1, 1, 1, 2, 1, 1, 3]
+barak    = [1, 2, 3, 1, 2, 3, 1]
+baral    = [1, 2, 3, 1, 1, 1, 1]
+baraijkl = [1, 1, 1, 1, 1/2, 1/2, 1/2]
 
 barcj    = [1]
 barck    = [2]
@@ -98,30 +102,30 @@ maketask() do task
 
 end
 
-##########################################################################
-m = Model(solver=MosekSolver())
+# ##########################################################################
+# m = Model(solver=MosekSolver())
 
-@variable(m, Xs1[1:6,1:6], SDP)
-@variable(m, Xs2[1:1,1:1], SDP)
-@variable(m, Xs3[1:1,1:1], SDP)
+# @variable(m, Xs1[1:6,1:6], SDP)
+# @variable(m, Xs2[1:1,1:1], SDP)
+# @variable(m, Xs3[1:1,1:1], SDP)
 
-# moment constraint one
-@constraint(m, Xs1[1,1] == 1)
+# # moment constraint one
+# @constraint(m, Xs1[1,1] == 1)
 
-# Ball constraint
-@constraint(m, Xs1[4,4] + Xs1[6,6] + Xs2[1,1] == 16)
-@constraint(m, Xs1[2,2] + Xs1[3,3] + Xs3[1,1] == 100)
+# # Ball constraint
+# @constraint(m, Xs1[4,4] + Xs1[6,6] + Xs2[1,1] == 16)
+# @constraint(m, Xs1[2,2] + Xs1[3,3] + Xs3[1,1] == 100)
 
-# Find upper bound
-@objective(m, Max, Xs1[1,2])
+# # Find upper bound
+# @objective(m, Max, Xs1[1,2])
 
-println(m)
-solve(m)
-println("Maximum value is ", getobjective(m))
+# println(m)
+# solve(m)
+# println("Maximum value is ", getobjective(m))
 
-println("\nSolution is:")
-@show getvalue(Xs1)
-@show getvalue(Xs2)
+# println("\nSolution is:")
+# @show getvalue(Xs1)
+# @show getvalue(Xs2)
 
-@show getdual(Xs1)
-@show getdual(Xs2)
+# @show getdual(Xs1)
+# @show getdual(Xs2)
