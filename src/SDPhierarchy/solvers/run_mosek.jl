@@ -50,19 +50,19 @@ function get_SDPtriplets(problem::SDP_Problem; debug = false)
     end
   end
 
-  if debug
-    println("*********************************************************************************")
-    println("Debug -> Reading SDP_Problem")
-    @printf("%5s  %5s  %5s  %s\n", "barcj", "barck", "barcl", "barcjkl")
-    for i=1:length(barcj)
-        @printf("%5i  %5i  %5i  %f\n", barcj[i], barck[i], barcl[i], barcjkl[i])
-    end
+  # if debug
+  #   println("*********************************************************************************")
+  #   println("Debug -> Reading SDP_Problem")
+  #   @printf("%5s  %5s  %5s  %s\n", "barcj", "barck", "barcl", "barcjkl")
+  #   for i=1:length(barcj)
+  #       @printf("%5i  %5i  %5i  %f\n", barcj[i], barck[i], barcl[i], barcjkl[i])
+  #   end
 
-    @printf("%5s  %5s  %5s  %5s  %s\n", "barai", "baraj", "barak", "baral", "baraijkl")
-    for i=1:length(barai)
-        @printf("%5i  %5i  %5i  %5i  %f\n", barai[i], baraj[i], barak[i], baral[i], baraijkl[i])
-    end
-  end
+  #   @printf("%5s  %5s  %5s  %5s  %s\n", "barai", "baraj", "barak", "baral", "baraijkl")
+  #   for i=1:length(barai)
+  #       @printf("%5i  %5i  %5i  %5i  %f\n", barai[i], baraj[i], barak[i], baral[i], baraijkl[i])
+  #   end
+  # end
   return barcj, barck, barcl, barcjkl, barai, baraj, barak, baral, baraijkl
 end
 
@@ -96,16 +96,16 @@ function get_linterms(problem; debug=debug)
     end
   end
 
-  if debug
-    warn("--- cj :")
-    for i=1:length(cj)
-      @printf("%i  %f\n", cj[i], cjval[i])
-    end
-    warn("--- a :")
-    for i=1:length(aj)
-      @printf("%i  %i  %f\n", ai[i], aj[i], aij[i])
-    end
-  end
+  # if debug
+  #   warn("--- cj :")
+  #   for i=1:length(cj)
+  #     @printf("%i  %f\n", cj[i], cjval[i])
+  #   end
+  #   warn("--- a :")
+  #   for i=1:length(aj)
+  #     @printf("%i  %i  %f\n", ai[i], aj[i], aij[i])
+  #   end
+  # end
   return cj, cjval, ai, aj, aij
 end
 
@@ -140,13 +140,13 @@ function get_ctrbounds(problem::SDP_Problem; debug = false)
       error("get_ctrbounds() : Unknown constraint kind $(ctr[2]) $(bkc[id_ctr]) $(MSK_BK_FX[1])")
     end
   end
-  if debug
-    warn("get_ctrbounds(): done")
-    @show numcon
-    @show bkc
-    @show blc
-    @show buc
-  end
+  # if debug
+  #   warn("get_ctrbounds(): done")
+  #   @show numcon
+  #   @show bkc
+  #   @show blc
+  #   @show buc
+  # end
   return numcon, bkc, blc, buc
 end
 
@@ -163,6 +163,25 @@ function get_varbounds(problem::SDP_Problem)
   return sub, bkx, blx, bux
 end
 
+"""
+  (primalobj, dualobj) = solve_mosek(problem, primal, dual; debug, logname, printlog, msk_maxtime, sol_info, optsense)
+
+  Calls Mosek on `problem::SDP_Problem`. Returns the primal and dual objectives if possible.
+  
+  *Arguments* :
+  - `problem::SDP_Problem`
+  - `primal::SortedDict{Tuple{String,String,String}, Float64}`: primal solution `x`,
+  - `dual::SortedDict{Tuple{String, String, String}, Float64}` : dual solution `s`,
+  - `debug`: default is false, dump Mosek loaded problem
+  - `printlog` : if true (default), Mosek will write its log to the console,
+  - `logname` : if specified, Mosek log will be written to the given file name,
+  - `msk_maxtime` : Mosek max computation time, in seconds. Default -1 means no limit,
+  - `sol_info` : Information on problem and solution status upon termination of solve,
+  - `optsense` : default is `:max`.
+
+  **Note**: 
+  - Mosek expects lower triangular terms of the coefficient matrices. Hence diagonal or non-diagonal terms will not be scaled.
+"""
 function solve_mosek(problem::SDP_Problem, primal::SortedDict{Tuple{String,String,String}, Float64},
                                            dual::SortedDict{Tuple{String, String, String}, Float64};
                                            debug = false,
