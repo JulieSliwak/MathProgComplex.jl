@@ -1,9 +1,10 @@
-# export build_SDP_Instance_from_SDPDual
+export build_SDP_Instance_from_SDPDual
 
 function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
     sdp_pb = SDP_Problem()
 
     ## First. Deal fully with moment matrices
+    blocktovars = SortedDict{String, SortedSet}()
     n_sdp = 0
     for ((ctrname, cliquename), matrix) in sdpdual.constraints
         if ctrname == get_momentcstrname()
@@ -15,19 +16,22 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
             sdp_pb.id_to_sdpblock[n_sdp] = block
 
             @assert matrix.matrixkind == :SDP
+            blocktovars[blockname] = SortedSet{String}()
             for (α, β) in keys(matrix)
                 var1 = format_string(α)
-                if !haskey(block.var_to_id, var1)
-                    block.var_to_id[var1] = length(block.var_to_id)+1
-                end
-
                 var2 = format_string(β)
-                if !haskey(block.var_to_id, var2)
-                    block.var_to_id[var2] = length(block.var_to_id)+1
-                end
-            end
 
-            # println(" * $blockname:\n$block\n")
+                push!(blocktovars[blockname], var1)
+                push!(blocktovars[blockname], var2)
+            end
+        end
+    end
+    for (blockname, vars) in blocktovars
+        block = sdp_pb.name_to_sdpblock[blockname]
+        n=0
+        for var in vars
+            n += 1
+            block.var_to_id[var] = n
         end
     end
 
@@ -40,7 +44,7 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
         block_name, α, β = split_moment(moment)
 
         α_str, β_str = format_string(α), format_string(β)
-        var1, var2 = min(α_str, β_str), max(α_str, β_str)
+        var1, var2 = max(α_str, β_str), min(α_str, β_str)
 
         @assert haskey(sdp_pb.name_to_sdpblock, block_name)
         @assert haskey(sdp_pb.name_to_sdpblock[block_name].var_to_id, var1)
@@ -83,7 +87,7 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
                     block_name, α, β = split_moment(moment)
 
                     α_str, β_str = format_string(α), format_string(β)
-                    var1, var2 = min(α_str, β_str), max(α_str, β_str)
+                    var1, var2 = max(α_str, β_str), min(α_str, β_str)
 
                     @assert haskey(sdp_pb.name_to_sdpblock, block_name)
                     @assert haskey(sdp_pb.name_to_sdpblock[block_name].var_to_id, var1)
@@ -95,18 +99,18 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
 
                         sdp_pb.cst_ctr[ctr_name] += fαβ
                     else
-                        sdp_pb.matrices[(ctr_name, block_name, var1, var2)] = fαβ * (var1!=var2 ? 0.5 : 1)
+                        sdp_pb.matrices[(ctr_name, block_name, var1, var2)] = fαβ #* (var1!=var2 ? 0.5 : 1)
                     end
                 end
 
                 # If the matrix is SDP, add link to auxiliary SDP var
                 if matrix.matrixkind == :SDP
                     block_name = S_name
-                    var1 = min(γ_str, δ_str)
-                    var2 = max(γ_str, δ_str)
+                    var1 = max(γ_str, δ_str)
+                    var2 = min(γ_str, δ_str)
 
                     # # @show (ctr_name, block_name, var1, var2), -1
-                    sdp_pb.matrices[(ctr_name, block_name, var1, var2)] = -1 * (var1!=var2 ? 0.5 : 1)
+                    sdp_pb.matrices[(ctr_name, block_name, var1, var2)] = -1 #* (var1!=var2 ? 0.5 : 1)
                 else
                     # Nothing to do, constraint will be scalar, ==0 by default.
                 end
@@ -126,6 +130,7 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
 
     # @show momentvars
     # println()
+    empty!(blocktovars)
 
     n_sdp = length(sdp_pb.name_to_sdpblock)
     for ((ctr_name, blockname, var1, var2), f_αβ) in sdp_pb.matrices
@@ -140,17 +145,17 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
                 block = sdp_pb.name_to_sdpblock[blockname]
             end
 
-            # @assert !haskey(block.var_to_id, var1)
-            # @assert !haskey(block.var_to_id, var2)
-            if !haskey(block.var_to_id, var1)
-                block.var_to_id[var1] = length(block.var_to_id)+1
-            end
-
-            if !haskey(block.var_to_id, var2)
-                block.var_to_id[var2] = length(block.var_to_id)+1
-            end
-
-            # println(" * $blockname:\n$block\n")
+            !haskey(blocktovars, blockname) && (blocktovars[blockname] = SortedSet{String}())
+            push!(blocktovars[blockname], var1)
+            push!(blocktovars[blockname], var2)
+        end
+    end
+    for (blockname, vars) in blocktovars
+        block = sdp_pb.name_to_sdpblock[blockname]
+        n=0
+        for var in vars
+            n += 1
+            block.var_to_id[var] = n
         end
     end
 

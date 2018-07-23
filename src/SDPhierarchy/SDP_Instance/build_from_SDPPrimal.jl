@@ -26,8 +26,8 @@ function set_matrices!(sdp_pb::SDP_Problem, sdpprimal::SDPPrimal)
 
         ctr_name = (format_string(moment.conj_part), format_string(moment.expl_part), moment.clique)
         block_name = block
-        row_name = min(γ_str, δ_str)
-        col_name = max(γ_str, δ_str)
+        row_name = max(γ_str, δ_str)
+        col_name = min(γ_str, δ_str)
 
         # sanity check
         @assert !haskey(sdp_pb.matrices, (ctr_name, block_name, row_name, col_name))

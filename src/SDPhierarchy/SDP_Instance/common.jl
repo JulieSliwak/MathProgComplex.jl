@@ -40,18 +40,22 @@ Set string to id map for each sdp block given a `SDP_Problem` already set with
 SDP matrix contributions.
 """
 function set_blocks!(sdp_pb::SDP_Problem)
+    blocktovarsset = SortedDict{String, SortedSet{String}}()
+
     for (ctr_name, blockname, var1, var2) in keys(sdp_pb.matrices)
         # sanity check
         @assert haskey(sdp_pb.name_to_sdpblock, blockname)
 
-        cur_block = sdp_pb.name_to_sdpblock[blockname]
+        !haskey(blocktovarsset, blockname) && (blocktovarsset[blockname]=SortedSet{String}())
+        union!(blocktovarsset[blockname], [var1, var2])
+    end
 
-        # Adding vars and ids to SDP block
-        if !haskey(cur_block.var_to_id, var1)
-            cur_block.var_to_id[var1] = length(cur_block.var_to_id) + 1
-        end
-        if !haskey(cur_block.var_to_id, var2)
-            cur_block.var_to_id[var2] = length(cur_block.var_to_id) + 1
+    for (blockname, vars) in blocktovarsset
+        n = 0
+        cur_block = sdp_pb.name_to_sdpblock[blockname]
+        for var in vars
+            n += 1
+            cur_block.var_to_id[var] = n
         end
     end
 end
