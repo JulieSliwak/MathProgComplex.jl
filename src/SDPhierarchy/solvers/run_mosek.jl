@@ -15,8 +15,7 @@ function get_SDPtriplets(problem::SDP_Problem; debug = false)
         nza += 1
       end
   end
-  # println("nza : ", nza)
-  # println("nzc : ", nzc)
+
   barai = Int32[0 for i in 1:nza]
   baraj = Int32[0 for i in 1:nza]
   barak = Int32[0 for i in 1:nza]
@@ -50,19 +49,6 @@ function get_SDPtriplets(problem::SDP_Problem; debug = false)
     end
   end
 
-  # if debug
-  #   println("*********************************************************************************")
-  #   println("Debug -> Reading SDP_Problem")
-  #   @printf("%5s  %5s  %5s  %s\n", "barcj", "barck", "barcl", "barcjkl")
-  #   for i=1:length(barcj)
-  #       @printf("%5i  %5i  %5i  %f\n", barcj[i], barck[i], barcl[i], barcjkl[i])
-  #   end
-
-  #   @printf("%5s  %5s  %5s  %5s  %s\n", "barai", "baraj", "barak", "baral", "baraijkl")
-  #   for i=1:length(barai)
-  #       @printf("%5i  %5i  %5i  %5i  %f\n", barai[i], baraj[i], barak[i], baral[i], baraijkl[i])
-  #   end
-  # end
   return barcj, barck, barcl, barcjkl, barai, baraj, barak, baral, baraijkl
 end
 
@@ -96,16 +82,6 @@ function get_linterms(problem; debug=debug)
     end
   end
 
-  # if debug
-  #   warn("--- cj :")
-  #   for i=1:length(cj)
-  #     @printf("%i  %f\n", cj[i], cjval[i])
-  #   end
-  #   warn("--- a :")
-  #   for i=1:length(aj)
-  #     @printf("%i  %i  %f\n", ai[i], aj[i], aij[i])
-  #   end
-  # end
   return cj, cjval, ai, aj, aij
 end
 
@@ -117,7 +93,6 @@ function get_ctrbounds(problem::SDP_Problem; debug = false)
   buc = Float64[0 for i in 1:numcon]
   blc = Float64[0 for i in 1:numcon]
   for (ctrname, ctr) in problem.name_to_ctr
-    # @printf("%10d%20s%10d%20s\n", ctr[1], ctrname, MOSEK_KIND[ctr[2]], ctr[2])
     id_ctr=ctr[1]
     lb = ctr[3]
     ub = ctr[4]
@@ -140,13 +115,7 @@ function get_ctrbounds(problem::SDP_Problem; debug = false)
       error("get_ctrbounds() : Unknown constraint kind $(ctr[2]) $(bkc[id_ctr]) $(MSK_BK_FX[1])")
     end
   end
-  # if debug
-  #   warn("get_ctrbounds(): done")
-  #   @show numcon
-  #   @show bkc
-  #   @show blc
-  #   @show buc
-  # end
+
   return numcon, bkc, blc, buc
 end
 
@@ -340,7 +309,6 @@ function get_primalsol!(task::Mosek.Task, problem::SDP_Problem,
     for j in 1:length(all_variables)
       for i in j:length(all_variables)
         n+=1
-        # @printf("%15s%15s%15s%25.10f\n", id_block[2].name, all_variables[i], all_variables[j], barx[n])
         primal[block.name, all_variables[i], all_variables[j]] = barx[n]
       end
     end
@@ -356,7 +324,6 @@ function get_dualsol!(task::Mosek.Task, problem::SDP_Problem,
     it = 0
     for j=1:length(id_to_var), i=j:length(id_to_var)
       it += 1
-      # println("($(block.name), $(id_to_var[i]), $(id_to_var[j])) = $(bars[it])")
       dual[(block.name, id_to_var[i], id_to_var[j])] = bars[it]
     end
   end

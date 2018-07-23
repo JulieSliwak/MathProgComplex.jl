@@ -34,7 +34,7 @@ function export_SDP_Instance(sdp_pb::SDP_Problem, path::String)
     end
 end
 
-function print_matrices(io::IO, matrices::SortedDict{Tuple{SDP_Moment, String, String, String}, Float64}, indentedprint=true)
+function print_matrices(io::IO, matrices::SortedDict{Tuple{SDP_CtrObjName, String, String, String}, Float64}, indentedprint=true)
     MPC.print_blocksfile_header(io)
 
     ctrkey1len =  max( maximum(x->length(x[1][1]), keys(matrices)), length("#j_conj"))
@@ -65,7 +65,7 @@ function print_matrices(io::IO, matrices::SortedDict{Tuple{SDP_Moment, String, S
     end
 end
 
-function print_scalarlinear(io::IO, linear::SortedDict{Tuple{SDP_Moment, String}, Float64}, indentedprint=true)
+function print_scalarlinear(io::IO, linear::SortedDict{Tuple{SDP_CtrObjName, String}, Float64}, indentedprint=true)
     MPC.print_linfile_header(io)
 
     (length(linear) == 0) && return
@@ -92,7 +92,7 @@ function print_scalarlinear(io::IO, linear::SortedDict{Tuple{SDP_Moment, String}
     end
 end
 
-function print_constant(io::IO, cst::SortedDict{SDP_Moment, Float64}, indentedprint=true)
+function print_constant(io::IO, cst::SortedDict{SDP_CtrObjName, Float64}, indentedprint=true)
     MPC.print_cstfile_header(io)
 
     (length(cst) == 0) && return
