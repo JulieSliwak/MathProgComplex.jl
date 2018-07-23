@@ -31,7 +31,7 @@ function main()
     x1 = Variable("x", Real); add_variable!(problem, x1)
     x2 = Variable("y", Real); add_variable!(problem, x2)
 
-    set_objective!(problem, -x1)
+    set_objective!(problem, -x1-x2^2)
     add_constraint!(problem, "ctr2", (x1^4+x2^4) << 2^4)
     add_constraint!(problem, "ctr1", (x1^2+x2^2) << 10^2)
 

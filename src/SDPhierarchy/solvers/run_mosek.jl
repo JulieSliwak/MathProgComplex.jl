@@ -304,10 +304,15 @@ function get_primalsol!(task::Mosek.Task, problem::SDP_Problem,
     all_variables = ["" for kv in block.var_to_id]
     for (var, varid) in block.var_to_id
       all_variables[varid] = var
+      warn("$var   \t$varid")
     end
     n = 0
     for j in 1:length(all_variables)
       for i in j:length(all_variables)
+        @show i, j
+        @show all_variables[i], all_variables[j], all_variables[i] >= all_variables[j]
+        @assert i>=j
+        @assert isless(all_variables[j], all_variables[i]) || (all_variables[j] == all_variables[i])
         n+=1
         primal[block.name, all_variables[i], all_variables[j]] = barx[n]
       end

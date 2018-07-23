@@ -20,10 +20,10 @@ const mosek_optgap = 1.0e-6
 # SDP hierarchy problems
 @testset "SDP hierarchy" begin
 
-    # include(joinpath("SDPhierarchy", "sos_example1.jl"))
-    # include(joinpath("SDPhierarchy", "sos_example2.jl"))
-    # include(joinpath("SDPhierarchy", "sos_example5_sparse.jl"))
-    # include(joinpath("SDPhierarchy", "sos_example6_matpower_rankrel.jl"))
+    include(joinpath("SDPhierarchy", "sos_example1.jl"))
+    include(joinpath("SDPhierarchy", "sos_example2.jl"))
+    include(joinpath("SDPhierarchy", "sos_example5_sparse.jl"))
+    include(joinpath("SDPhierarchy", "sos_example6_matpower_rankrel.jl"))
 
     # include(joinpath("SDPhierarchy", "sos_example3.1_dense_WB2.jl"))
     # include(joinpath("SDPhierarchy", "sos_example3.2_dense_WB2.jl"))
