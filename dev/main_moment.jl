@@ -74,7 +74,7 @@ function main()
                                                                       sol_info=relax_ctx.relaxparams,
                                                                       printlog = true,
                                                                       debug=false,
-                                                                      optsense=:max)
+                                                                      optsense=:Max)
 
     # println(STDOUT, "----- SOS relaxation solutions -----")
     # println(STDOUT, "Dual solution")
@@ -95,7 +95,7 @@ function main()
                                                                       sol_info=relax_ctx.relaxparams,
                                                                       printlog = true,
                                                                       debug = false,
-                                                                      optsense=:min)
+                                                                      optsense=:Min)
 
 
     # println(STDOUT, "----- Moment relaxation solutions -----")

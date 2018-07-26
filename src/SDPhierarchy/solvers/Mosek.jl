@@ -136,7 +136,7 @@ end
   (primalobj, dualobj) = solve_mosek(problem, primal, dual; debug, logname, printlog, msk_maxtime, sol_info, optsense)
 
   Calls Mosek on `problem::SDP_Problem`. Returns the primal and dual objectives if possible.
-  
+
   *Arguments* :
   - `problem::SDP_Problem`
   - `primal::SortedDict{Tuple{String,String,String}, Float64}`: primal solution `x`,
@@ -146,9 +146,9 @@ end
   - `logname` : if specified, Mosek log will be written to the given file name,
   - `msk_maxtime` : Mosek max computation time, in seconds. Default -1 means no limit,
   - `sol_info` : Information on problem and solution status upon termination of solve,
-  - `optsense` : default is `:max`.
+  - `optsense` : default is `:Max`.
 
-  **Note**: 
+  **Note**:
   - Mosek expects lower triangular terms of the coefficient matrices. Hence diagonal or non-diagonal terms will not be scaled.
 """
 function solve_mosek(problem::SDP_Problem, primal::SortedDict{Tuple{String,String,String}, Float64},
@@ -158,7 +158,7 @@ function solve_mosek(problem::SDP_Problem, primal::SortedDict{Tuple{String,Strin
                                            printlog = true,
                                            msk_maxtime = -1,            #Default -1 means no time limit
                                            sol_info = OrderedDict(),
-                                           optsense = :max)
+                                           optsense = :Max)
   empty!(primal)
   empty!(dual)
   primobj = NaN
@@ -199,7 +199,7 @@ function solve_mosek(problem::SDP_Problem, primal::SortedDict{Tuple{String,Strin
       putconboundslice(task,1,numcon+1, bkc,blc,buc)
 
       # Minimize
-      optimsense = ((optsense==:max)?MSK_OBJECTIVE_SENSE_MAXIMIZE:MSK_OBJECTIVE_SENSE_MINIMIZE)
+      optimsense = ((optsense==:Max)?MSK_OBJECTIVE_SENSE_MAXIMIZE:MSK_OBJECTIVE_SENSE_MINIMIZE)
       putobjsense(task, optimsense)
 
       # Set constraints SDP vars coeffs

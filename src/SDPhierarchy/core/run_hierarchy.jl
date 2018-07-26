@@ -63,18 +63,31 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedp
     dual = SortedDict{Tuple{String, String, String}, Float64}()
 
     primobj = dualobj = NaN
-    try
-        printlog = ((relax_ctx.relaxparams[:opt_outmode]!=1) && (relax_ctx.relaxparams[:opt_outlev] ≥ 1))
+    printlog = ((relax_ctx.relaxparams[:opt_outmode]!=1) && (relax_ctx.relaxparams[:opt_outlev] ≥ 1))
 
-        primobj, dualobj = solve_mosek(sdp::SDP_Problem, primal, dual; logname = joinpath(logpath, "Mosek_run.log"),
-                                                                       printlog = printlog,
-                                                                       msk_maxtime = relax_ctx.relaxparams[:opt_msk_maxtime],
-                                                                       sol_info = relax_ctx.relaxparams)
+    solver::Symbol = relax_ctx.relaxparams[:opt_solver]
+    @assert solver in OrderedSet([:MosekCAPI, :MosekSolver, :SCSSolver])
 
-    catch err
-        relax_ctx.relaxparams[:slv_prosta] = err.msg
-        relax_ctx.relaxparams[:slv_solsta] = "_"
+    if solver == :MosekCAPI
+        try
+            primobj, dualobj = solve_mosek(sdp::SDP_Problem, primal, dual;
+                                                                logname = joinpath(logpath, "Mosek_run.log"),
+                                                                printlog = printlog,
+                                                                msk_maxtime = relax_ctx.relaxparams[:opt_msk_maxtime],
+                                                                sol_info = relax_ctx.relaxparams)
+        catch err
+            relax_ctx.relaxparams[:slv_prosta] = err.msg
+            relax_ctx.relaxparams[:slv_solsta] = "_"
+        end
+
+    else
+        primobj, dualobj = solve_JuMP(sdp::SDP_Problem, solver, primal, dual;
+                                                            logname = joinpath(logpath, "Mosek_run.log"),
+                                                            printlog = printlog,
+                                                            msk_maxtime = relax_ctx.relaxparams[:opt_msk_maxtime],
+                                                            sol_info = relax_ctx.relaxparams)
     end
+
 
     params_file = joinpath(logpath, "maxcliques_relaxctx.txt")
     isfile(params_file) && rm(params_file)

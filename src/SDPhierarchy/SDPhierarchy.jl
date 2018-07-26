@@ -4,6 +4,8 @@
 # using DataStructures
 using OPFInstances
 
+import JuMP, Mosek, SCS, MathProgBase
+
 export RelaxationContext, Moment, MomentMatrix, SDPDual, SDPPrimal
 export SDP_Instance, SDP_Block, SDP_CtrObjName, SDP_Problem
 
@@ -102,7 +104,7 @@ include(joinpath("io", "export_SDPPrimal.jl"))
 
 
 ###############################################################################
-## Mosek Structures
+## Solver structures
 ###############################################################################
 type SDP_Instance
   VAR_TYPES
@@ -164,7 +166,9 @@ type SDP_Problem
                       )
 end
 
-include(joinpath("solvers", "run_mosek.jl"))
+include(joinpath("solvers", "Mosek.jl"))
+include(joinpath("solvers", "JuMP.jl"))
+
 
 include(joinpath("SDP_Instance", "common.jl"))
 include(joinpath("SDP_Instance", "build_from_sdpfile.jl"))

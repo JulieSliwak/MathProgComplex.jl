@@ -1,8 +1,108 @@
-# export JuMP_from_SDP_Problem
+export solve_JuMP, JuMP_from_SDP_Problem
 
-# see mathprogcomplex : a78593860b662fc1c09dbd3910656b84425729f7
+# for complex to real conversion, see klorel/mathprogcomplex a78593860b662fc1c09dbd3910656b84425729f7
 
-function JuMP_from_SDP_Problem(sdp_pb::MPC.SDP_Problem, mysolver)
+"""
+  (primalobj, dualobj) = solve_JuMP(problem, solver, primal, dual; debug, logname, printlog, msk_maxtime, sol_info, optsense)
+
+  Calls any JuMP interfaced SDP solver on `problem::SDP_Problem`. Returns the primal and dual objectives if possible.
+
+  TODO: update arguments
+  *Arguments* :
+  - `problem::SDP_Problem`
+  - `primal::SortedDict{Tuple{String,String,String}, Float64}`: primal solution `x`,
+  - `dual::SortedDict{Tuple{String, String, String}, Float64}` : dual solution `s`,
+  - `debug`: default is false, dump Mosek loaded problem
+  - `printlog` : if true (default), Mosek will write its log to the console,
+  - `logname` : if specified, Mosek log will be written to the given file name,
+  - `msk_maxtime` : Mosek max computation time, in seconds. Default -1 means no limit,
+  - `sol_info` : Information on problem and solution status upon termination of solve,
+  - `optsense` : default is `:Max`.
+
+  **Note**:
+  - Mosek expects lower triangular terms of the coefficient matrices. Hence diagonal or non-diagonal terms will not be scaled.
+"""
+function solve_JuMP(problem::SDP_Problem, solver::T,
+                                            primal::SortedDict{Tuple{String,String,String}, Float64},
+                                            dual::SortedDict{Tuple{String, String, String}, Float64};
+                                            debug = false,
+                                            logname = "",
+                                            printlog = true,
+                                            msk_maxtime = -1,            # Default -1 means no time limit
+                                            sol_info = OrderedDict(),
+                                            optsense = :Max) where T<:MathProgBase.AbstractMathProgSolver
+
+    empty!(primal)
+    empty!(dual)
+
+    m = JuMP_from_SDP_Problem(problem, solver)
+
+    JuMP.setobjectivesense(m, optsense)
+
+    JuMP.solve(m)
+
+    debug && MathProgBase.writeproblem(m, "myfile.jtask")
+
+    primobj = JuMP.getobjectivevalue(m)
+
+    ## TODO: - build up primal, dual solutions...
+    ##       - have functions signature converge
+
+    return primobj, primobj
+end
+
+function solve_JuMP(problem::SDP_Problem, solver::Symbol,
+                                            primal::SortedDict{Tuple{String,String,String}, Float64},
+                                            dual::SortedDict{Tuple{String, String, String}, Float64};
+                                            debug = false,
+                                            logname = "",
+                                            printlog = true,
+                                            msk_maxtime = -1,            # Default -1 means no time limit
+                                            sol_info = OrderedDict(),
+                                            optsense = :Max)
+
+    empty!(primal)
+    empty!(dual)
+
+    @assert solver in OrderedSet([:MosekSolver, :SCSSolver])
+    if solver == :MosekSolver
+        options = Any[]
+
+        !printlog && push!(options, (:MSK_IPAR_LOG, 0))
+
+        mysolver = Mosek.MosekSolver(options)
+    elseif solver == :SCSSolver
+        options = Any[]
+
+        !printlog && push!(options, (:verbose, 0))
+
+        mysolver = SCS.SCSSolver(options)
+    end
+
+    m = JuMP_from_SDP_Problem(problem, mysolver)
+
+    JuMP.setobjectivesense(m, optsense)
+
+    JuMP.solve(m)
+
+    debug && MathProgBase.writeproblem(m, "myfile.jtask")
+
+    primobj = JuMP.getobjectivevalue(m)
+
+    ## TODO: - build up primal, dual solutions...
+    ##       - have functions signature converge
+
+    return primobj, primobj
+end
+
+
+
+"""
+    m = JuMP_from_SDP_Problem(sdp_pb::SDP_Problem, mysolver::T) where T<:MathProgBase.AbstractMathProgSolver
+
+    Given a JuMP interfaced SDP solver, convert the input `SDP_Problem` into a JuMP model `m`.
+"""
+function JuMP_from_SDP_Problem(sdp_pb::SDP_Problem, mysolver::T) where T<:MathProgBase.AbstractMathProgSolver
     m = JuMP.Model(solver = mysolver)
 
     ## Variables
