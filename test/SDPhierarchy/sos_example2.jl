@@ -38,8 +38,6 @@ using MathProgComplex
         primobj, dualobj =run_hierarchy(problem, relax_ctx)
         @test primobj ≈ -2 atol=1e-6
         @test dualobj ≈ primobj atol=mosek_optgap*min(abs(primobj), abs(dualobj))
-
-        rm(logpath, recursive = true)
     end
 end
 
