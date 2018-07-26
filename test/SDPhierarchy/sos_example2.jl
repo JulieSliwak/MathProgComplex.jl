@@ -18,22 +18,24 @@ using MathProgComplex
         add_constraint!(problem, "crt3", (1-(x2-3)^2) >> 0)
 
         logpath = joinpath(Pkg.dir("MathProgComplex"), "Mosek_runs", "testfolder")
-        ispath(logpath) && rm(logpath, recursive=true); mkpath(logpath)
+
         ## Order 1
         relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                             d = 1,
-                                            params = Dict(:opt_outlev=>0))
+                                            params = Dict(:opt_outlev=>0,
+                                                          :opt_logpath=>logpath))
 
-        primobj, dualobj =run_hierarchy(problem, relax_ctx, logpath)
+        primobj, dualobj =run_hierarchy(problem, relax_ctx)
         @test primobj ≈ -3 atol=1e-6
         @test dualobj ≈ primobj atol=mosek_optgap*min(abs(primobj), abs(dualobj))
 
         ## Order 2
         relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                             d = 2,
-                                            params = Dict(:opt_outlev=>0))
+                                            params = Dict(:opt_outlev=>0,
+                                                          :opt_logpath=>logpath))
 
-        primobj, dualobj =run_hierarchy(problem, relax_ctx, logpath)
+        primobj, dualobj =run_hierarchy(problem, relax_ctx)
         @test primobj ≈ -2 atol=1e-6
         @test dualobj ≈ primobj atol=mosek_optgap*min(abs(primobj), abs(dualobj))
 

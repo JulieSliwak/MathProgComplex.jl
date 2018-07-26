@@ -1,12 +1,19 @@
 export run_hierarchy, build_relaxation, build_mosekpb
 
 
-function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext, logpath; indentedprint=false,
-                                                                                max_cliques::DictType{String, Set{Variable}}=DictType{String, Set{Variable}}(),
-                                                                                save_pbs=false)
+function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedprint=false,
+                                                                       max_cliques::DictType{String, Set{Variable}}=DictType{String, Set{Variable}}(),
+                                                                       save_pbs=false)
 
-    open(joinpath(logpath, "pb_opt.log"), "w") do fout
-        print(fout, problem)
+
+    logpath = relax_ctx.relaxparams[:opt_exportsdppath]
+    ispath(logpath) && rm(logpath, recursive=true)
+    mkpath(logpath)
+
+    if save_pbs
+        open(joinpath(logpath, "pb_opt.log"), "w") do fout
+            print(fout, problem)
+        end
     end
 
     ########################################
@@ -40,10 +47,6 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext, logpath; 
     relax_ctx.relaxparams[:slv_sosrel_bytes] = bytes
 
     if (relax_ctx.relaxparams[:opt_exportsdp] == 1)
-        logpath = relax_ctx.relaxparams[:opt_exportsdppath]
-        ispath(logpath) && rm(logpath, recursive=true)
-        mkpath(logpath)
-
         sdp, t, bytes, gctime, memallocs = @timed export_SDPPrimal(sdpinstance, logpath, indentedprint=indentedprint);
         relax_ctx.relaxparams[:slv_fileexport_t] = t
         relax_ctx.relaxparams[:slv_fileexport_bytes] = bytes

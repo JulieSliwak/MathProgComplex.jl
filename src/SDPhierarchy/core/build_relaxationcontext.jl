@@ -215,6 +215,7 @@ function get_defaultparams()
                         :opt_globalorder=>-1,
                         :opt_sym_phaseinv=>false,
                         :opt_nb_cliques=>-1,
+                        :opt_logpath=>".",
                         :opt_exportsdp=>0,                      # 0: no, 1: export specified problem to :opt_exportsdppath
                         :opt_exportsdppath=>"SDP_Problem",
                         :opt_msk_maxtime=>-1,                   # Default -1 is no time limit; unit is seconds
