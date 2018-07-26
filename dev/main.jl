@@ -11,12 +11,9 @@ function main()
     # problem = buildPOP_WB2(setnetworkphase=false)
     # problem_c, pt = MPC.import_from_dat(getinstancepath("Matpower", "QCQP", "LMBM3"))
 
-
-    workpath = "SDPwork"
-
-    ispath(workpath) && rm(workpath, recursive = true)
+    workpath = joinpath("Mosek_runs", "worksdp")
+    ispath(workpath) && rm(workpath, recursive=true)
     mkpath(workpath)
-
 
     # problem = MPC.pb_cplx2real(problem_c)
 
@@ -138,6 +135,22 @@ function main()
 
     println("SOS relaxation:    $primobj, $dualobj")
     println("Moment relaxation: $primobjmom, $dualobjmom")
+
+
+    # println("Objectives : $primobj, $dualobj")
+
+    # moseksolver = MosekSolver()
+    # m = JuMP_from_SDP_Problem(sdp_instance, moseksolver)
+
+    # JuMP.solve(m)
+
+    # objective = JuMP.getobjectivevalue(m)
+
+    # println()
+    # println("primobj    ", primobj)
+    # println("dualobj    ", dualobj)
+    # println("objective  ", objective)
+    # return 
 
     return problem
 end
