@@ -13,7 +13,6 @@ function run_pb_orders(problem, order_to_obj)
 
         cur_obj, dualobj = run_hierarchy(problem, relax_ctx, indentedprint=true, save_pbs=true)
 
-        @show d, cur_obj, dualobj
         data[d] = (cur_obj, dualobj)
     end
     return data
@@ -46,7 +45,7 @@ end
 
         @printf("%5s  %15s  %15s  | %15s", "order", "primal obj", "dual obj", "expected obj\n")
         for (d, (primobj, dualobj)) in data_sol
-            @printf("%5i  %15f  %15f  | %15f\n", d, primobj, dualobj, order_to_obj[d])
+            # @printf("%5i  %15f  %15f  | %15f\n", d, primobj, dualobj, order_to_obj[d])
             @test primobj ≈ order_to_obj[d] atol=ε
             @test dualobj ≈ primobj atol=mosek_optgap*min(abs(primobj), abs(dualobj))
         end

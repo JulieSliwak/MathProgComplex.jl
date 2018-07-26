@@ -40,6 +40,8 @@ using Base.Test, MathProgComplex, OPFInstances
         ε_rel = OPFsols[(instance, 1)].rel_opt_gap
         ε_abs = max(primobj, dualobj) * ε_rel
 
+        @show primobj, dualobj,  OPFsols[(instance, 1)].primal_solvalue, ε_abs, instance
+
         @test primobj ≈ OPFsols[(instance, 1)].primal_solvalue atol=ε_abs
         @test dualobj ≈ primobj atol=ε_abs
     end
