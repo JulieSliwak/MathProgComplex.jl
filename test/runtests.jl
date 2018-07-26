@@ -6,14 +6,14 @@ else
     using Test
 end
 
-# # Polynomial optimization problems
-# @testset "Polynomial optim" begin
-#     include("basetypes.jl")
-#     include("cplx2real.jl")
-#     include("dat_importexport.jl")
-#     include("polynomial_types.jl")
-#     include("jump_export.jl")
-# end
+# Polynomial optimization problems
+@testset "Polynomial optim" begin
+    include("basetypes.jl")
+    include("cplx2real.jl")
+    include("dat_importexport.jl")
+    include("polynomial_types.jl")
+    include("jump_export.jl")
+end
 
 const mosek_optgap = 1.0e-6
 
