@@ -50,11 +50,9 @@ function JuMP_from_SDP_Problem(sdp_pb::MPC.SDP_Problem, mysolver)
         j = block.var_to_id[var2]
 
         Ai = sparse([i], [j], [1], n, n)
-        # if i == j
-            # Ai = sparse([i], [j], [1], n, n)
-        # else
-        #     Ai = sparse([i; j], [j; i], [1; 1], n, n)
-        # end
+        if (i != j) #&& (ctr_name ∉ objective_keys)
+            Ai = sparse([i; j], [j; i], [1; 1], n, n)
+        end
 
         if ctr_name in ctr_names
             bodys[ctr_name] += vecdot( Zi[blockname], Ai ) * f_αβ
@@ -80,7 +78,7 @@ function JuMP_from_SDP_Problem(sdp_pb::MPC.SDP_Problem, mysolver)
             bodys[ctr_name] += f_αβ
         else
             @assert ctr_name in objective_keys
-            obj += f_αβ
+            obj += -f_αβ                            ## Note : why the sign change here ?
         end
     end
 
