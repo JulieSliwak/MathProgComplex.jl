@@ -13,58 +13,60 @@ testfolder = joinpath(Pkg.dir("MathProgComplex"), "Mosek_runs", "tests", "sos_ex
     problem_c, point = import_from_dat(getinstancepath("Matpower", "QCQP", instance))
     problem = pb_cplx2real(problem_c)
 
+    logpath = joinpath(testfolder, "$instance")
+
     relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                         d = 1,
                                         issparse = true,
-                                        params = Dict(:opt_outlev=>0))
+                                        params = Dict(:opt_outlev=>1,
+                                                      :opt_logpath=>logpath,
+                                                      :opt_solver=>testsSolver))
 
     max_cliques = get_WB5cliques(relax_ctx, problem)
     @assert length(max_cliques) == 2
 
-    logpath = joinpath(testfolder, "$instance")
-    ispath(logpath) && rm(logpath, recursive=true); mkpath(logpath)
-    println("Saving file at $logpath")
+    primobj, dualobj = run_hierarchy(problem, relax_ctx, save_pbs=false,
+                                                         max_cliques=max_cliques)
 
-    primobj, dualobj = run_hierarchy(problem, relax_ctx, logpath,
-                                                        save_pbs=true,
-                                                        max_cliques=max_cliques);
-    @show 1458.8347 dualobj, 1458.8347
 
-    @test primobj ≈ 954.8232 atol=1e-4
-    @test dualobj ≈ primobj atol=(mosek_optgap*min(abs(primobj), abs(dualobj)))
+    ε_rel = OPFsols[("WB5", 1)].rel_opt_gap
+    ε_abs = max(primobj, dualobj) * ε_rel
+
+    @show primobj, dualobj,  OPFsols[("WB5", 1)].primal_solvalue, ε_abs
+
+    @test primobj ≈ OPFsols[("WB5", 1)].primal_solvalue atol=ε_abs
+    @test dualobj ≈ primobj atol=ε_abs
 end
 
 
 
-@testset "WB5 real formulation - order $i - two cliques" for i in 1:2
+@testset "case9 real formulation - order $i - three cliques" for i in 1:1
     instance = "case9"
 
     problem_c, point = import_from_dat(getinstancepath("Matpower", "QCQP", instance))
     problem = pb_cplx2real(problem_c)
 
+    logpath = joinpath(testfolder, "$instance")
+
     relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                         d = i,
                                         issparse = true,
-                                        params = Dict(:opt_outlev=>0))
+                                        params = Dict(:opt_outlev=>1,
+                                                      :opt_logpath=>logpath,
+                                                      :opt_solver=>testsSolver))
 
     max_cliques = get_case9cliques(relax_ctx, problem)
     @assert length(max_cliques) == 3
 
-    logpath = joinpath(testfolder, "$instance")
-    ispath(logpath) && rm(logpath, recursive=true); mkpath(logpath)
-    println("Saving file at $logpath")
+    primobj, dualobj = run_hierarchy(problem, relax_ctx, save_pbs=false,
+                                                         max_cliques=max_cliques);
 
-    primobj, dualobj = run_hierarchy(problem, relax_ctx, logpath,
-                                                        save_pbs=true,
-                                                        max_cliques=max_cliques);
 
-    if i == 1
-        @show (primobj, dualobj, 1458.60)
-        @test primobj ≈ 1458.6003 atol=1e-4
-        @test dualobj ≈ primobj atol=(mosek_optgap*min(abs(primobj), abs(dualobj)))
-    else
-        @show (primobj, dualobj, 1458.60)
-        @test primobj ≈ 1458.60 atol=1e-2
-        @test dualobj ≈ primobj atol=(mosek_optgap*min(abs(primobj), abs(dualobj)))
-    end
+    ε_rel = OPFsols[("case9", i)].rel_opt_gap
+    ε_abs = max(primobj, dualobj) * ε_rel
+
+    @show primobj, dualobj,  OPFsols[("case9", i)].primal_solvalue, ε_abs
+
+    @test primobj ≈ OPFsols[("case9", i)].primal_solvalue atol=ε_abs
+    @test dualobj ≈ primobj atol=ε_abs
 end

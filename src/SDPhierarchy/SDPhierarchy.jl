@@ -4,8 +4,10 @@
 # using DataStructures
 using OPFInstances
 
+import JuMP, Mosek, SCS, MathProgBase, CSDP
+
 export RelaxationContext, Moment, MomentMatrix, SDPDual, SDPPrimal
-export SDP_Instance, SDP_Block, SDP_Moment, SDP_Problem
+export SDP_Instance, SDP_Block, SDP_CtrObjName, SDP_Problem
 
 
 const DictType = SortedDict
@@ -61,10 +63,10 @@ include(joinpath("base_types", "moment.jl"))
     **Note** that the matrix is indexed by a tuple of exponents, *the first of which contains only conjugated variables*, et second only real ones.
 """
 mutable struct MomentMatrix{T}
-    mm::DictType{Tuple{Exponent, Exponent}, DictType{Moment, T}}
-    vars::Set{Variable}
-    order::Int
-    matrixkind::Symbol            # Either :SDP, :SDPC or :Null
+    mm::DictType{Tuple{Exponent, Exponent}, DictType{Moment, T}}    # (row index, col index) -> lin. comb. of moments
+    vars::Set{Variable}                                             # The set of variables from which the MomentMatrix was built
+    order::Int                                                      # The order at which the moment matrix was built (d-ki for localizing constraints)
+    matrixkind::Symbol                                              # Either :SDP, :SDPC or :Null
 end
 
 include(joinpath("base_types", "momentmatrix.jl"))
@@ -99,12 +101,10 @@ end
 
 include(joinpath("core", "build_SOSrelaxation.jl"))
 include(joinpath("io", "export_SDPPrimal.jl"))
-# include("SDPPrimal_cplx2real.jl")
-
 
 
 ###############################################################################
-## Mosek Structures
+## Solver structures
 ###############################################################################
 type SDP_Instance
   VAR_TYPES
@@ -122,43 +122,58 @@ type SDP_Block
   SDP_Block(id::Int64, name::String) = new(id, name, SortedDict{String, Int64}())
 end
 
-const SDP_Moment = Tuple{String, String, String}
+const SDP_CtrObjName = Tuple{String, String, String}
 
+"""
+    SDP_Problem
+
+    Description of a SDP problem in the primal form, with string to integer maps coefficients matrices, scalar variables and contraint keys.
+
+    All SDP problems to be solved should be converted to this structure, for which the Mosek solver can be readily used, and can be easily extended to other solvers.
+
+            max               ∑ A_0i[k,l] × Zi[k,l] + ∑ b_0[k] × x[k] + c_0
+            s.t.    lb_j  <=  ∑ A_ji[k,l] × Zi[k,l] + ∑ b_j[k] × x[k] + c_j  <=  ub_j
+
+    **Notes**:
+    - Only the lower triangular part of coefficient matrices is stored. Hence a slice of the initial matrix is stroed, **no diagonal or non-diagonal coefficient is scaled**.
+"""
 type SDP_Problem
   # SDP vars
-  name_to_sdpblock::SortedDict{String, SDP_Block}
-  id_to_sdpblock::SortedDict{Int64, SDP_Block}
+  name_to_sdpblock::SortedDict{String, SDP_Block}                                   # SDP variable name -> SDP variable description
+  id_to_sdpblock::SortedDict{Int64, SDP_Block}                                      # SDP variable id   -> SDP variable description
 
   # Scalar variables
-  scalvar_to_id::Dict{String, Int64}
+  scalvar_to_id::Dict{String, Int64}                                                # Scalar variable name -> scalar variable id
 
   # Objective / constraints
-  obj_keys::SortedSet{SDP_Moment}
-  name_to_ctr::SortedDict{SDP_Moment, Tuple{Int64, String, Float64, Float64}} # Id, type et bornes des contraintes
-  id_to_ctr::SortedDict{Int64, SDP_Moment}
+  obj_keys::SortedSet{SDP_CtrObjName}                                               # Set of SDP_CtrObjName corresponding to the objective
+  name_to_ctr::SortedDict{SDP_CtrObjName, Tuple{Int64, String, Float64, Float64}}   # SDP_CtrObjName constraint -> constraint id j, type, lower and upper bounds (lb_j, ub_j)
+  id_to_ctr::SortedDict{Int64, SDP_CtrObjName}                                      # SDP_CtrObjName constraint id -> SDP_CtrObjName name
 
-  matrices::SortedDict{Tuple{SDP_Moment, String, String, String}, Float64} # Matrices SDP du corps des contraintes / objectif
-  linear::SortedDict{Tuple{SDP_Moment, String}, Float64} # Matrice portant les parties linéaires des contraintes
-  cst_ctr::SortedDict{SDP_Moment, Float64} # Constante du corps des contraintes
+  matrices::SortedDict{Tuple{SDP_CtrObjName, String, String, String}, Float64}      # matrix coefficients           (j, i, k, l) -> A_ji[k,l]
+  linear::SortedDict{Tuple{SDP_CtrObjName, String}, Float64}                        # scalar variables coeffs       (j, k) -> b_j[k]
+  cst_ctr::SortedDict{SDP_CtrObjName, Float64}                                      # constant coeff                j -> c_j
 
   SDP_Problem() = new(SortedDict{String, SDP_Block}(),
                       SortedDict{Int64, SDP_Block}(),
                       Dict{String, Int64}(),
-                      SortedSet{SDP_Moment}(),
-                      SortedDict{SDP_Moment, Tuple{Int64, String, Float64, Float64}}(),
-                      SortedDict{Int64, SDP_Moment}(),
-                      SortedDict{Tuple{SDP_Moment, String, String, String}, Float64}(),
-                      SortedDict{Tuple{SDP_Moment, String}, Float64}(),
-                      SortedDict{SDP_Moment, Float64}()
+                      SortedSet{SDP_CtrObjName}(),
+                      SortedDict{SDP_CtrObjName, Tuple{Int64, String, Float64, Float64}}(),
+                      SortedDict{Int64, SDP_CtrObjName}(),
+                      SortedDict{Tuple{SDP_CtrObjName, String, String, String}, Float64}(),
+                      SortedDict{Tuple{SDP_CtrObjName, String}, Float64}(),
+                      SortedDict{SDP_CtrObjName, Float64}()
                       )
 end
 
-include(joinpath("solvers", "run_mosek.jl"))
+include(joinpath("solvers", "Mosek.jl"))
+include(joinpath("solvers", "JuMP.jl"))
+
 
 include(joinpath("SDP_Instance", "common.jl"))
 include(joinpath("SDP_Instance", "build_from_sdpfile.jl"))
 include(joinpath("SDP_Instance", "build_from_SDPPrimal.jl"))
-# include(joinpath("SDP_Instance", "build_from_SDPDual.jl"))
+include(joinpath("SDP_Instance", "build_from_SDPDual.jl"))
 # include(joinpath("SDP_Instance", "fileexport.jl"))
 
 

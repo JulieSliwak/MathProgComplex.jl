@@ -9,6 +9,9 @@ cache:
 addons:
   apt_packages:
   - gfortran
+  - build-essential
+  - liblapack-dev
+  - libopenblas-dev
 before_install:
     # don't keep an old version of the code in the cache
   - julia -e 'if "MathProgComplex" in keys(Pkg.installed()) Pkg.rm("MathProgComplex"); Pkg.rm("MathProgComplex") end'
@@ -17,9 +20,11 @@ before_install:
   - julia -e 'if !("Documenter" in keys(Pkg.installed())) Pkg.add("Documenter") end'
   - julia -e 'if !("OPFInstances" in keys(Pkg.installed())) Pkg.clone("https://github.com/JulieSliwak/OPFInstances.jl.git") end'
 script:
-  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+  # - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'Pkg.clone(pwd())'
   - julia -e 'Pkg.test("MathProgComplex", coverage=true)'
 after_success:
   - julia -e  'using Coverage; cd(Pkg.dir("MathProgComplex")); LCOV.writefile("lcov.info", process_folder(".")); run(pipeline(`curl -s https://codecov.io/bash`, `bash`))'
   # - julia -e 'cd(Pkg.dir("MathProgComplex")); include(joinpath("docs", "make.jl"))'
+notifications:
+  email: false

@@ -215,8 +215,10 @@ function get_defaultparams()
                         :opt_globalorder=>-1,
                         :opt_sym_phaseinv=>false,
                         :opt_nb_cliques=>-1,
+                        :opt_logpath=>".",
                         :opt_exportsdp=>0,                      # 0: no, 1: export specified problem to :opt_exportsdppath
-                        :opt_exportsdppath=>"SDP_Problem",
+                        :opt_exportsdppath=>"Mosek_runs",
+                        :opt_solver=>:MosekCAPI,                # Default :MosekCAPI, else JuMP solvers :MosekSolver, :SCSSolver
                         :opt_msk_maxtime=>-1,                   # Default -1 is no time limit; unit is seconds
                         :opt_outmode=>0,                        # 0: screen, 1: file, 2: both
                         :opt_outlev=>1,                         # 0: none, 1:summary at moment relaxation, sos relaxation, 2: detailled information, 3: full problems

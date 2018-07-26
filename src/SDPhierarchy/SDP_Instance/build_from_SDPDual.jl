@@ -1,9 +1,10 @@
-# export build_SDP_Instance_from_SDPDual
+export build_SDP_Instance_from_SDPDual
 
-function build_SDP_Instance_from_SDPDual(sdpdual::MPC.SDPDual)
+function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
     sdp_pb = SDP_Problem()
 
     ## First. Deal fully with moment matrices
+    blocktovars = SortedDict{String, SortedSet}()
     n_sdp = 0
     for ((ctrname, cliquename), matrix) in sdpdual.constraints
         if ctrname == get_momentcstrname()
@@ -15,23 +16,26 @@ function build_SDP_Instance_from_SDPDual(sdpdual::MPC.SDPDual)
             sdp_pb.id_to_sdpblock[n_sdp] = block
 
             @assert matrix.matrixkind == :SDP
+            blocktovars[blockname] = SortedSet{String}()
             for (α, β) in keys(matrix)
                 var1 = format_string(α)
-                if !haskey(block.var_to_id, var1)
-                    block.var_to_id[var1] = length(block.var_to_id)+1
-                end
-
                 var2 = format_string(β)
-                if !haskey(block.var_to_id, var2)
-                    block.var_to_id[var2] = length(block.var_to_id)+1
-                end
-            end
 
-            println(" * $blockname:\n$block\n")
+                push!(blocktovars[blockname], var1)
+                push!(blocktovars[blockname], var2)
+            end
+        end
+    end
+    for (blockname, vars) in blocktovars
+        block = sdp_pb.name_to_sdpblock[blockname]
+        n=0
+        for var in vars
+            n += 1
+            block.var_to_id[var] = n
         end
     end
 
-    warn("Done with moment constraints.\n")
+    # warn("Done with moment constraints.\n")
 
     ## Second. Filling obj and ctrs coefficients
     ## Dealing with objective
@@ -40,24 +44,37 @@ function build_SDP_Instance_from_SDPDual(sdpdual::MPC.SDPDual)
         block_name, α, β = split_moment(moment)
 
         α_str, β_str = format_string(α), format_string(β)
-        var1, var2 = min(α_str, β_str), max(α_str, β_str)
+        var1, var2 = max(α_str, β_str), min(α_str, β_str)
 
         @assert haskey(sdp_pb.name_to_sdpblock, block_name)
         @assert haskey(sdp_pb.name_to_sdpblock[block_name].var_to_id, var1)
         @assert haskey(sdp_pb.name_to_sdpblock[block_name].var_to_id, var2)
-        @show (ctr_name, block_name, var1, var2), fαβ
-        sdp_pb.matrices[(ctr_name, block_name, var1, var2)] = -fαβ
+
+        if product(α, β) == Exponent()
+            !haskey(sdp_pb.cst_ctr, ctr_name) && (sdp_pb.cst_ctr[ctr_name] = 0)
+
+            sdp_pb.cst_ctr[ctr_name] += fαβ
+        else
+            sdp_pb.matrices[(ctr_name, block_name, var1, var2)] = fαβ * (var1!=var2 ? 0.5 : 1)
+        end
     end
 
-    warn("Done with moment objective.\n")
+    # warn("Done with moment objective.\n")
 
     ## Dealing with constraints
     for ((ctrname, cliquename), matrix) in sdpdual.constraints
+        doprint = ismatch(r"UNIT_1", ctrname)
+        if doprint
+
+            println("-- localizing matrix: ", ctrname)
+            println(matrix)
+        end
+
         if ctrname != get_momentcstrname()
 
             # Name of auxiliary SDP constrained matrix
             S_name = get_auxSDPmatrix_name(ctrname, cliquename)
-            info("Sname: ", S_name)
+            # info("Sname: ", S_name)
 
             # for all matrix coefficients
             # Deal with S[γ, δ]
@@ -70,24 +87,30 @@ function build_SDP_Instance_from_SDPDual(sdpdual::MPC.SDPDual)
                     block_name, α, β = split_moment(moment)
 
                     α_str, β_str = format_string(α), format_string(β)
-                    var1, var2 = min(α_str, β_str), max(α_str, β_str)
+                    var1, var2 = max(α_str, β_str), min(α_str, β_str)
 
                     @assert haskey(sdp_pb.name_to_sdpblock, block_name)
                     @assert haskey(sdp_pb.name_to_sdpblock[block_name].var_to_id, var1)
                     @assert haskey(sdp_pb.name_to_sdpblock[block_name].var_to_id, var2)
 
-                    @show (ctr_name, block_name, var1, var2), fαβ
-                    sdp_pb.matrices[(ctr_name, block_name, var1, var2)] = fαβ
+                    # @show (ctr_name, block_name, var1, var2), fαβ
+                    if product(α, β) == Exponent()
+                        !haskey(sdp_pb.cst_ctr, ctr_name) && (sdp_pb.cst_ctr[ctr_name] = 0)
+
+                        sdp_pb.cst_ctr[ctr_name] += fαβ
+                    else
+                        sdp_pb.matrices[(ctr_name, block_name, var1, var2)] = fαβ #* (var1!=var2 ? 0.5 : 1)
+                    end
                 end
 
                 # If the matrix is SDP, add link to auxiliary SDP var
                 if matrix.matrixkind == :SDP
                     block_name = S_name
-                    var1 = min(γ_str, δ_str)
-                    var2 = max(γ_str, δ_str)
+                    var1 = max(γ_str, δ_str)
+                    var2 = min(γ_str, δ_str)
 
-                    # @show (ctr_name, block_name, var1, var2), -1
-                    sdp_pb.matrices[(ctr_name, block_name, var1, var2)] = -1
+                    # # @show (ctr_name, block_name, var1, var2), -1
+                    sdp_pb.matrices[(ctr_name, block_name, var1, var2)] = -1 #* (var1!=var2 ? 0.5 : 1)
                 else
                     # Nothing to do, constraint will be scalar, ==0 by default.
                 end
@@ -96,11 +119,18 @@ function build_SDP_Instance_from_SDPDual(sdpdual::MPC.SDPDual)
     end
 
     ## Third. Add auxiliary SDP matrices standing for SDP localizing constraints
-    println("--------------------------------------------------------")
+    # println("--------------------------------------------------------")
     momentvars = SortedSet(collect(keys(sdp_pb.name_to_sdpblock)))
 
-    @show momentvars
-    println()
+    for block_name in momentvars
+        ctr_name = (block_name*"_1ctr", "1", "1")
+        sdp_pb.matrices[(ctr_name, block_name, "1", "1")] = 1
+        sdp_pb.cst_ctr[ctr_name] = -1
+    end
+
+    # @show momentvars
+    # println()
+    empty!(blocktovars)
 
     n_sdp = length(sdp_pb.name_to_sdpblock)
     for ((ctr_name, blockname, var1, var2), f_αβ) in sdp_pb.matrices
@@ -115,17 +145,17 @@ function build_SDP_Instance_from_SDPDual(sdpdual::MPC.SDPDual)
                 block = sdp_pb.name_to_sdpblock[blockname]
             end
 
-            @assert !haskey(block.var_to_id, var1)
-            @assert !haskey(block.var_to_id, var2)
-            if !haskey(block.var_to_id, var1)
-                block.var_to_id[var1] = length(block.var_to_id)+1
-            end
-
-            if !haskey(block.var_to_id, var2)
-                block.var_to_id[var2] = length(block.var_to_id)+1
-            end
-
-            println(" * $blockname:\n$block\n")
+            !haskey(blocktovars, blockname) && (blocktovars[blockname] = SortedSet{String}())
+            push!(blocktovars[blockname], var1)
+            push!(blocktovars[blockname], var2)
+        end
+    end
+    for (blockname, vars) in blocktovars
+        block = sdp_pb.name_to_sdpblock[blockname]
+        n=0
+        for var in vars
+            n += 1
+            block.var_to_id[var] = n
         end
     end
 
@@ -140,11 +170,6 @@ function build_SDP_Instance_from_SDPDual(sdpdual::MPC.SDPDual)
     # set_blocks!(sdp_pb, sdpdual)
 
     # MathProgComplex.set_blocks!(sdp_pb)
-
-
-    # warn("222222222222222222222222222")
-    # println(sdp_pb)
-    # warn("222222222222222222222222222")
 
     MathProgComplex.set_constraints!(sdp_pb)
     MathProgComplex.set_scalvars!(sdp_pb)
@@ -167,7 +192,7 @@ end
     Split the exponent into two exponents of conjugated and explicit variables in the complex case.
     Real case is not supported yet.
 """
-function split_moment(moment::MPC.Moment)
+function split_moment(moment::Moment)
     α, β = Exponent(), Exponent()
 
     if moment.conj_part != Exponent()
@@ -216,7 +241,7 @@ set_blockvartypes!(sdp_pb::SDP_Problem)
 
 # Set attributes `name_to_sdpblock` and `id_to_sdpblock` given a primal sdp.
 """
-function set_blockvartypes!(sdp_pb::MPC.SDP_Problem)
+function set_blockvartypes!(sdp_pb::SDP_Problem)
     n_sdp = 0
 
     blocknames = SortedSet([k[2] for k in keys(sdp_pb.matrices)])
@@ -231,7 +256,7 @@ function set_blockvartypes!(sdp_pb::MPC.SDP_Problem)
 end
 
 
-function set_blocks!(sdp_pb::MPC.SDP_Problem, sdpdual::MPC.SDPDual)
+function set_blocks!(sdp_pb::SDP_Problem, sdpdual::SDPDual)
     # Collecting moments from each moment constraint
     for ((ctrname, cliquename), matrix) in sdpdual.constraints
 
@@ -244,7 +269,7 @@ function set_blocks!(sdp_pb::MPC.SDP_Problem, sdpdual::MPC.SDPDual)
                 @assert length(momentpoly) == 1
 
                 moment = first(momentpoly)[1]  #y_αβ
-                @show moment
+                # @show moment
                 α_str = format_string(moment.conj_part)
                 β_str = format_string(moment.expl_part)
 
@@ -258,4 +283,81 @@ function set_blocks!(sdp_pb::MPC.SDP_Problem, sdpdual::MPC.SDPDual)
 
         end
     end
+end
+
+
+
+
+###########################################################################
+function get_formatedexpo(expo::Exponent)
+    if first(get_sumdegs(expo)) == 2
+        if length(expo) == 1
+            var1 = string(first(keys(expo)))
+            var2 = string(first(keys(expo)))
+        else
+            var1, var2 = string.(collect(keys(expo)))
+        end
+        linetype = "QUAD"
+    elseif first(get_sumdegs(expo)) == 1
+        var1 = string(first(keys(expo)))
+        var2 = "NONE"
+        linetype = "LIN"
+    elseif first(get_sumdegs(expo)) == 0
+        var1 = "NONE"
+        var2 = "NONE"
+        linetype = "CONST"
+    end
+
+    return var1, var2, linetype
+end
+
+function print_QCQPform(io::IO, momentrelax::SDPDual{T}) where T
+    maxvarlen = 15
+    maxcstrlen = 15
+
+    println(io, "Moment Relaxation Problem, QCQP form:")
+    for moment in sort(collect(keys(momentrelax.objective)))
+        expo = product(moment.expl_part, moment.conj_part)
+
+        var1, var2, linetype = get_formatedexpo(expo)
+
+        cstrname = "OBJ"
+        val1 = momentrelax.objective[moment]
+        val2 = 0
+        MathProgComplex.print_dat_line(io, linetype, cstrname, var1, var2, val1, val2, maxvarlen, maxcstrlen)
+    end
+
+    for (cstrname, blocname) in sort(collect(keys(momentrelax.constraints)))
+
+        if !ismatch(r"_lo", cstrname)
+            mmtmat = momentrelax.constraints[(cstrname, blocname)]
+
+            for (key, momentpoly) in mmtmat
+                for (moment, coeff) in momentpoly
+                    expo = product(moment.expl_part, moment.conj_part)
+
+                    var1, var2, linetype = get_formatedexpo(expo)
+
+                    val1 = coeff
+                    val2 = 0
+                    MathProgComplex.print_dat_line(io, linetype, cstrname, var1, var2, val1, val2, maxvarlen, maxcstrlen)
+                end
+            end
+        end
+
+    end
+
+    # println(io, "→ Moments clique overlap:")
+    # if length(momentrelax.moments_overlap) > 0
+    #     mmtlength = maximum(x->length(string(x)), keys(momentrelax.moments_overlap))
+    #     for moment in sort(collect(keys(momentrelax.moments_overlap)))
+    #         cliquenames = momentrelax.moments_overlap[moment]
+    #         print(io, " → ")
+    #         print_string(io, string(moment), mmtlength)
+    #         for clique in sort(collect(cliquenames)) print(io, "$clique, ") end
+    #         @printf(io, "\b\b \n")
+    #     end
+    # else
+    #     print(io, "  None")
+    # end
 end

@@ -4,16 +4,16 @@ using MathProgComplex
 function run_pb_orders(problem, order_to_obj)
     data = SortedDict()
     for d in keys(order_to_obj)
+        logpath = joinpath(Pkg.dir("MathProgComplex"), "Mosek_runs", "Lasserreex", "d_$d")
+
         relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                             d = d,
-                                            params = Dict(:opt_outlev=>0))
+                                            params = Dict(:opt_outlev=>0,
+                                                          :opt_logpath=>logpath,
+                                                          :opt_solver=>testsSolver))
 
-        logpath = joinpath(Pkg.dir("MathProgComplex"), "Mosek_runs", "Lasserreex", "d_$d")
-        ispath(logpath) && rm(logpath, recursive=true)
-        mkpath(logpath)
-        cur_obj, dualobj = run_hierarchy(problem, relax_ctx, logpath, indentedprint=true, save_pbs=true)
+        cur_obj, dualobj = run_hierarchy(problem, relax_ctx, indentedprint=true, save_pbs=true)
 
-        @show d, cur_obj, dualobj
         data[d] = (cur_obj, dualobj)
     end
     return data
