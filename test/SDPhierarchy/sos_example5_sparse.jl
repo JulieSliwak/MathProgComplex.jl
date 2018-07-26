@@ -18,14 +18,14 @@ testfolder = joinpath(Pkg.dir("MathProgComplex"), "Mosek_runs", "tests", "sos_ex
     relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                         d = 1,
                                         issparse = true,
-                                        params = Dict(:opt_outlev=>0,
+                                        params = Dict(:opt_outlev=>1,
                                                       :opt_logpath=>logpath,
                                                       :opt_solver=>testsSolver))
 
     max_cliques = get_WB5cliques(relax_ctx, problem)
     @assert length(max_cliques) == 2
 
-    primobj, dualobj = run_hierarchy(problem, relax_ctx, save_pbs=true,
+    primobj, dualobj = run_hierarchy(problem, relax_ctx, save_pbs=false,
                                                          max_cliques=max_cliques)
 
 
@@ -40,7 +40,7 @@ end
 
 
 
-@testset "case9 real formulation - order $i - three cliques" for i in 1:2
+@testset "case9 real formulation - order $i - three cliques" for i in 1:1
     instance = "case9"
 
     problem_c, point = import_from_dat(getinstancepath("Matpower", "QCQP", instance))
@@ -51,14 +51,14 @@ end
     relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                         d = i,
                                         issparse = true,
-                                        params = Dict(:opt_outlev=>0,
+                                        params = Dict(:opt_outlev=>1,
                                                       :opt_logpath=>logpath,
                                                       :opt_solver=>testsSolver))
 
     max_cliques = get_case9cliques(relax_ctx, problem)
     @assert length(max_cliques) == 3
 
-    primobj, dualobj = run_hierarchy(problem, relax_ctx, save_pbs=true,
+    primobj, dualobj = run_hierarchy(problem, relax_ctx, save_pbs=false,
                                                          max_cliques=max_cliques);
 
 

@@ -1,15 +1,15 @@
 using DataStructures, SCS, Mosek, OPFInstances
 
-using MathProgComplex
+import MathProgComplex
 
 !isdefined(:MPC) && (const MPC = MathProgComplex)
 
-include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "SDP_Instance", "build_from_SDPDual.jl"))
-include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "io", "export_SDP_Instance.jl"))
-include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "solvers", "JuMP.jl"))
+# include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "SDP_Instance", "build_from_SDPDual.jl"))
+# include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "io", "export_SDP_Instance.jl"))
+# include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "solvers", "JuMP.jl"))
 
 function main()
-    problem = buildPOP_WB2(setnetworkphase=false)
+    # problem = buildPOP_WB2(setnetworkphase=false)
     problem_c, pt = MPC.import_from_dat(getinstancepath("Matpower", "QCQP", "case9"))
 
     problem = MPC.pb_cplx2real(problem_c)
@@ -19,18 +19,18 @@ function main()
     mkpath(workpath)
 
 
-    cstobj = problem.objective[Exponent()]
+    cstobj = problem.objective[MPC.Exponent()]
     problem.objective += -cstobj
-    @assert !haskey(problem.objective, Exponent())
+    @assert !haskey(problem.objective, MPC.Exponent())
 
     # problem_c = buildPOP_1v1c()
-    problem = Problem()
-    x1 = Variable("x", Real)
-    x2 = Variable("y", Real)
+    problem = MPC.Problem()
+    x1 = MPC.Variable("x", Real)
+    x2 = MPC.Variable("y", Real)
 
-    set_objective!(problem, -x1 + 1 - 0.14159)
-    add_constraint!(problem, "ctr2", (x1^4+x2^4) << 2^4)
-    add_constraint!(problem, "ctr1", (x1^2+x2^2) << 10^2)
+    MPC.set_objective!(problem, -x1 + 1 - 0.14159)
+    MPC.add_constraint!(problem, "ctr2", (x1^4+x2^4) << 2^4)
+    MPC.add_constraint!(problem, "ctr1", (x1^2+x2^2) << 10^2)
 
     # println(problem)
 
@@ -39,7 +39,12 @@ function main()
                                             d = 2,
                                             params = Dict(:opt_outlev=>1,
                                                           :opt_outmode=>2,
-                                                          :opt_outcsv=>0))
+                                                          :opt_outcsv=>0,
+                                                          :opt_solver=>:MosekCAPI))
+
+    # primobj, dualobj = run_hierarchy(problem, relax_ctx, indentedprint=true, save_pbs=true)
+
+    # return primobj, dualobj
 
     # problem, relax_ctx = lasserre_ex1()
     # problem, relax_ctx = lasserre_ex2()
@@ -75,7 +80,7 @@ function main()
     # sdp_instance = MPC.build_SDP_Instance_from_sdpfiles(path)
 
     # sdp_instance_moment::SDP_Problem = build_SDP_Instance_from_SDPDual(momentrel)
-    sdp_instance_sos::SDP_Problem = MPC.build_SDP_Instance_from_SDPPrimal(sosrel)
+    sdp_instance_sos::MPC.SDP_Problem = MPC.build_SDP_Instance_from_SDPPrimal(sosrel)
 
     # mkpath(joinpath(workpath, "export_sdp_pb_sos"))
     # mkpath(joinpath(workpath, "export_sdp_pb_moment"))
@@ -91,12 +96,19 @@ function main()
     primal = SortedDict{Tuple{String,String,String}, Float64}()
     dual = SortedDict{Tuple{String, String, String}, Float64}()
 
-    primobj, dualobj = MPC.solve_mosek(sdp_instance_sos::MPC.SDP_Problem, primal,
-                                                                      dual,
-                                                                      sol_info=relax_ctx.relaxparams,
-                                                                      debug=false,
-                                                                      logname = joinpath("Mosek.log"),
-                                                                      optsense=:max)
+    primobj, dualobj = MPC.solve_JuMP(sdp_instance_sos, :CSDPSolver, primal, dual;
+                                                                logname = "Mosek_run.log",
+                                                                printlog = false,
+                                                                msk_maxtime = relax_ctx.relaxparams[:opt_msk_maxtime],
+                                                                sol_info = relax_ctx.relaxparams)
+
+    return primobj, dualobj
+    # primobj, dualobj = MPC.solve_mosek(sdp_instance_sos::MPC.SDP_Problem, primal,
+    #                                                                   dual,
+    #                                                                   sol_info=relax_ctx.relaxparams,
+    #                                                                   debug=false,
+    #                                                                   logname = joinpath("Mosek.log"),
+    #                                                                   optsense=:Max)
 
 
     # open(joinpath(workpath, "SOSrelsol.dat"), "w") do fout
@@ -116,7 +128,7 @@ function main()
     #                                                                   dual,
     #                                                                   sol_info=relax_ctx.relaxparams,
     #                                                                   debug=true,
-    #                                                                   optsense=:min)
+    #                                                                   optsense=:Min)
 
     # open(joinpath(workpath, "mmtrelsol.dat"), "w") do fout
     #     println(fout, "----- Moment relaxation solutions -----")
@@ -143,6 +155,8 @@ function main()
     m = JuMP_from_SDP_Problem(sdp_instance_sos, moseksolver)
 
     JuMP.solve(m)
+
+    return m
 
     objective = JuMP.getobjectivevalue(m)
 
