@@ -229,6 +229,11 @@ function solve_mosek(problem::SDP_Problem, primal::SortedDict{Tuple{String,Strin
       # putdouparam(task, MSK_DPAR_INTPNT_CO_TOL_PFEAS, 1e-12)
       # putdouparam(task, MSK_DPAR_INTPNT_CO_TOL_REL_GAP, 1e-1)
 
+      if debug
+        putintparam(task, MSK_IPAR_WRITE_DATA_FORMAT, MSK_DATA_FORMAT_JSON_TASK)
+        writedata(task, joinpath(splitdir(logname)[1], "Mosek_hierarchy.json"))
+      end
+
       # Set Mosek maxtime, default is infinity
       putdouparam(task, MSK_DPAR_OPTIMIZER_MAX_TIME, msk_maxtime)
 
