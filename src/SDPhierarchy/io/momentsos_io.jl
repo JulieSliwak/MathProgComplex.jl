@@ -137,13 +137,13 @@ function print_build_SOSrelax(relax_ctx::RelaxationContext, sosrel::SDPPrimal)
 
             if relaxparams[:opt_outlev] ≥ 2
                 warn(outstr, "(C)SDP variables :")
-                println(outstr, sort([(key[2]) for key in keys(sosrel.blocks)]))
+                println(outstr, SortedSet([(key[2]) for key in keys(sosrel.blocks)]))
                 warn(outstr, "Symmetric variables :")
-                println(outstr, sort([(key[2]) for key in keys(sosrel.linsym)]))
+                println(outstr, SortedSet([(key[2]) for key in keys(sosrel.linsym)]))
                 warn(outstr, "Scalar variables :")
-                println(outstr, sort([key[3] for key in keys(sosrel.lin)]))
+                println(outstr, SortedSet([key[3] for key in keys(sosrel.lin)]))
                 warn(outstr, "Constraint keys :")
-                println(outstr, sort(collect(momentset)))
+                println(outstr, SortedSet(collect(momentset)))
             end
 
             println(outstr, "- nb of (C)SDP matrix vars     : ", nb_SDPvars)
