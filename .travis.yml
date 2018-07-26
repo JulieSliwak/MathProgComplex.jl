@@ -26,3 +26,5 @@ script:
 after_success:
   - julia -e  'using Coverage; cd(Pkg.dir("MathProgComplex")); LCOV.writefile("lcov.info", process_folder(".")); run(pipeline(`curl -s https://codecov.io/bash`, `bash`))'
   # - julia -e 'cd(Pkg.dir("MathProgComplex")); include(joinpath("docs", "make.jl"))'
+notifications:
+  email: false

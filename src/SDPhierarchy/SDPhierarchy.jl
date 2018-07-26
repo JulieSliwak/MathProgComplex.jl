@@ -4,7 +4,7 @@
 # using DataStructures
 using OPFInstances
 
-import JuMP, Mosek, SCS, MathProgBase
+import JuMP, Mosek, SCS, MathProgBase, CSDP
 
 export RelaxationContext, Moment, MomentMatrix, SDPDual, SDPPrimal
 export SDP_Instance, SDP_Block, SDP_CtrObjName, SDP_Problem

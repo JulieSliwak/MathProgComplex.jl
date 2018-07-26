@@ -33,7 +33,8 @@ using MathProgComplex
         relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                             d = 2,
                                             params = Dict(:opt_outlev=>0,
-                                                          :opt_logpath=>logpath))
+                                                          :opt_logpath=>logpath,
+                                                          :opt_solver=>testsSolver))
 
         primobj, dualobj =run_hierarchy(problem, relax_ctx)
         @test primobj ≈ -2 atol=1e-6

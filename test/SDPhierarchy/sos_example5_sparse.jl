@@ -19,13 +19,14 @@ testfolder = joinpath(Pkg.dir("MathProgComplex"), "Mosek_runs", "tests", "sos_ex
                                         d = 1,
                                         issparse = true,
                                         params = Dict(:opt_outlev=>0,
-                                                      :opt_logpath=>logpath))
+                                                      :opt_logpath=>logpath,
+                                                      :opt_solver=>testsSolver))
 
     max_cliques = get_WB5cliques(relax_ctx, problem)
     @assert length(max_cliques) == 2
 
     primobj, dualobj = run_hierarchy(problem, relax_ctx, save_pbs=true,
-                                                         max_cliques=max_cliques);
+                                                         max_cliques=max_cliques)
 
 
     ε_rel = OPFsols[("WB5", 1)].rel_opt_gap
@@ -51,7 +52,8 @@ end
                                         d = i,
                                         issparse = true,
                                         params = Dict(:opt_outlev=>0,
-                                                      :opt_logpath=>logpath))
+                                                      :opt_logpath=>logpath,
+                                                      :opt_solver=>testsSolver))
 
     max_cliques = get_case9cliques(relax_ctx, problem)
     @assert length(max_cliques) == 3

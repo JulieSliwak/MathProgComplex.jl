@@ -9,7 +9,8 @@ function run_pb_orders(problem, order_to_obj)
         relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                             d = d,
                                             params = Dict(:opt_outlev=>0,
-                                                          :opt_logpath=>logpath))
+                                                          :opt_logpath=>logpath,
+                                                          :opt_solver=>testsSolver))
 
         cur_obj, dualobj = run_hierarchy(problem, relax_ctx, indentedprint=true, save_pbs=true)
 

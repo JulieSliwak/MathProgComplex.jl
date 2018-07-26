@@ -66,7 +66,7 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedp
     printlog = ((relax_ctx.relaxparams[:opt_outmode]!=1) && (relax_ctx.relaxparams[:opt_outlev] ≥ 1))
 
     solver::Symbol = relax_ctx.relaxparams[:opt_solver]
-    @assert solver in OrderedSet([:MosekCAPI, :MosekSolver, :SCSSolver])
+    @assert solver in OrderedSet([:MosekCAPI, :MosekSolver, :SCSSolver, :CSDPSolver])
 
     if solver == :MosekCAPI
         try

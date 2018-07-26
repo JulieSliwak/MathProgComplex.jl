@@ -64,19 +64,27 @@ function solve_JuMP(problem::SDP_Problem, solver::Symbol,
     empty!(primal)
     empty!(dual)
 
-    @assert solver in OrderedSet([:MosekSolver, :SCSSolver])
+    @assert solver in OrderedSet([:MosekSolver, :SCSSolver, :CSDPSolver])
     if solver == :MosekSolver
         options = Any[]
 
         !printlog && push!(options, (:MSK_IPAR_LOG, 0))
 
         mysolver = Mosek.MosekSolver(options)
+
     elseif solver == :SCSSolver
         options = Any[]
 
         !printlog && push!(options, (:verbose, 0))
 
         mysolver = SCS.SCSSolver(options)
+
+    elseif solver == :CSDPSolver
+        options = Dict{Symbol, Any}()
+
+        !printlog && (options[:printlevel] = 0)
+
+        mysolver = CSDP.CSDPSolver(options)
     end
 
     m = JuMP_from_SDP_Problem(problem, mysolver)
