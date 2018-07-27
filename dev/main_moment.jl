@@ -1,6 +1,6 @@
 using Mosek
 
-using MathProgComplex, DataStructures
+using MathProgComplex, DataStructures, OPFInstances
 
 !isdefined(:MPC) && (const MPC = MathProgComplex)
 
@@ -22,14 +22,17 @@ function main()
     add_constraint!(problem, "def_x2", 0 << x2)
     add_constraint!(problem, "def_x3", 0 << x3 << 3)
 
+    println(problem)
+    # problem_c, point = import_from_dat(getinstancepath("Matpower", "QCQP", "case9"))
+    # problem = pb_cplx2real(problem_c)
 
-    problem = Problem()
-    x1 = Variable("x", Real); add_variable!(problem, x1)
-    x2 = Variable("y", Real); add_variable!(problem, x2)
+    # problem = Problem()
+    # x1 = Variable("x", Real); add_variable!(problem, x1)
+    # x2 = Variable("y", Real); add_variable!(problem, x2)
 
-    set_objective!(problem, -x1)
-    # add_constraint!(problem, "ctr2", (x1^4+x2^4) << 2^4)
-    add_constraint!(problem, "ctr1", (x1^2+x2^2) << 2^2)
+    # set_objective!(problem, -x2)
+    # add_constraint!(problem, "ctr1", (x1^2+x2^2) << 2^2)
+    # add_constraint!(problem, "ctr2", (x1 + x2) == 0 )
 
     # problem = buildPOP_WB2(setnetworkphase=false)
 
@@ -40,6 +43,26 @@ function main()
 
     order = 1
 
+    # relax_ctx = set_relaxation(problem; hierarchykind=:Real,
+    #                         d = order,
+    #                         params = Dict(:opt_outlev=>1,
+    #                                     :opt_solver=>:MosekCAPI,
+    #                                     :opt_pbsolved=>:SOSRelaxation))
+
+    # primobj_sos, dualobj_sos = run_hierarchy(problem, relax_ctx)
+
+    # relax_ctx = set_relaxation(problem; hierarchykind=:Real,
+    #                     d = order,
+    #                     params = Dict(:opt_outlev=>1,
+    #                                 :opt_solver=>:MosekCAPI,
+    #                                 :opt_pbsolved=>:MomentRelaxation))
+
+    # primobj_mmt, dualobj_mmt = run_hierarchy(problem, relax_ctx)
+
+    # @show primobj_sos, dualobj_sos
+    # @show primobj_mmt, dualobj_mmt
+    # return
+
     workpath = "SDPwork"
     ispath(workpath) && rm(workpath, recursive = true)
     mkpath(workpath)
@@ -49,7 +72,7 @@ function main()
 
     relax_ctx = MPC.set_relaxation(problem; hierarchykind=:Real,
                                             issparse = false,
-                                            d = 1,
+                                            d = order,
                                             params = Dict(:opt_outlev=>1))
 
 
@@ -61,8 +84,6 @@ function main()
     # Build the moment, SOS relaxation problem
     momentrel = MPC.build_momentrelaxation(relax_ctx, problem, momentmat_param, localizingmat_param, max_cliques)
     sosrel = MPC.build_SOSrelaxation(relax_ctx, momentrel)
-
-    println(sosrel)
 
 
     sdp_instance_moment::SDP_Problem = build_SDP_Instance_from_SDPDual(momentrel)
@@ -77,7 +98,7 @@ function main()
                                                                       sol_info=relax_ctx.relaxparams,
                                                                       logname = joinpath(worksos, "Mosek.log"),
                                                                       printlog = true,
-                                                                      debug=true,
+                                                                      debug = false,
                                                                       optsense=:Max)
 
     # println(STDOUT, "----- SOS relaxation solutions -----")
@@ -91,6 +112,10 @@ function main()
     #     @printf(STDOUT, "%30s %10s %10s %f\n", blockname, var1, var2, val)
     # end
 
+    info("--------------------------------")
+    println(sdp_instance_moment)
+    info("--------------------------------")
+
     prim_mmt = SortedDict{Tuple{String, String, String}, Float64}()
     dual_mmt = SortedDict{Tuple{String, String, String}, Float64}()
 
@@ -99,7 +124,7 @@ function main()
                                                                       sol_info=relax_ctx.relaxparams,
                                                                       logname = joinpath(workmmt, "Mosek.log"),
                                                                       printlog = true,
-                                                                      debug = true,
+                                                                      debug = false,
                                                                       optsense=:Min)
 
 
@@ -118,15 +143,15 @@ function main()
     #     dual_mmt[k] *= -1
     # end
 
-    # for k in keys(dual_sos)
-    #     dual_sos[k] *= -1
-    # end
+    for k in keys(dual_sos)
+        dual_sos[k] *= -1
+    end
 
-    println(STDOUT, "----- Moment primal | SOS dual -----")
-    printcompared(prim_mmt, dual_sos)
+    # println(STDOUT, "----- Moment primal | SOS dual -----")
+    # printcompared(prim_mmt, dual_sos)
 
-    println(STDOUT, "----- Moment dual | SOS primal -----")
-    printcompared(dual_mmt, prim_sos)
+    # println(STDOUT, "----- Moment dual | SOS primal -----")
+    # printcompared(dual_mmt, prim_sos)
 
     # for (mmt_blockname, mmt_var1, mmt_var2) in keys(prim_mmt)
     #     @printf("%30s  %10s  %10s  %i\n", mmt_blockname, mmt_var1, mmt_var2, mmt_var1 >= mmt_var2)
@@ -139,8 +164,8 @@ function main()
     @printf("sos relaxation ; primal: %10f   dual : %10f        sol: %10f\n", primobj_sos, dualobj_sos, order_to_obj[order])
     @printf("mmt relaxation ; primal: %10f   dual : %10f        sol: %10f\n", primobj_mmt, dualobj_mmt, order_to_obj[order])
 
-    @show SortedSet(collect(keys(prim_mmt)))
-    @show SortedSet(collect(keys(dual_sos)))
+    # @show SortedSet(collect(keys(prim_mmt)))
+    # @show SortedSet(collect(keys(dual_sos)))
 
     return
 end

@@ -14,7 +14,7 @@ m = Model(solver=MosekSolver())
 @constraint(m, Xs3[1,1] - Xs1[2,1] - Xs1[3,1] == 0)
 
 # Find upper bound
-@objective(m, Max, -Xs1[1,3])
+@objective(m, Min, -Xs1[1,3])
 
 println(m)
 solve(m)
@@ -48,10 +48,10 @@ barai    = [1, 2, 2, 2, 3, 3, 3]
 baraj    = [1, 1, 1, 2, 1, 1, 3]
 barak    = [1, 2, 3, 1, 2, 3, 1]
 baral    = [1, 2, 3, 1, 1, 1, 1]
-baraijkl = [1, 1, 1, 1, 1/2, 1/2, 1/2]
+baraijkl = [1, 1, 1, 1, -1/2, -1/2, 1]
 
 barcj    = [1]
-barck    = [2]
+barck    = [3]
 barcl    = [1]
 barcjkl  = [-0.5]
 
@@ -79,10 +79,11 @@ maketask() do task
     # Objective matrices and constant
     putbarcblocktriplet(task, length(barcj), barcj, barck, barcl, barcjkl)
 
+    optimize(task)
+
     writedata(task, "Mosek.jtask")
     mv("Mosek.jtask", "Mosek.json", remove_destination = true)
 
-    optimize(task)
     solutionsummary(task,MSK_STREAM_MSG)
 
     info("suc:")
