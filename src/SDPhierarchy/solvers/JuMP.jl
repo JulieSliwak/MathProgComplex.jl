@@ -41,7 +41,8 @@ function solve_JuMP(problem::SDP_Problem, solver::T,
 
     JuMP.solve(m)
 
-    debug && MathProgBase.writeproblem(m, "myfile.jtask")
+    debug && MathProgBase.writeproblem(m.internalModel, "myfile.jtask")
+    debug && mv("myfile.jtask", "solve_JuMP_task.json", remove_destination = true)
 
     primobj = JuMP.getobjectivevalue(m)
 
@@ -93,7 +94,8 @@ function solve_JuMP(problem::SDP_Problem, solver::Symbol,
 
     JuMP.solve(m)
 
-    debug && MathProgBase.writeproblem(m, "myfile.jtask")
+    debug && MathProgBase.writeproblem(m.internalModel, "myfile.jtask")
+    debug && mv("myfile.jtask", "solve_JuMP_task.json", remove_destination = true)
 
     primobj = JuMP.getobjectivevalue(m)
 
@@ -186,7 +188,7 @@ function JuMP_from_SDP_Problem(sdp_pb::SDP_Problem, mysolver::T) where T<:MathPr
             bodys[ctr_name] += f_αβ
         else
             @assert ctr_name in objective_keys
-            obj += -f_αβ                            ## Note : why the sign change here ?
+            obj += f_αβ                            ## Note : why the sign change here ?
         end
     end
 

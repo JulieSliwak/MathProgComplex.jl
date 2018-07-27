@@ -61,12 +61,6 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
 
     ## Dealing with constraints
     for ((ctrname, cliquename), matrix) in sdpdual.constraints
-        doprint = ismatch(r"UNIT_1", ctrname)
-        if doprint
-
-            println("-- localizing matrix: ", ctrname)
-            println(matrix)
-        end
 
         if ctrname != get_momentcstrname()
 
