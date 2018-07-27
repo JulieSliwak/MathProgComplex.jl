@@ -151,7 +151,25 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
 
     ## Deal with equality constaints
     if length(sdpdual.moments_overlap) != 0
-        error("Coupling constraints not implemented yet.")
+        for (expo, cliques) in sdpdual.moments_overlap
+            if expo != Exponent()
+                @assert length(cliques) > 1
+
+                clique_ref = first(cliques)
+                moment_ref = Moment(expo, clique_ref)
+
+                block_name, α, β = split_moment(moment_ref)
+                α_str, β_str = format_string(α), format_string(β)
+                var1, var2 = max(α_str, β_str), min(α_str, β_str)
+
+                for clique in setdiff(cliques, Set([clique_ref]))
+                    ctr_name = get_coupling_ctr_name(clique_ref, clique, var1, var2)
+
+                    sdp_pb.matrices[(ctr_name, clique_ref, var1, var2)] = 1
+                    sdp_pb.matrices[(ctr_name, clique, var1, var2)] = -1
+                end
+            end
+        end
     end
 
     # Build structural information and string to id maps
@@ -174,6 +192,10 @@ end
 
 function get_auxSDPmatrix_name(ctrname, cliquename)
     return "S_"*replace(ctrname, " ", "")*"_"*replace(cliquename, " ", "")
+end
+
+function get_coupling_ctr_name(clique_ref, clique, var1, var2)
+    return var1, var2, clique_ref*"_"*clique
 end
 
 """
