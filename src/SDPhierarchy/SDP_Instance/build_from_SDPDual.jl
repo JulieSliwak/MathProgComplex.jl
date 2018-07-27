@@ -59,8 +59,6 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
         end
     end
 
-    # warn("Done with moment objective.\n")
-
     ## Dealing with constraints
     for ((ctrname, cliquename), matrix) in sdpdual.constraints
         doprint = ismatch(r"UNIT_1", ctrname)
@@ -74,7 +72,6 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
 
             # Name of auxiliary SDP constrained matrix
             S_name = get_auxSDPmatrix_name(ctrname, cliquename)
-            # info("Sname: ", S_name)
 
             # for all matrix coefficients
             # Deal with S[γ, δ]
@@ -99,7 +96,7 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
 
                         sdp_pb.cst_ctr[ctr_name] += fαβ
                     else
-                        sdp_pb.matrices[(ctr_name, block_name, var1, var2)] = fαβ #* (var1!=var2 ? 0.5 : 1)
+                        sdp_pb.matrices[(ctr_name, block_name, var1, var2)] = fαβ * (var1!=var2 ? 0.5 : 1)
                     end
                 end
 
@@ -109,8 +106,7 @@ function build_SDP_Instance_from_SDPDual(sdpdual::SDPDual)
                     var1 = max(γ_str, δ_str)
                     var2 = min(γ_str, δ_str)
 
-                    # # @show (ctr_name, block_name, var1, var2), -1
-                    sdp_pb.matrices[(ctr_name, block_name, var1, var2)] = -1 #* (var1!=var2 ? 0.5 : 1)
+                    sdp_pb.matrices[(ctr_name, block_name, var1, var2)] = -1 * (var1!=var2 ? 0.5 : 1)
                 else
                     # Nothing to do, constraint will be scalar, ==0 by default.
                 end
@@ -210,7 +206,7 @@ function split_moment(moment::Moment)
         for (var, degree) in moment.expl_part
             @assert degree.conjvar == 0
 
-            if α_curadd < β_curadd
+            if α_deg < β_deg
                 α_curadd = ceil(degree.explvar / 2)
                 β_curadd = floor(degree.explvar / 2)
             else
