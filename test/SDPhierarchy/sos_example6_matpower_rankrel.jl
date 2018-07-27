@@ -26,7 +26,7 @@ using Base.Test, MathProgComplex, OPFInstances
         relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                             d = order,
                                             params = Dict(:opt_outlev=>0,
-                                                          :opt_solver=>testsSolver))
+                                                          :opt_solver=>testsolver))
 
         primobj, dualobj = run_hierarchy(problem, relax_ctx);
 

@@ -24,7 +24,7 @@ using MathProgComplex
                                             d = 1,
                                             params = Dict(:opt_outlev=>0,
                                                           :opt_logpath=>logpath,
-                                                          :opt_solver=>testsSolver))
+                                                          :opt_solver=>testsolver))
 
         primobj, dualobj = run_hierarchy(problem, relax_ctx)
 
@@ -37,7 +37,7 @@ using MathProgComplex
                                             d = 2,
                                             params = Dict(:opt_outlev=>0,
                                                           :opt_logpath=>logpath,
-                                                          :opt_solver=>testsSolver))
+                                                          :opt_solver=>testsolver))
 
         primobj, dualobj = run_hierarchy(problem, relax_ctx)
 
