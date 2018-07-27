@@ -25,8 +25,10 @@ using MathProgComplex
                                             params = Dict(:opt_outlev=>0,
                                                           :opt_logpath=>logpath))
 
-        primobj, dualobj =run_hierarchy(problem, relax_ctx)
-        @test primobj ≈ -3 atol=1e-6
+        primobj, dualobj = run_hierarchy(problem, relax_ctx)
+
+        @show primobj, dualobj, -3
+        @test primobj ≈ -3 atol=1e-4
         @test dualobj ≈ primobj atol=mosek_optgap*min(abs(primobj), abs(dualobj))
 
         ## Order 2
@@ -36,8 +38,10 @@ using MathProgComplex
                                                           :opt_logpath=>logpath,
                                                           :opt_solver=>testsSolver))
 
-        primobj, dualobj =run_hierarchy(problem, relax_ctx)
-        @test primobj ≈ -2 atol=1e-6
+        primobj, dualobj = run_hierarchy(problem, relax_ctx)
+
+        @show primobj, dualobj, -2
+        @test primobj ≈ -2 atol=1e-4
         @test dualobj ≈ primobj atol=mosek_optgap*min(abs(primobj), abs(dualobj))
     end
 end
