@@ -18,6 +18,10 @@ m = Model(solver=MosekSolver())
 
 println(m)
 solve(m)
+
+MathProgBase.writeproblem(m.internalModel, "JuMP_task.jtask")
+mv("JuMP_task.jtask", "JuMP_task.json", remove_destination = true)
+
 println("Maximum value is ", getobjective(m))
 
 println("\nSolution is:")
@@ -49,7 +53,7 @@ baraijkl = [1, 1, 1, 1, 1/2, 1/2, 1/2]
 barcj    = [1]
 barck    = [2]
 barcl    = [1]
-barcjkl  = [0.5]
+barcjkl  = [-0.5]
 
 # Create a task object and attach log stream printer
 maketask() do task
@@ -66,7 +70,8 @@ maketask() do task
     appendcons(task,numcon)
     putconboundslice(task,1,numcon+1, bkc,blc,buc)
 
-    putobjsense(task, MSK_OBJECTIVE_SENSE_MAXIMIZE)
+    # putobjsense(task, MSK_OBJECTIVE_SENSE_MAXIMIZE)
+    putobjsense(task, MSK_OBJECTIVE_SENSE_MINIMIZE)
 
     # Set constraints SDP vars coeffs
     putbarablocktriplet(task, length(barai), barai, baraj, barak, baral, baraijkl)
@@ -74,7 +79,8 @@ maketask() do task
     # Objective matrices and constant
     putbarcblocktriplet(task, length(barcj), barcj, barck, barcl, barcjkl)
 
-    MathProgComplex.dump_mosek_model(task)
+    writedata(task, "Mosek.jtask")
+    mv("Mosek.jtask", "Mosek.json", remove_destination = true)
 
     optimize(task)
     solutionsummary(task,MSK_STREAM_MSG)

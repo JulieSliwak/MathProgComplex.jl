@@ -22,7 +22,7 @@ using MathProgComplex
         ## Order 1
         relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                             d = 1,
-                                            params = Dict(:opt_outlev=>0,
+                                            params = Dict(:opt_outlev=>3,
                                                           :opt_logpath=>logpath))
 
         primobj, dualobj = run_hierarchy(problem, relax_ctx)

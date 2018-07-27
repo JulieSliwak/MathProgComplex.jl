@@ -9,7 +9,7 @@ using MathProgComplex, DataStructures
 
 function main()
     problem = Problem()
-    
+
     x1 = Variable("x1", Real); add_variable!(problem, x1)
     x2 = Variable("x2", Real); add_variable!(problem, x2)
     x3 = Variable("x3", Real); add_variable!(problem, x3)
@@ -39,14 +39,17 @@ function main()
                             4=>-4.0000)
 
     order = 1
-    
+
     workpath = "SDPwork"
     ispath(workpath) && rm(workpath, recursive = true)
     mkpath(workpath)
 
+    worksos = joinpath(workpath, "sos"); mkpath(worksos)
+    workmmt = joinpath(workpath, "mmt"); mkpath(workmmt)
+
     relax_ctx = MPC.set_relaxation(problem; hierarchykind=:Real,
                                             issparse = false,
-                                            d = 2,
+                                            d = 1,
                                             params = Dict(:opt_outlev=>1))
 
 
@@ -72,8 +75,9 @@ function main()
     primobj_sos, dualobj_sos = MPC.solve_mosek(sdp_instance_sos::MPC.SDP_Problem, prim_sos,
                                                                       dual_sos,
                                                                       sol_info=relax_ctx.relaxparams,
+                                                                      logname = joinpath(worksos, "Mosek.log"),
                                                                       printlog = true,
-                                                                      debug=false,
+                                                                      debug=true,
                                                                       optsense=:Max)
 
     # println(STDOUT, "----- SOS relaxation solutions -----")
@@ -93,8 +97,9 @@ function main()
     primobj_mmt, dualobj_mmt = MPC.solve_mosek(sdp_instance_moment::MPC.SDP_Problem, prim_mmt,
                                                                       dual_mmt,
                                                                       sol_info=relax_ctx.relaxparams,
+                                                                      logname = joinpath(workmmt, "Mosek.log"),
                                                                       printlog = true,
-                                                                      debug = false,
+                                                                      debug = true,
                                                                       optsense=:Min)
 
 
@@ -112,9 +117,10 @@ function main()
     # for k in keys(dual_mmt)
     #     dual_mmt[k] *= -1
     # end
-    for k in keys(dual_sos)
-        dual_sos[k] *= -1
-    end
+
+    # for k in keys(dual_sos)
+    #     dual_sos[k] *= -1
+    # end
 
     println(STDOUT, "----- Moment primal | SOS dual -----")
     printcompared(prim_mmt, dual_sos)
@@ -122,13 +128,13 @@ function main()
     println(STDOUT, "----- Moment dual | SOS primal -----")
     printcompared(dual_mmt, prim_sos)
 
-    for (mmt_blockname, mmt_var1, mmt_var2) in keys(prim_mmt)
-        @printf("%30s  %10s  %10s  %i\n", mmt_blockname, mmt_var1, mmt_var2, mmt_var1 >= mmt_var2)
-    end
+    # for (mmt_blockname, mmt_var1, mmt_var2) in keys(prim_mmt)
+    #     @printf("%30s  %10s  %10s  %i\n", mmt_blockname, mmt_var1, mmt_var2, mmt_var1 >= mmt_var2)
+    # end
 
-    for (mmt_blockname, mmt_var1, mmt_var2) in keys(prim_sos)
-        @printf("%30s  %10s  %10s  %i\n", mmt_blockname, mmt_var1, mmt_var2, mmt_var1 >= mmt_var2)
-    end
+    # for (mmt_blockname, mmt_var1, mmt_var2) in keys(prim_sos)
+    #     @printf("%30s  %10s  %10s  %i\n", mmt_blockname, mmt_var1, mmt_var2, mmt_var1 >= mmt_var2)
+    # end
 
     @printf("sos relaxation ; primal: %10f   dual : %10f        sol: %10f\n", primobj_sos, dualobj_sos, order_to_obj[order])
     @printf("mmt relaxation ; primal: %10f   dual : %10f        sol: %10f\n", primobj_mmt, dualobj_mmt, order_to_obj[order])
@@ -140,13 +146,14 @@ function main()
 end
 
 function printcompared(prim_mmt, dual_sos)
+    @printf("%30s %10s %10s %10s  |  %10s  %10s %10s %30s ||     %10s \n", "mat Z_i", "row id j", "col id k", "Z_i[j,k]", "Z_i*[j*,k*]", "row id j*", "col id k*", "mat Z_i*", "rel. difference (%)")
     for (k, v) in zip(prim_mmt, dual_sos)
         (mmt_blockname, mmt_var1, mmt_var2), mmt_val = k
         (sos_blockname, sos_var1, sos_var2), sos_val = v
 
-        reldiff = 100 * abs(mmt_val-sos_val) / max(mmt_val, sos_val, 1e-6)
+        reldiff = 100 * abs(mmt_val-sos_val) / max(abs(mmt_val), abs(sos_val), 1e-3)
 
-        @printf("%30s %10s %10s % 10f  |  % 10f  %10s %10s %30s || delta is %10f \n", mmt_blockname, mmt_var1, mmt_var2, mmt_val, sos_val, sos_var1, sos_var2, sos_blockname, reldiff)
+        @printf("%30s %10s %10s % 10f  |  % 10f  %10s %10s %30s || delta is %10.2f \n", mmt_blockname, mmt_var1, mmt_var2, mmt_val, sos_val, sos_var1, sos_var2, sos_blockname, reldiff)
     end
 end
 
