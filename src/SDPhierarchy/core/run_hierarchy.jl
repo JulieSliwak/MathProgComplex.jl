@@ -29,8 +29,7 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedp
 
     ########################################
     # Compute moment and localization matrices
-    mmtrel_pb, t, bytes, gctime, memallocs = @timed build_momentrelaxation(relax_ctx, problem, momentmat_param, localizingmat_param, max_cliques);
-    # mmtrel_pb = build_momentrelaxation(relax_ctx, problem, momentmat_param, localizingmat_param, max_cliques)
+    mmtrel_pb::SDPDual, t, bytes, gctime, memallocs = @timed build_momentrelaxation(relax_ctx, problem, momentmat_param, localizingmat_param, max_cliques);
     relax_ctx.relaxparams[:slv_mmtrel_t] = t
     relax_ctx.relaxparams[:slv_mmtrel_bytes] = bytes
 
@@ -41,23 +40,34 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedp
     end
 
     ########################################
-    # Convert to a primal SDP problem
-    sdpinstance, t, bytes, gctime, memallocs = @timed build_SOSrelaxation(relax_ctx, mmtrel_pb);
-    relax_ctx.relaxparams[:slv_sosrel_t] = t
-    relax_ctx.relaxparams[:slv_sosrel_bytes] = bytes
+    # Build the required SDP_Problem instance : either moment or SOS relaxation
+
+    if relax_ctx.relaxparams[:opt_pbsolved] == :MomentRelaxation
+        sdp_pb::SDP_Problem, t, bytes, gctime, memallocs = @timed build_SDP_Instance_from_SDPDual(mmtrel_pb);
+        relax_ctx.relaxparams[:slv_mskstruct_t] = t
+        relax_ctx.relaxparams[:slv_mskstruct_bytes] = bytes
+        optsense = :Min
+
+    elseif relax_ctx.relaxparams[:opt_pbsolved] == :SOSRelaxation
+        sosrel_pb::SDPPrimal, t, bytes, gctime, memallocs = @timed build_SOSrelaxation(relax_ctx, mmtrel_pb);
+        relax_ctx.relaxparams[:slv_sosrel_t] = t
+        relax_ctx.relaxparams[:slv_sosrel_bytes] = bytes
+
+
+        sdp_pb, t, bytes, gctime, memallocs = @timed build_SDP_Instance_from_SDPPrimal(sosrel_pb);
+        relax_ctx.relaxparams[:slv_mskstruct_t] = t
+        relax_ctx.relaxparams[:slv_mskstruct_bytes] = bytes
+        optsense = :Max
+    else
+        error("run_hierarchy(): Unrecognized :opt_pbsolved parameter : $(relax_ctx.relaxparams[:opt_pbsolved])")
+    end
 
     if (relax_ctx.relaxparams[:opt_exportsdp] == 1)
-        sdp, t, bytes, gctime, memallocs = @timed export_SDPPrimal(sdpinstance, logpath, indentedprint=indentedprint);
+        _, t, bytes, gctime, memallocs = @timed export_SDP_Instance(sdp_pb, logpath, indentedprint=indentedprint);
         relax_ctx.relaxparams[:slv_fileexport_t] = t
         relax_ctx.relaxparams[:slv_fileexport_bytes] = bytes
     end
 
-
-    sdp, t, bytes, gctime, memallocs = @timed build_SDP_Instance_from_SDPPrimal(sdpinstance);
-    relax_ctx.relaxparams[:slv_mskstruct_t] = t
-    relax_ctx.relaxparams[:slv_mskstruct_bytes] = bytes
-
-    # sdp = build_SDP_Instance_from_SDPPrimal(sdpinstance)
 
     primal = SortedDict{Tuple{String,String,String}, Float64}()
     dual = SortedDict{Tuple{String, String, String}, Float64}()
@@ -70,22 +80,24 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedp
 
     if solver == :MosekCAPI
         try
-            primobj, dualobj = solve_mosek(sdp::SDP_Problem, primal, dual;
+            primobj, dualobj = solve_mosek(sdp_pb::SDP_Problem, primal, dual;
                                                                 logname = joinpath(logpath, "Mosek_run.log"),
                                                                 printlog = printlog,
                                                                 msk_maxtime = relax_ctx.relaxparams[:opt_msk_maxtime],
-                                                                sol_info = relax_ctx.relaxparams)
+                                                                sol_info = relax_ctx.relaxparams,
+                                                                optsense = optsense)
         catch err
             relax_ctx.relaxparams[:slv_prosta] = err.msg
             relax_ctx.relaxparams[:slv_solsta] = "_"
         end
 
     else
-        primobj, dualobj = solve_JuMP(sdp::SDP_Problem, solver, primal, dual;
+        primobj, dualobj = solve_JuMP(sdp_pb::SDP_Problem, solver, primal, dual;
                                                             logname = joinpath(logpath, "Mosek_run.log"),
                                                             printlog = printlog,
                                                             msk_maxtime = relax_ctx.relaxparams[:opt_msk_maxtime],
-                                                            sol_info = relax_ctx.relaxparams)
+                                                            sol_info = relax_ctx.relaxparams,
+                                                            optsense = optsense)
     end
 
 

@@ -210,6 +210,7 @@ function get_defaultparams()
                         :slv_dualfeas=>-1.0,
                         :slv_solvetime=>-1.0,
                         :opt_hierarchykind=>:Undef,
+                        :opt_pbsolved=>:MomentRelaxation,       # either :MomentRelaxation or :SOSRelaxation
                         :opt_issparse=>false,                   # Relaxation parameters
                         :opt_multiordered=>false,
                         :opt_globalorder=>-1,
