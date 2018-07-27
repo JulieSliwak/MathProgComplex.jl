@@ -8,45 +8,42 @@ using MathProgComplex, DataStructures, OPFInstances
 # include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "io", "export_SDP_Instance.jl"))
 
 function main()
-    problem = Problem()
-
-    x1 = Variable("x1", Real); add_variable!(problem, x1)
-    x2 = Variable("x2", Real); add_variable!(problem, x2)
-    x3 = Variable("x3", Real); add_variable!(problem, x3)
-
-    set_objective!(problem, -2*x1+x2-x3)
-    add_constraint!(problem, "ctr1", (x1*(4*x1-4*x2+4*x3-20)+x2*(2*x2-2*x3+9)+x3*(2*x3-13)+24) >> 0)
-    add_constraint!(problem, "ctr2", (x1+x2+x3) << 4)
-    add_constraint!(problem, "ctr3", (3*x2+x3) << 6)
-    add_constraint!(problem, "def_x1", 0 << x1 << 2)
-    add_constraint!(problem, "def_x2", 0 << x2)
-    add_constraint!(problem, "def_x3", 0 << x3 << 3)
-
-    println(problem)
     # problem_c, point = import_from_dat(getinstancepath("Matpower", "QCQP", "case9"))
     # problem = pb_cplx2real(problem_c)
 
-    # problem = Problem()
-    # x1 = Variable("x", Real); add_variable!(problem, x1)
-    # x2 = Variable("y", Real); add_variable!(problem, x2)
 
-    # set_objective!(problem, -x2)
-    # add_constraint!(problem, "ctr1", (x1^2+x2^2) << 2^2)
-    # add_constraint!(problem, "ctr2", (x1 + x2) == 0 )
+    # order = 1
+    problem_fct = lasserre_ex1
 
-    # problem = buildPOP_WB2(setnetworkphase=false)
+    problem, order_to_obj, ε_abs = problem_fct()
 
-    order_to_obj = SortedDict(1=>-6.0000,
-                            2=>-5.6923,
-                            3=>-4.0685,
-                            4=>-4.0000)
+    testsolver= :MosekSolver
+    pbsolved = :MomentRelaxation
 
-    order = 1
+    d = 2
+    relax_ctx = set_relaxation(problem; hierarchykind=:Real,
+                                d = d,
+                                params = Dict(:opt_outlev=>0,
+                                            :opt_solver=>testsolver,
+                                            :opt_pbsolved=>pbsolved))
+
+    primobj, dualobj = run_hierarchy(problem, relax_ctx)
+
+    @show pbsolved, problem_fct, d
+    @show d, primobj, dualobj, order_to_obj[d]
+
+    @show primobj - order_to_obj[d]
+    @show primobj - dualobj
+
+    # @assert isapprox(primobj, order_to_obj[d], atol=1e-2)
+    # @assert isapprox(dualobj, primobj, atol=1e-2)
+
+    order = 2
 
     # relax_ctx = set_relaxation(problem; hierarchykind=:Real,
     #                         d = order,
     #                         params = Dict(:opt_outlev=>1,
-    #                                     :opt_solver=>:MosekCAPI,
+    #                                     :opt_solver=>testsolver,
     #                                     :opt_pbsolved=>:SOSRelaxation))
 
     # primobj_sos, dualobj_sos = run_hierarchy(problem, relax_ctx)
@@ -54,7 +51,7 @@ function main()
     # relax_ctx = set_relaxation(problem; hierarchykind=:Real,
     #                     d = order,
     #                     params = Dict(:opt_outlev=>1,
-    #                                 :opt_solver=>:MosekCAPI,
+    #                                 :opt_solver=>testsolver,
     #                                 :opt_pbsolved=>:MomentRelaxation))
 
     # primobj_mmt, dualobj_mmt = run_hierarchy(problem, relax_ctx)
@@ -93,7 +90,7 @@ function main()
     prim_sos = SortedDict{Tuple{String,String,String}, Float64}()
     dual_sos = SortedDict{Tuple{String, String, String}, Float64}()
 
-    primobj_sos, dualobj_sos = MPC.solve_mosek(sdp_instance_sos::MPC.SDP_Problem, prim_sos,
+    primobj_sos, dualobj_sos = MPC.solve_JuMP(sdp_instance_sos::MPC.SDP_Problem, :MosekSolver, prim_sos,
                                                                       dual_sos,
                                                                       sol_info=relax_ctx.relaxparams,
                                                                       logname = joinpath(worksos, "Mosek.log"),
@@ -112,22 +109,26 @@ function main()
     #     @printf(STDOUT, "%30s %10s %10s %f\n", blockname, var1, var2, val)
     # end
 
-    info("--------------------------------")
-    println(sdp_instance_moment)
-    info("--------------------------------")
-
     prim_mmt = SortedDict{Tuple{String, String, String}, Float64}()
     dual_mmt = SortedDict{Tuple{String, String, String}, Float64}()
+
+
 
     primobj_mmt, dualobj_mmt = MPC.solve_mosek(sdp_instance_moment::MPC.SDP_Problem, prim_mmt,
                                                                       dual_mmt,
                                                                       sol_info=relax_ctx.relaxparams,
-                                                                      logname = joinpath(workmmt, "Mosek.log"),
+                                                                      logname = joinpath(".", "Mosek.log"),
                                                                       printlog = true,
-                                                                      debug = false,
+                                                                      debug = true,
                                                                       optsense=:Min)
 
-
+    primobj_mmt, dualobj_mmt = MPC.solve_JuMP(sdp_instance_moment::MPC.SDP_Problem, :MosekSolver, prim_mmt,
+                                                                    dual_mmt,
+                                                                    sol_info=relax_ctx.relaxparams,
+                                                                    logname = joinpath(workmmt, "Mosek.log"),
+                                                                    printlog = true,
+                                                                    debug = true,
+                                                                    optsense = :Min)
     # println(STDOUT, "----- Moment relaxation solutions -----")
     # println(STDOUT, "Primal solution")
     # for ((blockname, var1, var2), val) in prim_mmt
