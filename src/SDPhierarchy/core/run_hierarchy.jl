@@ -76,7 +76,7 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedp
     printlog = ((relax_ctx.relaxparams[:opt_outmode]!=1) && (relax_ctx.relaxparams[:opt_outlev] ≥ 1))
 
     solver::Symbol = relax_ctx.relaxparams[:opt_solver]
-    @assert solver in OrderedSet([:MosekCAPI, :MosekSolver, :SCSSolver, :CSDPSolver])
+    @assert solver in OrderedSet([:MosekCAPI, :MosekSolver, :SCSSolver, :CSDPSolver, :None])
 
     if solver == :MosekCAPI
         try
@@ -91,7 +91,7 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedp
             relax_ctx.relaxparams[:slv_solsta] = "_"
         end
 
-    else
+    elseif solver != :None
         primobj, dualobj = solve_JuMP(sdp_pb::SDP_Problem, solver, primal, dual;
                                                             logname = joinpath(logpath, "Mosek_run.log"),
                                                             printlog = printlog,
