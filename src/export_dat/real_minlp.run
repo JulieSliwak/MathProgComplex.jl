@@ -179,10 +179,6 @@ if OPTIMIZATION_CHOICE == MPEC then {
  	printf{i in 1.._ncons: _con[i].slack / max(1, abs(_con[i].body))<-1e-6}"violation on %50s : %10.6E, %10.6E\n", _conname [i], _con[i].slack, _con[i].body;
  	#expand{i in 1.._ncons: _con[i].slack<-1e-6}_con[i]; 
  	
- 	expand constraint['Scen1_2_Gen1_BinDef-lower_Re'];
- 	fix;
- 	display y['BinVolt_2_Scen1_eq_BaseCase'];
-	display y['BinVolt_2_Scen1_inf_BaseCase'];
 
 };
 
