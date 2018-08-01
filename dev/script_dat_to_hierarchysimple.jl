@@ -16,7 +16,7 @@ function parse_commandline()
         help = "folder storing all output"
         arg_type = String
         required = true
-    "relaxation type"
+    "relaxation_type"
         help = "either 0 (SOSRelaxation) or 1 (MomentRelaxation)"
         arg_type = Int
         required = true
@@ -31,14 +31,14 @@ function main(args)
     # input_params = Dict("instance_path"=>getinstancepath("Matpower", "QCQP", "case9"),
     #                     "d"=>1,
     #                     "logpath"=>joinpath("tltu", "tita"),
-    #                     "relaxation type"=>0)
+    #                     "relaxation_type"=>0)
 
     instance_path = input_params["instance_path"]
     d = input_params["d"]
     hierarchykind = :Real
     symmetries = DataType[]
     logpath = input_params["logpath"]
-    pbsolved = input_params["relaxation type"]==0 ? (:MomentRelaxation) : (:SOSRelaxation)
+    pbsolved = input_params["relaxation_type"]==0 ? (:MomentRelaxation) : (:SOSRelaxation)
 
     instance_name = splitdir(instance_path)[2][1:end-4]
     mkpath(logpath)

@@ -198,13 +198,16 @@ end
 function write_ctxcsv(relaxparams)
     isfile(relaxparams[:opt_outcsvname]) && rm(relaxparams[:opt_outcsvname])
     open(relaxparams[:opt_outcsvname], "w") do f
-        for key in keys(relaxparams)
-            print(f, key, ";")
+        n = length(keys(relaxparams))
+        for (i, key) in enumerate(keys(relaxparams))
+            print(f, key)
+            (i < n) && print(f, ";")
         end
         println(f)
 
-        for val in values(relaxparams)
+        for (i, val) in enumerate(values(relaxparams))
             print(f, val, ";")
+            (i < n) && print(f, ";")
         end
     end
 end
