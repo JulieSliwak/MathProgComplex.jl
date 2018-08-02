@@ -93,7 +93,12 @@ end
 function poly_to_NLexpression(m::JuMP.Model, variables_jump::SortedDict{String, JuMP.Variable},polynome::Polynomial)
     s = 0
     ispolylinear = true
-    d = polynome.degree
+    d = compute_degree(polynome) #max degree on one variable, not total degree
+    for expo in keys(polynome.poly)
+        explsum, conjsum = get_sumdegs(expo)
+        d.explvar = max(d.explvar, explsum)
+        d.conjvar = max(d.conjvar,conjsum)
+    end
     if d.explvar + d.conjvar > 1
         ispolylinear = false
     end
