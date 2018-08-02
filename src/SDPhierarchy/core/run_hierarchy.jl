@@ -103,7 +103,7 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedp
 
     params_file = joinpath(logpath, "maxcliques_relaxctx.txt")
     isfile(params_file) && rm(params_file)
-    open(params_file, "w") do fcliques
+    open(params_file, "a") do fcliques
         println(fcliques, "# max_cliques are:")
         println(fcliques, max_cliques)
         println(fcliques, "# relaxation_ctx is:")

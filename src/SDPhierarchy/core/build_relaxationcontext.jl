@@ -225,7 +225,8 @@ function get_defaultparams()
                         :opt_outlev=>1,                         # 0: none, 1:summary at moment relaxation, sos relaxation, 2: detailled information, 3: full problems
                         :opt_outname=>"momentsos.log",
                         :opt_outcsv=>0,                         # 0: no csv is written, 1: csv is written
-                        :opt_outcsvname=>"momentsos_solve.csv")
+                        :opt_outcsvname=>"momentsos_solve.csv"
+                        )
 
     return defparams
 end

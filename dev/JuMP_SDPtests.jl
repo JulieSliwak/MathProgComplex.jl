@@ -1,37 +1,48 @@
-using JuMP, Mosek
+using JuMP, Mosek, SCS
 import MathProgComplex
 
-m = Model(solver=MosekSolver())
+function run_SDPpb(cst, optsense)
+    m = Model(solver=MosekSolver(LOG=0))
+    # m = Model(solver=SCSSolver(verbose=0))
 
-@variable(m, Xs1[1:3,1:3], SDP)
-@variable(m, Xs2[1:1,1:1], SDP)
-@variable(m, Xs3[1:1,1:1], SDP)
+    @variable(m, Xs1[1:3,1:3], SDP)
+    @variable(m, Xs2[1:1,1:1], SDP)
+    @variable(m, Xs3[1:1,1:1], SDP)
 
-# moment constraint one
-@constraint(m, Xs1[1,1] == 1)
+    @constraint(m, Xs1[1,1] == 1)
+    @constraint(m, Xs2[1,1] + Xs1[2,2] + Xs1[3,3] == 4)
+    @constraint(m, Xs3[1,1] - Xs1[2,1] - Xs1[3,1] == 0)
 
-@constraint(m, Xs2[1,1] + Xs1[2,2] + Xs1[3,3] == 4)
-@constraint(m, Xs3[1,1] - Xs1[2,1] - Xs1[3,1] == 0)
+    # Find upper bound
+    @objective(m, optsense, -Xs1[1,3]+cst)
+    solve(m)
+    return getobjectivevalue(m)
+end
 
-# Find upper bound
-@objective(m, Min, -Xs1[1,3])
+function main()
+    @show run_SDPpb(0., :Min)
+    @show run_SDPpb(1., :Min)
 
-println(m)
-solve(m)
+    @show run_SDPpb(0., :Max)
+    @show run_SDPpb(1., :Max)
+end
 
-MathProgBase.writeproblem(m.internalModel, "JuMP_task.jtask")
-mv("JuMP_task.jtask", "JuMP_task.json", remove_destination = true)
+main()
+# println(m)
 
-println("Maximum value is ", getobjective(m))
+# MathProgBase.writeproblem(m.internalModel, "JuMP_task.jtask")
+# mv("JuMP_task.jtask", "JuMP_task.json", remove_destination = true)
 
-println("\nSolution is:")
-@show getvalue(Xs1)
-@show getvalue(Xs2)
-@show getvalue(Xs3)
 
-@show getdual(Xs1)
-@show getdual(Xs2)
-@show getdual(Xs3)
+
+# println("\nSolution is:")
+# @show getvalue(Xs1)
+# @show getvalue(Xs2)
+# @show getvalue(Xs3)
+
+# @show getdual(Xs1)
+# @show getdual(Xs2)
+# @show getdual(Xs3)
 
 ############ Plain Mosek:
 

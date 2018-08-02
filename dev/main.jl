@@ -4,34 +4,31 @@ import MathProgComplex
 
 !isdefined(:MPC) && (const MPC = MathProgComplex)
 
-# include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "SDP_Instance", "build_from_SDPDual.jl"))
-# include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "io", "export_SDP_Instance.jl"))
-# include(joinpath(Pkg.dir("MathProgComplex"), "src", "SDPhierarchy", "solvers", "JuMP.jl"))
-
 function main()
     # problem = buildPOP_WB2(setnetworkphase=false)
-    problem_c, pt = MPC.import_from_dat(getinstancepath("Matpower", "QCQP", "case9"))
+    # problem_c, pt = MPC.import_from_dat(getinstancepath("Matpower", "QCQP", "case9"))
 
-    problem = MPC.pb_cplx2real(problem_c)
-
+    # problem = MPC.pb_cplx2real(problem_c)
+    
     workpath = joinpath("Mosek_runs", "worksdp")
     ispath(workpath) && rm(workpath, recursive=true)
     mkpath(workpath)
-
-
+    
+    problem, relax = MPC.lasserre_ex1()
+    
     cstobj = problem.objective[MPC.Exponent()]
+    cstobj = 0
     problem.objective += -cstobj
-    @assert !haskey(problem.objective, MPC.Exponent())
-
+    # @assert !haskey(problem.objective, MPC.Exponent())
+    
     # problem_c = buildPOP_1v1c()
-    problem = MPC.Problem()
-    x1 = MPC.Variable("x", Real)
-    x2 = MPC.Variable("y", Real)
-
-    MPC.set_objective!(problem, -x1 + 1 - 0.14159)
-    MPC.add_constraint!(problem, "ctr2", (x1^4+x2^4) << 2^4)
-    MPC.add_constraint!(problem, "ctr1", (x1^2+x2^2) << 10^2)
-
+    # problem = MPC.Problem()
+    # x1 = MPC.Variable("x", Real)
+    # x2 = MPC.Variable("y", Real)
+    
+    # MPC.set_objective!(problem, -x1 + 1 - 0.14159)
+    # MPC.add_constraint!(problem, "ctr2", (x1^4+x2^4) << 2^4)
+    # MPC.add_constraint!(problem, "ctr1", (x1^2+x2^2) << 10^2)
     # println(problem)
 
     relax_ctx = MPC.set_relaxation(problem; hierarchykind=:Real,
@@ -40,11 +37,31 @@ function main()
                                             params = Dict(:opt_outlev=>1,
                                                           :opt_outmode=>2,
                                                           :opt_outcsv=>0,
-                                                          :opt_solver=>:MosekCAPI))
+                                                          :opt_pbsolved=>:SOSRelaxation,
+                                                          :opt_solver=>:MosekSolver,
+                                                          :opt_debug=>true))
 
-    # primobj, dualobj = run_hierarchy(problem, relax_ctx, indentedprint=true, save_pbs=true)
+    primobj_JuMP, dualobj_JuMP = MPC.run_hierarchy(problem, relax_ctx, indentedprint=true, save_pbs=true)
 
-    # return primobj, dualobj
+
+    relax_ctx = MPC.set_relaxation(problem; hierarchykind=:Real,
+                                                issparse = false,
+                                                d = 2,
+                                                params = Dict(:opt_outlev=>1,
+                                                            :opt_outmode=>2,
+                                                            :opt_outcsv=>0,
+                                                            :opt_pbsolved=>:SOSRelaxation,
+                                                            :opt_solver=>:MosekCAPI,
+                                                            :opt_debug=>true))
+
+    primobj_CAPI, dualobj_CAPI = MPC.run_hierarchy(problem, relax_ctx, indentedprint=true, save_pbs=true)
+
+    @show primobj_JuMP, dualobj_JuMP
+
+    @show primobj_CAPI, dualobj_CAPI
+
+    @show cstobj
+    return nothing
 
     # problem, relax_ctx = lasserre_ex1()
     # problem, relax_ctx = lasserre_ex2()
@@ -100,9 +117,12 @@ function main()
                                                                 logname = "Mosek_run.log",
                                                                 printlog = false,
                                                                 msk_maxtime = relax_ctx.relaxparams[:opt_msk_maxtime],
-                                                                sol_info = relax_ctx.relaxparams)
+                                                                sol_info = relax_ctx.relaxparams,
+                                                                optsense = :Max)
 
-    return primobj, dualobj
+    @show primobj, dualobj
+
+    return nothing
     # primobj, dualobj = MPC.solve_mosek(sdp_instance_sos::MPC.SDP_Problem, primal,
     #                                                                   dual,
     #                                                                   sol_info=relax_ctx.relaxparams,

@@ -146,14 +146,11 @@ function JuMP_from_SDP_Problem(sdp_pb::SDP_Problem, mysolver::T) where T<:MathPr
         end
     end
 
-    JuMP.@constraintref ctrs[1:length(ctr_names)]
     obj = 0
-    bodys = Dict()
+    bodys = Dict{Tuple{String, String, String}, JuMP.GenericAffExpr{Float64,JuMP.Variable}}([ctr_name=>0 for ctr_name in ctr_names])
 
     # Building constraints and objective bodys
     for ((ctr_name, blockname, var1, var2), f_αβ) in sdp_pb.matrices
-        !haskey(bodys, ctr_name) && (bodys[ctr_name] = 0)
-
         block = sdp_pb.name_to_sdpblock[blockname]
         n = length(block.var_to_id)
         i = block.var_to_id[var1]
@@ -161,7 +158,7 @@ function JuMP_from_SDP_Problem(sdp_pb::SDP_Problem, mysolver::T) where T<:MathPr
 
         Ai = sparse([i], [j], [1], n, n)
         if (i != j) #&& (ctr_name ∉ objective_keys)
-            Ai = sparse([i; j], [j; i], [1; 1], n, n)
+            Ai = sparse([i; j], [j; i], [1.; 1.], n, n)
         end
 
         if ctr_name in ctr_names
@@ -194,6 +191,7 @@ function JuMP_from_SDP_Problem(sdp_pb::SDP_Problem, mysolver::T) where T<:MathPr
 
     # Adding constraints and objective to JuMP model
     JuMP.@objective(m, Max, obj)
+    JuMP.@constraintref ctrs[1:length(ctr_names)]
 
     for (i, ctr_name) in enumerate(ctr_names)
         ctrs[i] = JuMP.@constraint(m, bodys[ctr_name] == 0)
