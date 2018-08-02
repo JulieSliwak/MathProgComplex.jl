@@ -55,7 +55,7 @@ end
 """
     isless_degree(exp1::Exponent, exp2::Exponent)
 
-    Order sorting elements on their sum of degrees first.
+    Order sorting elements on their sum of degrees at a first level.
     Test show performance is comparable to previous sorting function.
 """
 function isless_degree(exp1::Exponent, exp2::Exponent)
