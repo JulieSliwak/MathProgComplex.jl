@@ -10,7 +10,7 @@ makedocs(
             "PolynomialOptim/polynomialoptim_structures.md"
         ],
         "SDP hierarchy" => Any[
-            "SDPhierarchy/intro.md",
+            "SDPhierarchy/purpose.md",
             "SDPhierarchy/mathprinciple.md",
             "SDPhierarchy/relax_settings.md",
             "SDPhierarchy/problems.md",

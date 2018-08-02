@@ -4,6 +4,16 @@ Implementing Lasserre hierarchy for complex numbers, CJ, DM paper.
 
 ## Initial problem
 
+[TODO]
+
+- POP problem, equivalent to (finite dim NLP)
+- measure problem (infinite dim LP)
+- equivalence of measures and positivity of measure to moments and LMI
+- Moment Relaxation
+- SOS relaxation
+
+Add sources here, to Lasserre original paper, and two papers of Dan, Cedric
+
 ## Deriving the moment relaxation
 
 ## Deriving the Sum Of Squares relaxation
