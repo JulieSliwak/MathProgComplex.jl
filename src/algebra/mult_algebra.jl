@@ -56,16 +56,33 @@ function product(p1::Polynomial, p2::Polynomial)
     return p
 end
 
+function product(p1::Polynomial, λ::Number)
+    if λ == 0
+        return Polynomial()
+    end
+
+    pdict = SortedDict{Exponent, Number}()
+    for (expo, coeff) in p1
+        pdict[expo] = coeff*λ
+    end
+    return Polynomial(pdict)
+end
+
 function product(p1::T, p2::U) where T<:AbstractPolynomial where U<:AbstractPolynomial
     return product(convert(Polynomial, p1), convert(Polynomial, p2))
 end
-function product(p1::Number, p2::T) where T<:AbstractPolynomial
-    return product(convert(Polynomial, p1), convert(Polynomial, p2))
-end
+# function product(p1::Number, p2::T) where T<:AbstractPolynomial
+#     return product(convert(Polynomial, p1), convert(Polynomial, p2))
+# end
+# function product(p1::T, p2::Number) where T<:AbstractPolynomial
+#     return product(convert(Polynomial, p1), convert(Polynomial, p2))
+# end
 function product(p1::T, p2::Number) where T<:AbstractPolynomial
-    return product(convert(Polynomial, p1), convert(Polynomial, p2))
+    return product(convert(Polynomial, p1), p2)
 end
-
+function product(p1::Number, p2::T) where T<:AbstractPolynomial
+    return product(convert(Polynomial, p2), p1)
+end
 
 function *(λ::Number, expo::Exponent)
     return Polynomial(SortedDict{Exponent, Number}(expo=>λ))
