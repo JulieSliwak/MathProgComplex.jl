@@ -2,8 +2,8 @@ using JuMP, Mosek, SCS
 import MathProgComplex
 
 function run_SDPpb(cst, optsense)
-    m = Model(solver=MosekSolver(LOG=0))
-    # m = Model(solver=SCSSolver(verbose=0))
+    # m = Model(solver=MosekSolver(LOG=0))
+    m = Model(solver=SCSSolver(verbose=0))
 
     @variable(m, Xs1[1:3,1:3], SDP)
     @variable(m, Xs2[1:1,1:1], SDP)
@@ -19,14 +19,8 @@ function run_SDPpb(cst, optsense)
     return getobjectivevalue(m)
 end
 
-function main()
-    @show run_SDPpb(0., :Min)
-    @show run_SDPpb(0.5, :Min)
+@show run_SDPpb(0., :Min)
+@show run_SDPpb(0.5, :Min)
 
-    @show run_SDPpb(0., :Max)
-    @show run_SDPpb(0.5, :Max)
-
-    return nothing
-end
-
-main()
+@show run_SDPpb(0., :Max)
+@show run_SDPpb(0.5, :Max)

@@ -3,7 +3,9 @@ export run_hierarchy, build_relaxation, build_mosekpb
 
 function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedprint=false,
                                                                        max_cliques::DictType{String, Set{Variable}}=DictType{String, Set{Variable}}(),
-                                                                       save_pbs=false)
+                                                                       save_pbs=false,
+                                                                       primsol = SortedDict{Tuple{String, String, String}, Float64}(("", "", "")=>-1),
+                                                                       dualsol = SortedDict{Tuple{String, String, String}, Float64}(("", "", "")=>-1))
 
 
     logpath = relax_ctx.relaxparams[:opt_exportsdppath]
@@ -69,8 +71,6 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedp
     end
 
 
-    primal = SortedDict{Tuple{String,String,String}, Float64}()
-    dual = SortedDict{Tuple{String, String, String}, Float64}()
 
     primobj = dualobj = NaN
     printlog = ((relax_ctx.relaxparams[:opt_outmode]!=1) && (relax_ctx.relaxparams[:opt_outlev] ≥ 1))
@@ -80,7 +80,7 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedp
 
     if solver == :MosekCAPI
         try
-            primobj, dualobj = solve_mosek(sdp_pb::SDP_Problem, primal, dual;
+            primobj, dualobj = solve_mosek(sdp_pb::SDP_Problem, primsol, dualsol;
                                                                 logname = joinpath(logpath, "Mosek_run.log"),
                                                                 printlog = printlog,
                                                                 msk_maxtime = relax_ctx.relaxparams[:opt_msk_maxtime],
@@ -92,7 +92,7 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedp
         end
 
     elseif solver != :None
-        primobj, dualobj = solve_JuMP(sdp_pb::SDP_Problem, solver, primal, dual;
+        primobj, dualobj = solve_JuMP(sdp_pb::SDP_Problem, solver, primsol, dualsol;
                                                             logname = joinpath(logpath, "Mosek_run.log"),
                                                             printlog = printlog,
                                                             msk_maxtime = relax_ctx.relaxparams[:opt_msk_maxtime],
@@ -101,14 +101,14 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedp
     end
 
 
-    params_file = joinpath(logpath, "maxcliques_relaxctx.txt")
-    isfile(params_file) && rm(params_file)
-    open(params_file, "a") do fcliques
-        println(fcliques, "# max_cliques are:")
-        println(fcliques, max_cliques)
-        println(fcliques, "# relaxation_ctx is:")
-        println(fcliques, relax_ctx)
-    end
+    # params_file = joinpath(logpath, "maxcliques_relaxctx.txt")
+    # isfile(params_file) && rm(params_file)
+    # open(params_file, "a") do fcliques
+    #     println(fcliques, "# max_cliques are:")
+    #     println(fcliques, max_cliques)
+    #     println(fcliques, "# relaxation_ctx is:")
+    #     println(fcliques, relax_ctx)
+    # end
 
     return primobj, dualobj
 end
