@@ -20,6 +20,45 @@ end
 ## Exponent
 #############################
 function isless(exp1::Exponent, exp2::Exponent)
+    ## Handle one exponent, empty structures are not handled by following general sort alg.
+    if length(exp1) == 0        # if exp1 == 1
+        return length(exp2) > 0
+    end
+
+    if length(exp2) == 0        # exp1!=1, if exp2 == 1
+        return false
+    end
+
+    state1 = start(exp1)
+    state2 = start(exp2)
+    while !done(exp1, state1) && !done(exp2, state2)
+        (i1, state1) = next(exp1, state1)
+        (i2, state2) = next(exp2, state2)
+
+        if isequal(i1, i2)
+            continue
+        else
+            return isless(i1,i2)
+        end
+        if done(exp1, state1) && done(exp2, state2)
+            return false
+        elseif done(exp1, state1) && !done(exp2, state2)
+            return true
+        elseif !done(exp1, state1) && done(exp2, state2)
+            return false
+        end
+    end
+
+    return false
+end
+
+"""
+    isless_degree(exp1::Exponent, exp2::Exponent)
+
+    Order sorting elements on their sum of degrees first.
+    Test show performance is comparable to previous sorting function.
+"""
+function isless_degree(exp1::Exponent, exp2::Exponent)
     # First order level: sum of degrees
     exp1_deg = 0
     state1 = start(exp1)
