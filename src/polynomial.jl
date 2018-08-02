@@ -53,12 +53,18 @@ function ==(p1::Polynomial, p2::Polynomial)
   if (length(p1) != length(p2)) || (p1.degree != p2.degree)
     return false
   end
-  for (exponent, coeff) in p1
-    if !haskey(p2, exponent) || (coeff != p2.poly[exponent])
+
+  state1 = start(p1)
+  state2 = start(p2)
+  while !done(p1, state1) && !done(p2, state2)
+    (i1, state1) = next(p1, state1)
+    (i2, state2) = next(p2, state2)
+
+    if !(i1 == i2)
       return false
     end
   end
-  true
+  return true
 end
 !=(pol1::Polynomial, pol2::Polynomial) = !(pol1 == pol2)
 
