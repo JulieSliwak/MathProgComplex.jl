@@ -18,7 +18,7 @@
                                     x=>Degree(4,0),
                                     b=>Degree(1,0)))
 
-    preal, pimag = cplx2real(expo_cplx)
+    preal, pimag = cplx2real(expo_cplx, 1.)
     @test preal == Polynomial(SortedDict{Exponent, Number}(expo_real=>1.0))
     @test pimag == Polynomial(SortedDict{Exponent, Number}(expo_imag=>1.0))
 
@@ -27,7 +27,7 @@
                                     x=>Degree(4,0),
                                     b=>Degree(1,0)))
 
-    preal, pimag = cplx2real(expo_cplx)
+    preal, pimag = cplx2real(expo_cplx, 1.)
     @test preal == Polynomial(SortedDict{Exponent, Number}(expo_real=>1.0))
     @test pimag == Polynomial(SortedDict{Exponent, Number}(expo_imag=>-1.0))
 end

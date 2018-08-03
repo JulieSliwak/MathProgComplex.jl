@@ -59,11 +59,68 @@ end
 	`imagPart` polynomials of twice as many variables, real and imag parts of
 	`expo` variables. Done recursively with the `cplx2real_rec` function.
 """
-function cplx2real(expo::Exponent)
-	vars, inds = collect(keys(expo.expo)), collect(values(expo.expo))
-	realPart = Polynomial(); add!(realPart, 1)
-	imagPart = Polynomial(); add!(imagPart, 0)
-	return cplx2real_rec(vars, inds, realPart, imagPart, length(expo)+1, Degree(0,0))
+function cplx2real(expo::Exponent, λ::Number)
+	a=real(λ)
+	b=imag(λ)
+	if expo.degree.explvar  == 1 && expo.degree.conjvar  == 1
+		if length(expo.expo)==1
+			realPart = Polynomial(); add!(realPart, 0)
+			imagPart = Polynomial(); add!(imagPart, 0)
+
+			z1 = first(expo.expo)
+			# println("Square : ", z1[1])
+			x1 = Variable(z1[1].name*"_Re", Real)
+			y1 = Variable(z1[1].name*"_Im", Real)
+			x1x1 = SortedDict{Variable, Degree}(x1=>Degree(2,0))
+			y1y1 = SortedDict{Variable, Degree}(y1=>Degree(2,0))
+			# (a+ib) * conj(z1) * z1 = ax1^2+ay1^2+ibx1^2+iby1^2
+			if a != 0
+				realPart = Polynomial(SortedDict{Exponent, Number}(Exponent(x1x1)=>a, Exponent(y1y1)=>a))
+			end
+			if b != 0
+				imagPart = Polynomial(SortedDict{Exponent, Number}(Exponent(x1x1)=>b, Exponent(y1y1)=>b))
+			end
+			return realPart, imagPart
+		else
+			if first(expo.expo)[2].conjvar==1
+				z1 = first(expo.expo)
+				z2 = last(expo.expo)
+			else
+				z2 = first(expo.expo)
+				z1 = last(expo.expo)
+			end
+			# println("Bilinear : ", z1, ", ", z2)
+			x1 = Variable(z1[1].name*"_Re", Real)
+			y1 = Variable(z1[1].name*"_Im", Real)
+			x2 = Variable(z2[1].name*"_Re", Real)
+			y2 = Variable(z2[1].name*"_Im", Real)
+			# (a+ib)*conj(z1) * z2  = (a+ib)*(x1-iy1)*(x2+iy2)
+			# = (a+ib)*(x1.x2 + y1.y2 + ix1.y2-ix2.y1)
+			# = a.x1.x2 + a.y1.y2 + ia.x1.y2-ia.x2.y1+ib.x1.x2 + ib.y1.y2 - b.x1.y2+b.x2.y1
+			# =
+			#    a.x1.x2+a.y1.y2-b.x1.y2+b.x2.y1
+			#    +
+			#    i(a.x1.y2-a.x2.y1+b.x1.x2+b.y1.y2)
+			x1x2 = SortedDict{Variable, Degree}(x1=>Degree(1,0), x2=>Degree(1,0))
+			y1y2 = SortedDict{Variable, Degree}(y1=>Degree(1,0), y2=>Degree(1,0))
+			x1y2 = SortedDict{Variable, Degree}(x1=>Degree(1,0), y2=>Degree(1,0))
+			x2y1 = SortedDict{Variable, Degree}(x2=>Degree(1,0), y1=>Degree(1,0))
+
+			realPart = Polynomial(SortedDict{Exponent, Number}(Exponent(x1x2)=>a, Exponent(y1y2)=>a, Exponent(x1y2)=>-b, Exponent(x2y1)=>b))
+			imagPart = Polynomial(SortedDict{Exponent, Number}(Exponent(x1x2)=>b, Exponent(y1y2)=>b, Exponent(x1y2)=>a, Exponent(x2y1)=>-a))
+			return realPart, imagPart
+		end
+	elseif expo.degree.explvar  == 0 && expo.degree.conjvar  == 0
+		realPart = Polynomial(); add!(realPart, a)
+		imagPart = Polynomial(); add!(imagPart, b)
+		return realPart, imagPart
+	else
+		realPart = Polynomial(); add!(realPart, 1)
+		imagPart = Polynomial(); add!(imagPart, 0)
+
+		vars, inds = collect(keys(expo.expo)), collect(values(expo.expo))
+		return cplx2real_rec(vars, inds, realPart, imagPart, length(expo)+1, Degree(0,0))
+	end
 end
 
 """
@@ -134,16 +191,22 @@ end
 	`pol` variables.
 """
 function cplx2real(pol::Polynomial)
-	realPart = Polynomial()
+  realPart = Polynomial()
   imagPart = Polynomial()
-
   for (expo, λ) in pol
-    realexpo, imagexpo = cplx2real(expo)
+	if (expo.degree.explvar  == 1 && expo.degree.conjvar  == 1 )||( expo.degree.explvar  == 0 && expo.degree.conjvar  == 0)
+		realexpo, imagexpo = cplx2real(expo, λ)
 
-	add!(realPart, product(realexpo,   real(λ)))
-	add!(realPart, product(imagexpo, - imag(λ)))
-	add!(imagPart, product(imagexpo,   real(λ)))
-	add!(imagPart, product(realexpo,   imag(λ)))
+		add!(realPart, realexpo)
+		add!(imagPart, imagexpo)
+	else
+	    realexpo, imagexpo = cplx2real(expo, λ)
+
+		add!(realPart, product(realexpo,   real(λ)))
+		add!(realPart, product(imagexpo, - imag(λ)))
+		add!(imagPart, product(imagexpo,   real(λ)))
+		add!(imagPart, product(realexpo,   imag(λ)))
+	end
   end
   return (realPart, imagPart)
 end
