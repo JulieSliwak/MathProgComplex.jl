@@ -60,3 +60,14 @@ end
 
     @test get_minslack(qcqp, sol)[1] < 1e-6
 end
+
+
+@testset "Matpower case9 Ipopt" begin
+    instancepath = joinpath(Pkg.dir("MathProgComplex"), "test", "instances")
+    pb_real, ~ = import_from_dat(joinpath(instancepath,"case9real.dat"))
+
+    mysolver = IpoptSolver(print_level = 0)
+    m, variables_jump = get_JuMP_cartesian_model(pb_real, mysolver)
+    solve(m)
+    @test getobjectivevalue(m) ≈ 1.45883471040144e+003 atol=1e-6
+end
