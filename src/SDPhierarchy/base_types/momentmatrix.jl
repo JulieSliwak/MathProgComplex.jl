@@ -17,9 +17,22 @@ function MomentMatrix{T}(relax_ctx::RelaxationContext, vars::Set{Variable},
 
     @assert default_clique!="" || var_to_cliques!=DictType{Variable, Set{String}}()
 
+    continuousvars = Set{Variable}()
+    for var in vars
+        warn(var, var.kind)
+        if isbool(var)
+            @assert var in relax_ctx.binaryvariables
+            push!(continuousvars, Variable(var.name, Real))
+        elseif isreal(var) || iscomplex(var)
+            push!(continuousvars, var)
+        else
+            error("MomentMatrix(): Unhandled variable $var, of type $(var.kind), neihter real, complex nor binary.")
+        end
+    end
+
     ## Computing exponents for available variables
-    realexpos = compute_exponents(vars, d)
-    conjexpos = compute_exponents(vars, d, compute_conj=true)
+    realexpos = compute_exponents(continuousvars, d)
+    conjexpos = compute_exponents(continuousvars, d, compute_conj=true)
     for cexp in conjexpos
         for rexp in realexpos
             expo = product(cexp, rexp)
@@ -43,12 +56,9 @@ function MomentMatrix{T}(relax_ctx::RelaxationContext, vars::Set{Variable},
             end
         end
     end
-    return MomentMatrix{T}(mm, Set(vars), d, matrixkind)
+    return MomentMatrix{T}(mm, Set(continuousvars), d, matrixkind)
 end
 
-# function copy(mm::MomentMatrix)
-#     return MomentMatrix(copy(mm.mm), mm.vars, mm.order, mm.matrixkind)
-# end
 
 function print(io::IO, mm::MomentMatrix{T}) where T<:Number
     keylen = maximum(x->length("($(x[1]), $(x[2])) → "), keys(mm.mm))
@@ -92,8 +102,8 @@ getindex(mmtmat::MomentMatrix, expo1::Exponent, expo2::Exponent) = poly.mm[expo1
 """
     cliquename = get_exponentclique(expo, var_to_cliques)
 
-    Determine which clique expo fits in, that is which cliques contain all variables of expo.
-    Error if no such clique are found.
+Determine which clique expo fits in, that is which cliques contain all variables of expo.
+Error if no such clique are found.
 """
 function get_exponentclique(expo::Exponent, var_to_cliques::DictType{Variable, Set{String}})
     cliques = Set{String}()
@@ -103,6 +113,7 @@ function get_exponentclique(expo::Exponent, var_to_cliques::DictType{Variable, S
 
     union!(cliques, var_to_cliques[first(expo)[1]])
     for (var, deg) in expo
+        if isreal(var) && var in 
         cliques = intersect(cliques, var_to_cliques[var])
     end
 
@@ -149,21 +160,30 @@ end
 
 function product(moment::Moment, expo::Exponent, var_to_cliques::DictType{Variable, Set{String}})
     resexpo = product(moment.conj_part, moment.expl_part)
-    product!(resexpo, expo)
+    product_replacebinary!(resexpo, expo)
 
     clique = get_exponentclique(resexpo, var_to_cliques)
     return Moment(resexpo, clique)
 end
 
-# # function evaluate(mm::MomentMatrix, pt::Point)
-# #     mm_eval = SortedDict{Tuple{Exponent, Exponent}, AbstractPolynomial}()
-# #     for (key, p) in mm.mm
-# #         res = evaluate(p, pt)
-# #         if res == Polynomial()
-# #             delete!(mm_eval, key)
-# #         else
-# #             mm_eval[key] = res
-# #         end
-# #     end
-# #     return MomentMatrix(mm_eval, setdiff(mm.vars, SortedSet(keys(pt))), mm.order, mm.matrixkind)
-# # end
+
+function product_replacebinary!(resexpo::Exponent, expo::Exponent)
+    for (var, deg) in expo
+        contvar = get_continuousvar(var)
+
+        if !haskey(resexpo, contvar)
+            resexpo.expo[contvar] = Degree(0,0)
+        end
+        resexpo.expo[contvar].explvar += deg.explvar
+        resexpo.expo[contvar].conjvar += deg.conjvar
+        if (resexpo.expo[contvar].explvar, resexpo.expo[contvar].conjvar) == (0,0)
+            delete!(resexpo, contvar)
+        end
+    end
+    update_degree!(resexpo)
+    return resexpo
+end
+
+@inline function get_continuousvar(var::Variable)
+    return isbool(var)?Variable(var.name, Real):var
+end

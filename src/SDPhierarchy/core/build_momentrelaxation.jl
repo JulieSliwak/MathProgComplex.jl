@@ -3,7 +3,7 @@ export build_momentrelaxation
 """
     momentrelaxation = build_momentrelaxation(relax_ctx, problem, moment_param::Dict{String, Tuple{Set{String}, Int}}, max_cliques::Dict{String, Set{Variable}})
 
-    Compute the `momentrelaxation` of `problem` corresponding to the clique decomposition `max_cliques` and parameters `moment_param`.
+Compute the `momentrelaxation` of `problem` corresponding to the clique decomposition `max_cliques` and parameters `moment_param`.
 """
 function build_momentrelaxation(relax_ctx::RelaxationContext,
                                 problem::Problem,
@@ -15,8 +15,9 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
     var_to_cliques = DictType{Variable, Set{String}}()
     for (clique, vars) in max_cliques
         for var in vars
-            haskey(var_to_cliques, var) || (var_to_cliques[var] = Set{String}())
-            push!(var_to_cliques[var], clique)
+            contvar = get_continuousvar(var)
+            haskey(var_to_cliques, contvar) || (var_to_cliques[contvar] = Set{String}())
+            push!(var_to_cliques[contvar], clique)
         end
     end
 
@@ -39,6 +40,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
                                                                                                    default_clique = cliquename)
     end
 
+    binvar_constraints = 
     ## Build localizing matrices
     for (cstrname, cstr) in problem.constraints
 
@@ -49,7 +51,6 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
             # Deal with lower inequality
             clique_keys, order = localizingmat_param[cstrname_lo]
             vars, cliquename = collect_cliquesvars(clique_keys, max_cliques)
-            # length(clique_keys) == 1 || error("build_momentrelaxation(): constraint $cstrname spans several cliques ($clique_keys).\nNot supported yet.")
 
             mmt = MomentMatrix{T}(relax_ctx, vars, order, relax_ctx.symmetries,
                                                           relax_ctx.cstrtypes[cstrname_lo],
@@ -61,7 +62,6 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
             # Deal with upper inequality
             clique_keys, order = localizingmat_param[cstrname_up]
             vars, cliquename = collect_cliquesvars(clique_keys, max_cliques)
-            # length(clique_keys) == 1 || error("build_momentrelaxation(): constraint $cstrname spans several cliques ($clique_keys).\nNot supported yet.")
 
             mmt = MomentMatrix{T}(relax_ctx, vars, order, relax_ctx.symmetries,
                                                           relax_ctx.cstrtypes[cstrname_up],
@@ -92,7 +92,6 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
             # either cstrtype == :ineqlo, :inequp, :eq
             clique_keys, order = localizingmat_param[get_cstrname(cstrname, cstrtype)]
             vars, cliquename = collect_cliquesvars(clique_keys, max_cliques)
-            # length(clique_keys) == 1 || error("build_momentrelaxation(): constraint $cstrname spans several cliques ($clique_keys).\nNot supported yet.")
 
             mmt = MomentMatrix{T}(relax_ctx, vars, order, relax_ctx.symmetries,
                                                           relax_ctx.cstrtypes[get_cstrname(cstrname, cstrtype)],
@@ -105,6 +104,20 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
             momentmatrices[(get_cstrname(cstrname, cstrtype), cliquename)] = mmt
         end
     end
+
+    ## Build constraint relative to binary variables
+    for var in relax_ctx.binaryvariables
+        contvar = get_continuousvar(var)
+
+        mmt = MomentMatrix{T}(relax_ctx, vars, order, relax_ctx.symmetries,
+                                                          relax_ctx.cstrtypes[cstrname_up],
+                                                          var_to_cliques = var_to_cliques)
+        # print_with_color(:green, "$cstrname, :Up\n") ##NOTE: find better logging system.
+        product!(mmt, get_normalizedpoly(cstr, :inequp), var_to_cliques)
+        momentmatrices[(cstrname_up, cliquename)] = mmt
+    end
+
+
 
     ## Locate clique overlapping moments
     expo_to_cliques = DictType{Exponent, Set{String}}()
