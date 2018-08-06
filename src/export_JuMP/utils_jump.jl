@@ -35,15 +35,8 @@ function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
     startReal = 1.1
     startBool = 0
     for (varname, vartype) in pb_poly_real.variables
-    #     if init_point == Point()
-    #         startReal = 1.1
-    #         startBool = 0
-    #     else
-    #         startReal = init_point[Variable(varname, vartype)]
-    #         startBool = init_point[Variable(varname, vartype)]
-    #     end
         if vartype==Real
-            variables_jump["$varname"] = @variable(m, basename="$varname", start= startReal)
+            variables_jump["$varname"] = @variable(m, basename="$varname", start=startReal)
         elseif vartype==Bool
             variables_jump["$varname"] = @variable(m, category=:Bin, basename="$varname", start=startBool)
         else
