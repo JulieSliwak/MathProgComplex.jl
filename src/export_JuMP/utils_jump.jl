@@ -26,17 +26,24 @@ m = get_JuMP_cartesian_model(problem_poly, mysolver)
 print(m)
 ```
 """
-function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
+function get_JuMP_cartesian_model(problem_poly::Problem, mysolver, init_point::Point=Point())
     pb_poly_real = problem_poly
     m = Model(solver = mysolver)
     variables_jump = SortedDict{String, JuMP.Variable}()
 
     ## Define JuMP variables
     for (varname, vartype) in pb_poly_real.variables
+        if init_point == Point()
+            startReal = 1.1
+            startBool = 0
+        else
+            startReal = init_point[Variable(varname, vartype)]
+            startBool = init_point[Variable(varname, vartype)]
+        end
         if vartype==Real
-            variables_jump["$varname"] = @variable(m, basename="$varname", start=1.1)
+            variables_jump["$varname"] = @variable(m, basename="$varname", start=startReal)
         elseif vartype==Bool
-            variables_jump["$varname"] = @variable(m, category=:Bin, basename="$varname", start=0)
+            variables_jump["$varname"] = @variable(m, category=:Bin, basename="$varname", start=startBool)
         else
             error("$varname must be of type Real or Bool, here type is $vartype")
         end
