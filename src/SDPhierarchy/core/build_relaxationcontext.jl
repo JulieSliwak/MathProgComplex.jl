@@ -3,7 +3,7 @@ export set_relaxation, get_defaultparams
 """
     relax_ctx = set_relaxation(pb::Problem; ismultiordered=false, issparse=false, symmetries=Set(), hierarchykind=:Complex, renamevars=false, di=Dict{String, Int}(), d=-1)
 
-    Build a `relax_ctx` object containing relaxation choices and problem features : order by constraint, relaxation order by constraint...
+Build a `relax_ctx` object containing relaxation choices and problem features : order by constraint, relaxation order by constraint...
 """
 function set_relaxation(pb::Problem; ismultiordered::Bool=false,
                                      issparse::Bool=false,
@@ -24,6 +24,9 @@ function set_relaxation(pb::Problem; ismultiordered::Bool=false,
     relax_ctx = RelaxationContext()
 
     relaxparams = relax_ctx.relaxparams
+
+    # Collect binary variables
+    relctx_setbinaryvariables(relax_ctx, pb)
 
     # Compute each constraint degree
     relctx_setki!(relax_ctx, pb)
@@ -56,6 +59,14 @@ function set_relaxation(pb::Problem; ismultiordered::Bool=false,
 
     print_build_relctx(relax_ctx, pb)
     return relax_ctx
+end
+
+function relctx_setbinaryvariables(relax_ctx::RelaxationContext, pb::Problem)
+    for (varname, vartype) in pb.variables
+        vartype <: Bool && push!(relax_ctx.binaryvariables, Variable(varname, vartype))
+    end
+
+    return nothing
 end
 
 

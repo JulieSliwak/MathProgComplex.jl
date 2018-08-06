@@ -3,7 +3,7 @@ export build_sparsity, get_variables, get_locctrcliques, get_maxcliques, collect
 """
     momentmat_param, localizingmat_param = build_sparsity(relax_ctx, problem)
 
-    Build the sparsitty pattern and variables decomposition for laying out the moment or SOS hierarchy
+Build the sparsitty pattern and variables decomposition for laying out the moment or SOS hierarchy
 """
 function build_sparsity(relax_ctx::RelaxationContext, problem::Problem, max_cliques::DictType{String, Set{Variable}})
 
@@ -61,7 +61,7 @@ end
 
 
 """
-pvars = get_variables(p)
+    pvars = get_variables(p)
 
 Collect all variables appearing in `p`.
 """
@@ -78,7 +78,7 @@ end
 """
     locctrcliques = get_locctrcliques(p, max_cliques)
 
-    Find a minimal set of cliques gathering all variables from polynomial `p`.
+Find a minimal set of cliques gathering all variables from polynomial `p`.
 """
 function get_locctrcliques(p::Polynomial, max_cliques::DictType{String, Set{Variable}})
     ctrvars = get_variables(p)
@@ -156,7 +156,7 @@ end
 """
     vars, blocname = collect_cliquesvars(clique_keys, max_cliques)
 
-    Collect variables of `cliques_keys` cliques, described in `max_cliques`
+Collect variables of `cliques_keys` cliques, described in `max_cliques`
 """
 function collect_cliquesvars(clique_keys::Set{String}, max_cliques::DictType{String, Set{Variable}})
     # Collect variables involved in constraint

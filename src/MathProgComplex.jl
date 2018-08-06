@@ -38,7 +38,6 @@ include(joinpath("algebra", "unaries.jl"))
 
 ## export dat
 include(joinpath("export_dat", "utils_ampl.jl"))
-# include(joinpath("export_dat", "utils_dat_compare.jl"))
 include(joinpath("export_dat", "utils_dat_export.jl"))
 include(joinpath("export_dat", "utils_dat_import.jl"))
 

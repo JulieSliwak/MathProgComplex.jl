@@ -5,22 +5,22 @@ export solve_JuMP, JuMP_from_SDP_Problem
 """
   (primalobj, dualobj) = solve_JuMP(problem, solver, primal, dual; debug, logname, printlog, msk_maxtime, sol_info, optsense)
 
-  Calls any JuMP interfaced SDP solver on `problem::SDP_Problem`. Returns the primal and dual objectives if possible.
+Calls any JuMP interfaced SDP solver on `problem::SDP_Problem`. Returns the primal and dual objectives if possible.
 
-  TODO: update arguments
-  *Arguments* :
-  - `problem::SDP_Problem`
-  - `primal::SortedDict{Tuple{String,String,String}, Float64}`: primal solution `x`,
-  - `dual::SortedDict{Tuple{String, String, String}, Float64}` : dual solution `s`,
-  - `debug`: default is false, dump Mosek loaded problem
-  - `printlog` : if true (default), Mosek will write its log to the console,
-  - `logname` : if specified, Mosek log will be written to the given file name,
-  - `msk_maxtime` : Mosek max computation time, in seconds. Default -1 means no limit,
-  - `sol_info` : Information on problem and solution status upon termination of solve,
-  - `optsense` : default is `:Max`.
+TODO: update arguments
+*Arguments* :
+- `problem::SDP_Problem`
+- `primal::SortedDict{Tuple{String,String,String}, Float64}`: primal solution `x`,
+- `dual::SortedDict{Tuple{String, String, String}, Float64}` : dual solution `s`,
+- `debug`: default is false, dump Mosek loaded problem
+- `printlog` : if true (default), Mosek will write its log to the console,
+- `logname` : if specified, Mosek log will be written to the given file name,
+- `msk_maxtime` : Mosek max computation time, in seconds. Default -1 means no limit,
+- `sol_info` : Information on problem and solution status upon termination of solve,
+- `optsense` : default is `:Max`.
 
-  **Note**:
-  - Mosek expects lower triangular terms of the coefficient matrices. Hence diagonal or non-diagonal terms will not be scaled.
+**Note**:
+- Mosek expects lower triangular terms of the coefficient matrices. Hence diagonal or non-diagonal terms will not be scaled.
 """
 function solve_JuMP(problem::SDP_Problem, solver::T,
                                             primal::SortedDict{Tuple{String,String,String}, Float64},
@@ -110,7 +110,7 @@ end
 """
     m = JuMP_from_SDP_Problem(sdp_pb::SDP_Problem, mysolver::T) where T<:MathProgBase.AbstractMathProgSolver
 
-    Given a JuMP interfaced SDP solver, convert the input `SDP_Problem` into a JuMP model `m`.
+Given a JuMP interfaced SDP solver, convert the input `SDP_Problem` into a JuMP model `m`.
 """
 function JuMP_from_SDP_Problem(sdp_pb::SDP_Problem, mysolver::T) where T<:MathProgBase.AbstractMathProgSolver
     m = JuMP.Model(solver = mysolver)
@@ -185,7 +185,7 @@ function JuMP_from_SDP_Problem(sdp_pb::SDP_Problem, mysolver::T) where T<:MathPr
             bodys[ctr_name] += f_αβ
         else
             @assert ctr_name in objective_keys
-            obj += f_αβ                            ## Note : why the sign change here ?
+            obj += f_αβ
         end
     end
 

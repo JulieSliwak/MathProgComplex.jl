@@ -24,6 +24,7 @@ mutable struct RelaxationContext
     di::Dict{String, Int}
     ki::Dict{String, Int}
     cstrtypes::Dict{String, Symbol}
+    binaryvariables::SortedSet{Variable}
     relaxparams::OrderedDict{Symbol, Any}
 
     RelaxationContext() = new(false,
@@ -34,6 +35,7 @@ mutable struct RelaxationContext
                               Dict{String, Int}(),
                               Dict{String, Int}(),
                               Dict{String, Symbol}(),
+                              SortedSet{Variable}(),
                               get_defaultparams())
 end
 
@@ -59,8 +61,8 @@ include(joinpath("base_types", "moment.jl"))
 """
     MomentMatrix{T}(mm, vars, order, matrixkind)
 
-    Store a moment or localizing matrix of size `order`, corresponding to the `vars` variables in the `mm` dictionnary.
-    **Note** that the matrix is indexed by a tuple of exponents, *the first of which contains only conjugated variables*, et second only real ones.
+Store a moment or localizing matrix of size `order`, corresponding to the `vars` variables in the `mm` dictionnary.
+**Note** that the matrix is indexed by a tuple of exponents, *the first of which contains only conjugated variables*, et second only real ones.
 """
 mutable struct MomentMatrix{T}
     mm::DictType{Tuple{Exponent, Exponent}, DictType{Moment, T}}    # (row index, col index) -> lin. comb. of moments
@@ -74,7 +76,7 @@ include(joinpath("base_types", "momentmatrix.jl"))
 """
     momentrel = SDPDual(obj, cstrs, moment_overlap)
 
-    Store a Moment Relaxation problem.
+Store a Moment Relaxation problem.
 """
 struct SDPDual{T}
     objective::DictType{Moment, T}                                  # A linear comb. of moments, to be maximized
@@ -127,15 +129,15 @@ const SDP_CtrObjName = Tuple{String, String, String}
 """
     SDP_Problem
 
-    Description of a SDP problem in the primal form, with string to integer maps coefficients matrices, scalar variables and contraint keys.
+Description of a SDP problem in the primal form, with string to integer maps coefficients matrices, scalar variables and contraint keys.
 
-    All SDP problems to be solved should be converted to this structure, for which the Mosek solver can be readily used, and can be easily extended to other solvers.
+All SDP problems to be solved should be converted to this structure, for which the Mosek solver can be readily used, and can be easily extended to other solvers.
 
             max               ∑ A_0i[k,l] × Zi[k,l] + ∑ b_0[k] × x[k] + c_0
             s.t.    lb_j  <=  ∑ A_ji[k,l] × Zi[k,l] + ∑ b_j[k] × x[k] + c_j  <=  ub_j
 
-    **Notes**:
-    - Only the lower triangular part of coefficient matrices is stored. Hence a slice of the initial matrix is stroed, **no diagonal or non-diagonal coefficient is scaled**.
+**Notes**:
+- Only the lower triangular part of coefficient matrices is stored. Hence a slice of the initial matrix is stroed, **no diagonal or non-diagonal coefficient is scaled**.
 """
 type SDP_Problem
   # SDP vars

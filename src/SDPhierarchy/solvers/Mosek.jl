@@ -135,21 +135,21 @@ end
 """
   (primalobj, dualobj) = solve_mosek(problem, primal, dual; debug, logname, printlog, msk_maxtime, sol_info, optsense)
 
-  Calls Mosek on `problem::SDP_Problem`. Returns the primal and dual objectives if possible.
+Calls Mosek on `problem::SDP_Problem`. Returns the primal and dual objectives if possible.
 
-  *Arguments* :
-  - `problem::SDP_Problem`
-  - `primal::SortedDict{Tuple{String,String,String}, Float64}`: primal solution `x`,
-  - `dual::SortedDict{Tuple{String, String, String}, Float64}` : dual solution `s`,
-  - `debug`: default is false, dump Mosek loaded problem
-  - `printlog` : if true (default), Mosek will write its log to the console,
-  - `logname` : if specified, Mosek log will be written to the given file name,
-  - `msk_maxtime` : Mosek max computation time, in seconds. Default -1 means no limit,
-  - `sol_info` : Information on problem and solution status upon termination of solve,
-  - `optsense` : default is `:Max`.
+*Arguments* :
+- `problem::SDP_Problem`
+- `primal::SortedDict{Tuple{String,String,String}, Float64}`: primal solution `x`,
+- `dual::SortedDict{Tuple{String, String, String}, Float64}` : dual solution `s`,
+- `debug`: default is false, dump Mosek loaded problem
+- `printlog` : if true (default), Mosek will write its log to the console,
+- `logname` : if specified, Mosek log will be written to the given file name,
+- `msk_maxtime` : Mosek max computation time, in seconds. Default -1 means no limit,
+- `sol_info` : Information on problem and solution status upon termination of solve,
+- `optsense` : default is `:Max`.
 
-  **Note**:
-  - Mosek expects lower triangular terms of the coefficient matrices. Hence diagonal or non-diagonal terms will not be scaled.
+**Note**:
+- Mosek expects lower triangular terms of the coefficient matrices. Hence diagonal or non-diagonal terms will not be scaled.
 """
 function solve_mosek(problem::SDP_Problem, primal::SortedDict{Tuple{String,String,String}, Float64},
                                            dual::SortedDict{Tuple{String, String, String}, Float64};

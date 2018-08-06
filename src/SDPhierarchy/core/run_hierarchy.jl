@@ -141,7 +141,7 @@ end
 """
     sdp = build_mosekpb(logpath)
 
-    Build the sdp problem described at `logpath` into the generic structure interfaced with SDP solvers (Mosek for now).
+Build the sdp problem described at `logpath` into the generic structure interfaced with SDP solvers (Mosek for now).
 """
 function build_mosekpb(logpath::String)
     sdp_instance = read_SDPPrimal(logpath)

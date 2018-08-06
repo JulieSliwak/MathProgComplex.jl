@@ -36,6 +36,9 @@ function get_cstrname(cstrname::String, cstrtype::Symbol)
     end
 end
 
+"""
+    pnorm  = get_normalizedpoly(cstr::Constraint, cstrtype::Symbol)
+"""
 function get_normalizedpoly(cstr::Constraint, cstrtype::Symbol)
     if cstrtype == :eq
         return cstr.p - cstr.lb

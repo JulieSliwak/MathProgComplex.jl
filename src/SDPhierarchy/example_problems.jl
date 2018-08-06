@@ -41,7 +41,7 @@ end
 """
     problem = buildPOP_2v3c
 
-    Elliptic example problemp from Josz, Molzahn 2018 paper.
+Elliptic example problemp from Josz, Molzahn 2018 paper.
 """
 function buildPOP_EllJoszMolc()
     z1 = Variable("z1", Complex)
@@ -63,7 +63,7 @@ end
 """
     problem, relax_ctx = lasserre_ex1()
 
-    From Lasserre2001, global minimum : (3) -0.2428.
+From Lasserre2001, global minimum : (3) -0.2428.
 """
 function lasserre_ex1()
     x1 = Variable("x1", Real)
@@ -80,7 +80,7 @@ end
 """
     problem, relax_ctx = lasserre_ex2()
 
-    From Lasserre2001, global minimum : -11.4581.
+From Lasserre2001, global minimum : -11.4581.
 """
 function lasserre_ex2()
     x1 = Variable("x1", Real)
@@ -97,7 +97,7 @@ end
 """
     problem, relax_ctx = lasserre_ex3()
 
-    From Lasserre2001, global minimum : -1/27, x1*² = x2*² = 1/3.
+From Lasserre2001, global minimum : -1/27, x1*² = x2*² = 1/3.
 """
 function lasserre_ex3()
     x1 = Variable("x1", Real)
@@ -115,9 +115,9 @@ end
 """
     problem, relax_ctx = lasserre_ex5()
 
-    From Lasserre2001, global minimum : -2, for (1, 2).
-    Relaxation : order 1 -> -3; order 2 -> -2.
-    http://www.ii.uib.no/~lennart/drgrad/Lasserre2001.pdf
+From Lasserre2001, global minimum : -2, for (1, 2).
+Relaxation : order 1 -> -3; order 2 -> -2.
+http://www.ii.uib.no/~lennart/drgrad/Lasserre2001.pdf
 """
 function lasserre_ex5(;d = 2)
     x1 = Variable("x1", Real)
@@ -139,14 +139,15 @@ end
 """
     problem, order_to_obj, ε_abs = test_gloptipoly_ex1()
 
-    Return the problem, order to solution value and absolute tolerance
-    for the SDP test case taken from the gloptimoly doc:
-    http://homepages.laas.fr/henrion/papers/gpcocos.pdf p7
+Return the problem, order to solution value and absolute tolerance
+for the SDP test case taken from the gloptimoly doc:
+http://homepages.laas.fr/henrion/papers/gpcocos.pdf p7
 
-    Order : 1 -> -6.0000
-            2 -> -5.6923
-            3 -> -4.0685
-            3 -> -4.0000 (exact)
+Order : 
+  - 1 -> -6.0000
+  - 2 -> -5.6923
+  - 3 -> -4.0685
+  - 3 -> -4.0000 (exact)
 """
 function test_gloptipoly_ex1()
     problem = Problem()
@@ -173,13 +174,14 @@ end
 """
     problem, order_to_obj, ε_abs = test_gloptipoly_ex2()
 
-    Return the problem, order to solution value and absolute tolerance
-    for the SDP test case taken from the gloptimoly doc:
-    http://homepages.laas.fr/henrion/papers/gloptipoly.pdf p14
+Return the problem, order to solution value and absolute tolerance
+for the SDP test case taken from the gloptimoly doc:
+http://homepages.laas.fr/henrion/papers/gloptipoly.pdf p14
 
-    Order : 1 -> primal infeasible
-            2 -> 17.9189
-            3 -> 17.0000 (exact)
+Order : 
+  - 1 -> primal infeasible
+  - 2 -> 17.9189
+  - 3 -> 17.0000 (exact)
 """
 function test_gloptipoly_ex2()
     problem = Problem()

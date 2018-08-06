@@ -201,8 +201,8 @@ end
 """
     α, β = split_expo(expo::Exponent)
 
-    Split the exponent into two exponents of conjugated and explicit variables in the complex case.
-    Real case is not supported yet.
+Split the exponent into two exponents of conjugated and explicit variables in the complex case.
+Real case is not supported yet.
 """
 function split_moment(moment::Moment)
     α, β = Exponent(), Exponent()
