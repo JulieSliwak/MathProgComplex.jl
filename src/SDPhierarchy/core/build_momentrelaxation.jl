@@ -15,7 +15,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
     var_to_cliques = DictType{Variable, Set{String}}()
     for (clique, vars) in max_cliques
         for var in vars
-            contvar = get_continuousvar(var)
+            contvar = get_continuousvar(var)                                                # convert binary variables to continuous
             haskey(var_to_cliques, contvar) || (var_to_cliques[contvar] = Set{String}())
             push!(var_to_cliques[contvar], clique)
         end
@@ -24,8 +24,9 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
     ## Building linear-in-moments objective
     objective = DictType{Moment, T}()
     for (expo, val) in problem.objective
-        clique = get_exponentclique(expo, var_to_cliques)
-        objective[Moment(expo, clique)] = val
+        contexpo = get_continuousexpo(expo)                                                 # convert exponent to continuous
+        clique = get_exponentclique(contexpo, var_to_cliques)
+        objective[Moment(contexpo, clique)] = val
     end
 
 
@@ -40,9 +41,8 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
                                                                                                    default_clique = cliquename)
     end
 
-    binvar_constraints = 
     ## Build localizing matrices
-    for (cstrname, cstr) in problem.constraints
+    for (cstrname, cstr) in merge(problem.constraints, relax_ctx.binvar_constraints)
 
         cstrtype = get_cstrtype(cstr)
         if cstrtype == :ineqdouble
@@ -104,19 +104,6 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
             momentmatrices[(get_cstrname(cstrname, cstrtype), cliquename)] = mmt
         end
     end
-
-    ## Build constraint relative to binary variables
-    for var in relax_ctx.binaryvariables
-        contvar = get_continuousvar(var)
-
-        mmt = MomentMatrix{T}(relax_ctx, vars, order, relax_ctx.symmetries,
-                                                          relax_ctx.cstrtypes[cstrname_up],
-                                                          var_to_cliques = var_to_cliques)
-        # print_with_color(:green, "$cstrname, :Up\n") ##NOTE: find better logging system.
-        product!(mmt, get_normalizedpoly(cstr, :inequp), var_to_cliques)
-        momentmatrices[(cstrname_up, cliquename)] = mmt
-    end
-
 
 
     ## Locate clique overlapping moments

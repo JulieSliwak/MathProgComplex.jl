@@ -12,6 +12,8 @@ function set_relaxation(pb::Problem; ismultiordered::Bool=false,
                                      renamevars::Bool=false,
                                      di::Dict{String, Int}=Dict{String, Int}(),
                                      d::Int=-1,
+                                     binvar_di::Dict{Variable, Int}=Dict{Variable, Int}(),
+                                     binvar_d::Int=-1,
                                      params=Dict())
 
     # Check that all variables have a type fitting the hierarchy kind
@@ -25,7 +27,7 @@ function set_relaxation(pb::Problem; ismultiordered::Bool=false,
 
     relaxparams = relax_ctx.relaxparams
 
-    # Collect binary variables
+    # Handle binary variables: create associated constraints
     relctx_setbinaryvariables(relax_ctx, pb)
 
     # Compute each constraint degree
@@ -35,7 +37,7 @@ function set_relaxation(pb::Problem; ismultiordered::Bool=false,
     relctx_setSDPmulttypes!(relax_ctx, pb, hierarchykind)
 
     # Relaxation order management
-    relctx_setdi!(relax_ctx, pb, di, d)
+    relctx_setdi!(relax_ctx, pb, di, d, binvar_di, binvar_d)
 
     rel_ctx_setsymetries!(relax_ctx, pb, symmetries)
 
@@ -63,7 +65,10 @@ end
 
 function relctx_setbinaryvariables(relax_ctx::RelaxationContext, pb::Problem)
     for (varname, vartype) in pb.variables
-        vartype <: Bool && push!(relax_ctx.binaryvariables, Variable(varname, vartype))
+        if vartype <: Bool
+            var = Variable(varname, vartype)
+            relax_ctx.binvar_constraints[get_bindef_cstrname(var)] = (var * (1-var) == 0)
+        end
     end
 
     return nothing
@@ -73,7 +78,7 @@ end
 function relctx_setki!(relax_ctx, pb::Problem)
     ki = relax_ctx.ki
     ki[get_momentcstrname()] = 0
-    for (cstrname, cstr) in pb.constraints
+    for (cstrname, cstr) in merge(pb.constraints, relax_ctx.binvar_constraints)
         cstrtype = get_cstrtype(cstr)
         if cstrtype == :ineqdouble
             cstrname_lo, cstrname_up = get_cstrname(cstrname, cstrtype)
@@ -88,7 +93,7 @@ end
 
 function relctx_setSDPmulttypes!(relax_ctx, pb::Problem, hierarchykind)
     ctrtypes = relax_ctx.cstrtypes
-    for (cstrname, cstr) in pb.constraints
+    for (cstrname, cstr) in merge(pb.constraints, relax_ctx.binvar_constraints)
         cstrtype = get_cstrtype(cstr)
         if cstrtype == :ineqdouble
             cstrname_lo, cstrname_up = get_cstrname(cstrname, cstrtype)
@@ -104,9 +109,12 @@ function relctx_setSDPmulttypes!(relax_ctx, pb::Problem, hierarchykind)
     return
 end
 
-function relctx_setdi!(relax_ctx, pb::Problem, di, d)
+function relctx_setdi!(relax_ctx, pb::Problem, di, d, binvar_di, binvar_d)
     di_relax = relax_ctx.di
-    !((di == Dict{String, Int}()) && (d==-1)) || error(LOGGER, "RelaxationContext(): Either di or d should be provided as input.")
+    (di == Dict{String, Int}()) && (d==-1) && error(LOGGER, "RelaxationContext(): Either di or d should be provided as input.")
+    if length(relax_ctx.binvar_constraints) > 0
+        (binvar_di == Dict{String, Int}()) && (binvar_d==-1) && error(LOGGER, "RelaxationContext(): Either binvars_di or binvar_d should be provided as input.")
+    end
 
     ## Checking order by constraint
     for (cstrname, cstr) in pb.constraints
@@ -117,19 +125,30 @@ function relctx_setdi!(relax_ctx, pb::Problem, di, d)
         if cstrtype == :ineqdouble
             cstrname_lo, cstrname_up = get_cstrname(cstrname, cstrtype)
             cur_ki = relax_ctx.ki[cstrname_lo]
+
             (0 ≤ cur_order-ceil(cur_ki/2)) || warn(LOGGER, "RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value ceil($cur_ki/2).")
-            # (cur_ki <= cur_order) || warn("RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value $cur_ki, hierarchy may be multiordered.")
-            # di_relax[cstrname_lo] = cur_order
-            # di_relax[cstrname_up] = cur_order
             di_relax[cstrname_lo] = max(cur_order, ceil(cur_ki/2))
             di_relax[cstrname_up] = max(cur_order, ceil(cur_ki/2))
         else # :eq, :ineqlo, :inequp
             cur_ki = relax_ctx.ki[get_cstrname(cstrname, cstrtype)]
             (0 ≤ cur_order-ceil(cur_ki/2)) || warn(LOGGER, "RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value ceil($cur_ki/2).")
-            # (cur_ki <= cur_order) || warn("RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value $cur_ki, hierarchy may be multiordered.")
-            # di_relax[get_cstrname(cstrname, cstrtype)] = cur_order
             di_relax[get_cstrname(cstrname, cstrtype)] = max(cur_order, ceil(cur_ki/2))
         end
+    end
+
+    ## Dealing with biary equilibrium constraints x(1-x)=0
+    for (cstrname, cstr) in relax_ctx.binvar_constraints
+        binvar = first(get_polyvars(cstr.p))
+
+        cur_order = haskey(binvar_di, binvar) ? binvar_di[binvar] : binvar_d
+
+        # Check provided di is suitable wrt constraint degree, add
+        cstrtype = get_cstrtype(cstr)
+        cur_ki = relax_ctx.ki[get_cstrname(cstrname, cstrtype)]
+
+        (0 ≤ cur_order-ceil(cur_ki/2)) || warn(LOGGER, "RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value ceil($cur_ki/2).")
+
+        di_relax[get_cstrname(cstrname, cstrtype)] = max(cur_order, ceil(cur_ki/2))
     end
 
     ## Setting order for moment contraint(s)
@@ -140,6 +159,7 @@ function relctx_setdi!(relax_ctx, pb::Problem, di, d)
     else
         di_relax[get_momentcstrname()] = maximum(values(di_relax))
     end
+    di_relax[get_momentcstrname()] < maximum(values(di_relax)) && warn(LOGGER, "Some constraints have too high a relaxation order compared to moment matrix order")
 
     # Checking order of objective
     obj_degree = max(pb.objective.degree.explvar, pb.objective.degree.conjvar)

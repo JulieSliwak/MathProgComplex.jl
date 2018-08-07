@@ -11,7 +11,7 @@ function build_sparsity(relax_ctx::RelaxationContext, problem::Problem, max_cliq
 
     # Build localizing constraints order and variable set.
     localizingmat_param = DictType{String, Tuple{Set{String}, Int}}()
-    for (ctrname, ctr) in problem.constraints
+    for (ctrname, ctr) in merge(problem.constraints, relax_ctx.binvar_constraints)
         ctrtype = get_cstrtype(ctr)
         ctrcliques = get_locctrcliques(ctr.p, max_cliques)
 

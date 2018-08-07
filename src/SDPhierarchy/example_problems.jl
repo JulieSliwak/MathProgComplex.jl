@@ -1,4 +1,4 @@
-export buildPOP_1v1c, buildPOP_1v2c, buildPOP_1v2, buildPOP_EllJoszMolc
+export buildPOP_1v1c, buildPOP_1v2c, buildPOP_1v2, buildPOP_EllJoszMolc, buildPOP_knapsack
 export lasserre_ex1, lasserre_ex2, lasserre_ex3, lasserre_ex5
 export test_gloptipoly_ex1, test_gloptipoly_ex2
 export get_WB5cliques, get_case9cliques
@@ -52,6 +52,18 @@ function buildPOP_EllJoszMolc()
     add_constraint!(problem, "eq2", (abs2(z1)+abs2(z2)) == 3)
     add_constraint!(problem, "eq3", (im*z2-im*conj(z2)) == 0)
     add_constraint!(problem, "ineq", (z2+conj(z2)) >> 0)
+    return problem
+end
+
+function buildPOP_knapsack()
+    x1 = Variable("x1", Bool)
+    x2 = Variable("x2", Bool)
+    x3 = Variable("x3", Bool)
+    x4 = Variable("x4", Bool)
+    x5 = Variable("x5", Bool)
+    problem = Problem()
+    set_objective!(problem, -1*(x1+x2+x3+x4+1.5*x5))         # Problems are minimization only right now
+    add_constraint!(problem, "knapsack", (47*x1+45*x2+79*x3+53*x4+53*x5) << 178)
     return problem
 end
 

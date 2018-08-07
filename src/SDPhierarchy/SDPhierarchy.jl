@@ -24,7 +24,7 @@ mutable struct RelaxationContext
     di::Dict{String, Int}
     ki::Dict{String, Int}
     cstrtypes::Dict{String, Symbol}
-    binaryvariables::SortedSet{Variable}
+    binvar_constraints::SortedDict{String, Constraint}      # equilibrium constraints x(1-x)=0 for modeling binary variables
     relaxparams::OrderedDict{Symbol, Any}
 
     RelaxationContext() = new(false,
@@ -35,7 +35,7 @@ mutable struct RelaxationContext
                               Dict{String, Int}(),
                               Dict{String, Int}(),
                               Dict{String, Symbol}(),
-                              SortedSet{Variable}(),
+                              SortedDict{String, Constraint}(),
                               get_defaultparams())
 end
 

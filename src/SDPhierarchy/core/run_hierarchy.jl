@@ -61,7 +61,7 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedp
         relax_ctx.relaxparams[:slv_mskstruct_bytes] = bytes
         optsense = :Max
     else
-        error("run_hierarchy(): Unrecognized :opt_pbsolved parameter : $(relax_ctx.relaxparams[:opt_pbsolved])")
+        error(LOGGER, "run_hierarchy(): Unrecognized :opt_pbsolved parameter : $(relax_ctx.relaxparams[:opt_pbsolved])")
     end
 
     if (relax_ctx.relaxparams[:opt_exportsdp] == 1)

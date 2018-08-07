@@ -1,4 +1,5 @@
 export MomentMatrix, print, get_exponentclique, product, product!
+export get_continuousvar, get_continuousexpo
 
 # """
 #     mm = MomentMatrix(vars::SortedSet{Variable}, d, symmetries)
@@ -19,15 +20,7 @@ function MomentMatrix{T}(relax_ctx::RelaxationContext, vars::Set{Variable},
 
     continuousvars = Set{Variable}()
     for var in vars
-        warn(var, var.kind)
-        if isbool(var)
-            @assert var in relax_ctx.binaryvariables
-            push!(continuousvars, Variable(var.name, Real))
-        elseif isreal(var) || iscomplex(var)
-            push!(continuousvars, var)
-        else
-            error("MomentMatrix(): Unhandled variable $var, of type $(var.kind), neihter real, complex nor binary.")
-        end
+        push!(continuousvars, get_continuousvar(var))
     end
 
     ## Computing exponents for available variables
@@ -113,7 +106,6 @@ function get_exponentclique(expo::Exponent, var_to_cliques::DictType{Variable, S
 
     union!(cliques, var_to_cliques[first(expo)[1]])
     for (var, deg) in expo
-        if isreal(var) && var in 
         cliques = intersect(cliques, var_to_cliques[var])
     end
 
@@ -186,4 +178,13 @@ end
 
 @inline function get_continuousvar(var::Variable)
     return isbool(var)?Variable(var.name, Real):var
+end
+
+function get_continuousexpo(expo::Exponent)
+    contexpo = Exponent()
+    for (var, deg) in expo
+        contvar = get_continuousvar(var)
+        product!(contexpo, Exponent(SortedDict(contvar=>deg)))
+    end
+    return contexpo
 end
