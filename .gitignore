@@ -1,5 +1,6 @@
 *.jl.cov
 *.jl.*.cov
 *.jl.mem
+.tags*
 Knitro_runs
 Mosek_runs
