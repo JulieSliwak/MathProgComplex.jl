@@ -39,7 +39,7 @@ ctr_names = SortedSet{SDP_Moment}([(instance.CONST[i, 1], instance.CONST[i, 2], 
     end
   end
 
-  length(obj_keys) == 0 && error("No ctrkey matching objective key (\"1\", \"1\", .)")
+  length(obj_keys) == 0 && error(LOGGER, "No ctrkey matching objective key (\"1\", \"1\", .)")
   sdp.obj_keys = obj_keys
 
   ctr_id = 1
@@ -70,7 +70,7 @@ function set_vartypes!(sdp::SDP_Problem, instance::SDP_Instance; debug=false)
       sdp.id_to_sdpblock[n_sdp] = block
 
     else
-      error("set_vartypes()!: Unknown blockvar type $block_type for variable $block_name")
+      error(LOGGER, "set_vartypes()!: Unknown blockvar type $block_type for variable $block_name")
     end
   end
 
@@ -99,7 +99,7 @@ function set_blocks!(sdp::SDP_Problem, instance::SDP_Instance; debug=false)
         cur_blockvar.var_to_id[var2] = length(cur_blockvar.var_to_id) + 1
       end
     else
-      error("set_blocks!(): Unknown block_kind $(sdp.block_to_kind) for i=$i")
+      error(LOGGER, "set_blocks!(): Unknown block_kind $(sdp.block_to_kind) for i=$i")
     end
   end
 
@@ -134,11 +134,11 @@ function set_matrices!(sdp::SDP_Problem, instance::SDP_Instance; debug=false)
       if !haskey(sdp.matrices, (ctr_name, block_name, var1, var2))
         sdp.matrices[(ctr_name, block_name, var1, var2)] = parse(coeff)
       else
-        error("set_matrices!(): sdp.matrices already has key ($ctr_name, $block_name, $var1, $var2) with val $(sdp.matrices[(ctr_name, block_name, var1, var2)]), $(parse(coeff))")
+        error(LOGGER, "set_matrices!(): sdp.matrices already has key ($ctr_name, $block_name, $var1, $var2) with val $(sdp.matrices[(ctr_name, block_name, var1, var2)]), $(parse(coeff))")
       end
 
     else
-      error("set_matrices!(): Unhandled matrix var $block_name")
+      error(LOGGER, "set_matrices!(): Unhandled matrix var $block_name")
     end
   end
 
@@ -156,7 +156,7 @@ function set_linear!(sdp::SDP_Problem, instance::SDP_Instance; debug=false)
       if !haskey(sdp.linear, (ctr_name, var))
         sdp.linear[(ctr_name, var)] = parse(coeff)
       else
-        error("set_linear!(): sdp.linear already has key ($ctr_name, $var) with val $(sdp.linear[(ctr_name, var)]). New val is $(parse(coeff))")
+        error(LOGGER, "set_linear!(): sdp.linear already has key ($ctr_name, $var) with val $(sdp.linear[(ctr_name, var)]). New val is $(parse(coeff))")
       end
     end
   end

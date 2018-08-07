@@ -10,7 +10,7 @@ get_variables(pb::Problem) = pb.variables
 
 function get_variabletype(pb::Problem, varName::String)
   if !haskey(pb.variables, varName)
-    error("get_variable(): Current Problem has no variable named ", varName)
+    error(LOGGER, "get_variable(): Current Problem has no variable named ", varName)
   end
   pb.variables[varName]
 end
@@ -20,7 +20,7 @@ has_variable(pb::Problem, var::Variable) = haskey(pb.variables, var.name) && pb.
 
 function add_variable!(pb::Problem, x::Pair{String, T}) where T
   if haskey(pb.variables, x[1]) && !(x[2] <: pb.variables[x[1]])
-    error("add_variable!(): Attempting to add variable ", x.name, " (", x.kind, ") when ", x, " (", get_variabletype(pb, x.name), ") already exists.")
+    error(LOGGER, "add_variable!(): Attempting to add variable ", x.name, " (", x.kind, ") when ", x, " (", get_variabletype(pb, x.name), ") already exists.")
   end
   pb.variables[x[1]] = x[2]
 end
@@ -127,10 +127,10 @@ Add the constraint `cstr` under the `cstrname` name in the `pb` problem.
 """
 function add_constraint!(pb::Problem, cstrName::String, cstr::Constraint)
   if haskey(pb.constraints, cstrName)
-    warn("add_constraint!(): A constraint with that name already exists ($cstrName)")
+    warn(LOGGER, "add_constraint!(): A constraint with that name already exists ($cstrName)")
   end
   if real(cstr.ub) < real(cstr.lb) || imag(cstr.ub) < imag(cstr.lb)
-    warn("add_constraint!(): ", cstrName, " Lower bound is higher than upper bound ($(cstr.lb) - $(cstr.ub))")
+    warn(LOGGER, "add_constraint!(): ", cstrName, " Lower bound is higher than upper bound ($(cstr.lb) - $(cstr.ub))")
   end
   add_variables!(pb, cstr)
   pb.constraints[cstrName] = cstr
@@ -154,7 +154,7 @@ function get_slacks(pb::Problem, pt::Point)
   val_arr = Complex[]
   for (cstrName, cstr) in pb.constraints
     val = evaluate(cstr.p, pt)
-    isa(val, Number) || error("get_slacks(): constraint $cstrName not fully evaluated at provided point.\nEvaluated value is $val.")
+    isa(val, Number) || error(LOGGER, "get_slacks(): constraint $cstrName not fully evaluated at provided point.\nEvaluated value is $val.")
     push!(var_arr, Variable(cstrName, Complex))
     push!(val_arr, min(real(val-cstr.lb), real(cstr.ub-val)) + min(imag(val-cstr.lb), imag(cstr.ub-val))*im)
   end
@@ -168,7 +168,7 @@ function get_relative_slacks(pb::Problem, pt::Point)
     val = evaluate(cstr.p, pt)
     lb = cstr.lb
     ub = cstr.ub
-    isa(val, Number) || error("get_slacks(): constraint $cstrName not fully evaluated at provided point.\nEvaluated value is $val.")
+    isa(val, Number) || error(LOGGER, "get_slacks(): constraint $cstrName not fully evaluated at provided point.\nEvaluated value is $val.")
     push!(var_arr, Variable(cstrName, Complex))
     if lb==ub
       infeas = abs(real(val-ub))/max(abs(real(ub)),1) + im *abs(imag(val-ub))/max(abs(imag(ub)),1)

@@ -51,7 +51,7 @@ end
 
 function <<(bound::Number, cstr::Constraint)
   if real(bound) > real(cstr.ub) || imag(bound) > imag(cstr.ub)
-    warn("<<(bnd, cstr): Creating a constraint with lower bound ", bound, " and upper bound ", cstr.ub)
+    warn(LOGGER, "<<(bnd, cstr): Creating a constraint with lower bound ", bound, " and upper bound ", cstr.ub)
   end
   return Constraint(cstr.p, bound, cstr.ub)
 end
@@ -59,7 +59,7 @@ end
 
 function <<(cstr::Constraint, bound::Number)
   if real(cstr.lb) > real(bound) || imag(cstr.lb) > imag(bound)
-    warn("<<(cstr, bnd): Creating a constraint with lower bound ", cstr.lb, " and upper bound ", bound)
+    warn(LOGGER, "<<(cstr, bnd): Creating a constraint with lower bound ", cstr.lb, " and upper bound ", bound)
   end
   return Constraint(cstr.p, cstr.lb, bound)
 end

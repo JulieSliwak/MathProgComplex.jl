@@ -1,6 +1,22 @@
+isdefined(Base, :__precompile__) && __precompile__()
+
 module MathProgComplex
 
 using DataStructures, JuMP
+
+# see https://invenia.github.io/Memento.jl/latest/faq/pkg-usage.html#Using-Memento-in-Julia-packages?-1
+using Memento
+using Compat: @__MODULE__
+const LOGGER = getlogger(@__MODULE__)
+__init__() = Memento.register(LOGGER)
+
+# message hierarchy: debug < info < warn < error
+# do not print efficiency-related warnings
+setlevel!(LOGGER, "info")
+
+# print efficiency-related warnings
+# setlevel!(LOGGER, "debug")
+
 
 import Base: ==, !=, <<, >>, isless, isconst, isreal, isnull, isequal
 import Base: +, -, *, /, ^, conj, conj!, abs2, norm, real, imag
@@ -10,9 +26,6 @@ import Base: start, next, done, length, setindex!, getindex, haskey, keys, value
 export AbstractPolynomial
 
 abstract type  AbstractPolynomial end
-
-const SEEK_EFFICIENCY = [false]      # if true, unefficient function will display a warning when used.
-                                    # get/set with seek_efficiency, seek_efficiency!
 
 include("utils_internal.jl")
 

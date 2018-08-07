@@ -15,7 +15,7 @@ function get_blockname(cstrname, cliquename, mmtrelax_pb)
     if length(cstrcliques) == 1
         return cstrname
     else
-        cstrname == get_momentcstrname() || warn("get_blockname(): several cliques found for $cstrname : $cstrcliques")
+        cstrname == get_momentcstrname() || warn(LOGGER, "get_blockname(): several cliques found for $cstrname : $cstrcliques")
         return cstrname*"_"*cliquename
     end
 end
@@ -32,7 +32,7 @@ function get_cstrname(cstrname::String, cstrtype::Symbol)
         return cstrname
         # return get_cstrname_upper(cstrname)
     else
-        error("get_cstrname(): Unknown type $cstrtype.")
+        error(LOGGER, "get_cstrname(): Unknown type $cstrtype.")
     end
 end
 
@@ -44,7 +44,7 @@ function get_normalizedpoly(cstr::Constraint, cstrtype::Symbol)
     elseif cstrtype == :ineqhi
         return cstr.ub - cstr.p
     else
-        error("get_normalizedpoly(): Unhandeld type $cstrtype.")
+        error(LOGGER, "get_normalizedpoly(): Unhandeld type $cstrtype.")
     end
 end
 
@@ -62,7 +62,7 @@ function get_ccmultvar(relaxctx::RelaxationContext, moment::Exponent, clique1::S
     elseif relaxctx.hierarchykind == :Complex
         return Variable("lagmult_cc_$(format_string(moment))_$(clique1)_$(clique2)", Complex)
     else
-        error("get_ccmultvar(): Unhandled hierarchy kind $(relaxctx.hierarchykind) ")
+        error(LOGGER, "get_ccmultvar(): Unhandled hierarchy kind $(relaxctx.hierarchykind) ")
     end
 end
 
