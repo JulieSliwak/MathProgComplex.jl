@@ -92,7 +92,7 @@ function *(expo::Exponent, λ::Number)
 end
 
 function *(p1::T, p2::U) where T<:Union{Number, AbstractPolynomial} where U<:Union{Number, AbstractPolynomial}
-    debug(LOGGER_EFF, string(stacktrace()))
+    debug(LOGGER, "Inefficient implementation\n", string(stacktrace()))
     return product(p1, p2)
 end
 
@@ -125,7 +125,7 @@ end
 
 ## Point
 function *(pt1::Point, λ::Number)
-    debug(LOGGER_EFF, string(stacktrace()))
+    debug(LOGGER, "Inefficient implementation\n", string(stacktrace()))
     pt = Point()
     if λ == 0
         return pt

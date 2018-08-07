@@ -10,15 +10,12 @@ using Compat: @__MODULE__
 const LOGGER = getlogger(@__MODULE__)
 __init__() = Memento.register(LOGGER)
 
-# for efficiency-related logging
-const LOGGER_EFF = getlogger("SEEK_EFFICIENCY")
-push!(LOGGER_EFF, DefaultHandler(tempname(), DefaultFormatter("Inefficient implementation:\n{msg}")))
-
+# message hierarchy: debug < info < warn < error
 # do not print efficiency-related warnings
-setlevel!(LOGGER_EFF, "error")
+setlevel!(LOGGER, "info")
 
 # print efficiency-related warnings
-# setlevel!(LOGGER_EFF, "debug")
+# setlevel!(LOGGER, "debug")
 
 
 import Base: ==, !=, <<, >>, isless, isconst, isreal, isnull, isequal
