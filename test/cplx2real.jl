@@ -1,15 +1,15 @@
 @testset "cplx2real - Exponent" begin
-    z1 = Variable("z1", Complex)
-    z2 = Variable("z2", Complex)
-    x = Variable("x", Real)
-    b = Variable("b", Bool)
+    z1 = MPC.Variable("z1", Complex)
+    z2 = MPC.Variable("z2", Complex)
+    x = MPC.Variable("x", Real)
+    b = MPC.Variable("b", Bool)
 
     expo_cplx = Exponent(SortedDict(z1=>Degree(1,0),
                                     x=>Degree(4,0),
                                     b=>Degree(1,0)))
 
-    z1_re = Variable("z1_Re", Real)
-    z1_im = Variable("z1_Im", Real)
+    z1_re = MPC.Variable("z1_Re", Real)
+    z1_im = MPC.Variable("z1_Im", Real)
 
     expo_real = Exponent(SortedDict(z1_re=>Degree(1,0),
                                     x=>Degree(4,0),
@@ -33,10 +33,10 @@
 end
 
 @testset "cplx2real - Polynomial" begin
-    z1 = Variable("z1", Complex)
-    z2 = Variable("z2", Complex)
-    x = Variable("x", Real)
-    b = Variable("b", Bool)
+    z1 = MPC.Variable("z1", Complex)
+    z2 = MPC.Variable("z2", Complex)
+    x = MPC.Variable("x", Real)
+    b = MPC.Variable("b", Bool)
 
     expo_cplx = Exponent(SortedDict(z1=>Degree(1,0),
                                     x=>Degree(4,0),
@@ -45,8 +45,8 @@ end
                                                 Exponent()=>5im))
 
     # Corresponding real quantities
-    z1_re = Variable("z1_Re", Real)
-    z1_im = Variable("z1_Im", Real)
+    z1_re = MPC.Variable("z1_Re", Real)
+    z1_im = MPC.Variable("z1_Im", Real)
     expo_real = Exponent(SortedDict(z1_re=>Degree(1,0),
                                     x=>Degree(4,0),
                                     b=>Degree(1,0)))
@@ -64,19 +64,19 @@ end
 end
 
 @testset "cplx2real - Point" begin
-    z1 = Variable("z1", Complex)
-    z2 = Variable("z2", Complex)
-    x = Variable("x", Real)
-    b = Variable("b", Bool)
+    z1 = MPC.Variable("z1", Complex)
+    z2 = MPC.Variable("z2", Complex)
+    x = MPC.Variable("x", Real)
+    b = MPC.Variable("b", Bool)
 
     pt_c = Point(SortedDict(z1=>1+2im,
                             z2=>3im,
                             x=>3.5,
                             b=>1))
 
-    z1_Re = Variable("z1_Re", Real)
-    z1_Im = Variable("z1_Im", Real)
-    z2_Im = Variable("z2_Im", Real)
+    z1_Re = MPC.Variable("z1_Re", Real)
+    z1_Im = MPC.Variable("z1_Im", Real)
+    z2_Im = MPC.Variable("z2_Im", Real)
 
     pt_re = Point(SortedDict(z1_Re=>1,
                              z1_Im=>2,
