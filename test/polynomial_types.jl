@@ -1,20 +1,17 @@
-
 @testset "evaluation tests" begin
-    x = MathProgComplex.Variable("x", Complex)
-    y = MathProgComplex.Variable("y", Complex)
-    z = MathProgComplex.Variable("z", Real)
-    b = MathProgComplex.Variable("b", Bool)
+    x = MPC.Variable("x", Complex)
+    y = MPC.Variable("y", Complex)
+    z = MPC.Variable("z", Real)
+    b = MPC.Variable("b", Bool)
 
     ## Polynomial algebra
     pt = Point(SortedDict(x=>2, y=>1+im, z=>0+im, b=>2.1))
     # print(pt)
 
     p1 = x^2 + 3*y + conj(x) + conj(z) + b
-    # println(p1)
     evaluate(p1, pt) == 10 + 3im
 
     p2 = y^6 - y^6 + (-y*x*b) / 4 + π*conj(b)
-    # println(p2)
 
 
     ## Poly operators
@@ -33,7 +30,6 @@
     @test evaluate(x*y*conj(y), pt) == 2*(1+im)*(1-im)
     @test evaluate(x*y + conj(y), pt) == 3+im
     @test evaluate(x*y + 1 + 1im, pt) == 3+3im
-
 
 
     ## Point algebra

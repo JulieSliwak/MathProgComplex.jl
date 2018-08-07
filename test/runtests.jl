@@ -1,4 +1,5 @@
-using MathProgComplex, DataStructures
+using MathProgComplex, DataStructures, Memento
+MPC = MathProgComplex
 
 @static if VERSION < v"0.7.0-DEV.2005"
     using Base.Test
@@ -6,9 +7,13 @@ else
     using Test
 end
 
-# write your own tests here
-include("basetypes.jl")
-include("cplx2real.jl")
-include("dat_importexport.jl")
-include("polynomial_types.jl")
-include("jump_export.jl")
+# suppress all messages less important than errors
+setlevel!(getlogger(MathProgComplex), "error")
+
+# @testset "MathProgComplex" begin
+    include("basetypes.jl")
+    include("cplx2real.jl")
+    include("dat_importexport.jl")
+    include("polynomial_types.jl")
+    include("jump_export.jl")
+# end

@@ -1,4 +1,4 @@
-using MathProgComplex, JuMP, Ipopt
+using JuMP, Ipopt
 
 @testset "dat export import consistency check" begin
     # min x - y
@@ -9,9 +9,9 @@ using MathProgComplex, JuMP, Ipopt
 
     qcqp = Problem()
 
-    x = MathProgComplex.Variable("x", Complex)
-    y = MathProgComplex.Variable("y", Real)
-    b = MathProgComplex.Variable("b", Bool)
+    x = MPC.Variable("x", Complex)
+    y = MPC.Variable("y", Real)
+    b = MPC.Variable("b", Bool)
 
     set_objective!(qcqp, x - y)
 
