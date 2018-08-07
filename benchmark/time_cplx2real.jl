@@ -1,4 +1,4 @@
-using OPFInstances, BenchmarkTools, DataStructures
+using OPFInstances, BenchmarkTools, DataStructures, Memento
 
 println("Loading module MathProgComplex")
 tic();
@@ -9,8 +9,7 @@ function main(instance = "case300")
     instancepath = getinstancepath("Matpower", "QCQP", instance)
     println("\nWorking on $(splitdir(instancepath))")
 
-    seek_efficiency!(true)
-    @show seek_efficiency()
+    setlevel!(getlogger(MathProgComplex), "debug")
 
     pb_c, pt = import_from_dat(instancepath)
 
@@ -31,12 +30,13 @@ function main_work()
     instancepath = getinstancepath("Matpower", "QCQP", "case300")
     println("\nWorking on $(splitdir(instancepath))")
 
-    seek_efficiency!(true)
-    @show seek_efficiency()
+    setlevel!(getlogger(MathProgComplex), "debug")
     pb_c, pt = import_from_dat(instancepath)
 
     pb_cplx2real(pb_c)
-    seek_efficiency!(false)
+
+    # turn off debug info
+    setlevel!(getlogger(MathProgComplex), "info")
 
     return
 end

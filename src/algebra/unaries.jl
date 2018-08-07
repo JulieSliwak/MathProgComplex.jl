@@ -75,7 +75,7 @@ function abs2(p::T) where T<:AbstractPolynomial
 end
 
 function norm(pt::Point, p::Real = 2)
-    p > 0 || error("norm(): p should be positive ($p ≤ 0).")
+    p > 0 || error(LOGGER, "norm(): p should be positive ($p ≤ 0).")
     if p == Inf
         maxi = -Inf
         for (var, val) in pt

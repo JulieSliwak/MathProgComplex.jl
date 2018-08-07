@@ -32,13 +32,15 @@ function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
     variables_jump = SortedDict{String, JuMP.Variable}()
 
     ## Define JuMP variables
+    startReal = 1.1
+    startBool = 0
     for (varname, vartype) in pb_poly_real.variables
         if vartype==Real
-            variables_jump["$varname"] = @variable(m, basename="$varname", start=1.1)
+            variables_jump["$varname"] = @variable(m, basename="$varname", start=startReal)
         elseif vartype==Bool
-            variables_jump["$varname"] = @variable(m, category=:Bin, basename="$varname", start=0)
+            variables_jump["$varname"] = @variable(m, category=:Bin, basename="$varname", start=startBool)
         else
-            error("$varname must be of type Real or Bool, here type is $vartype")
+            error(LOGGER, "$varname must be of type Real or Bool, here type is $vartype")
         end
     end
 
@@ -48,15 +50,15 @@ function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
     for (ctrname, modeler_ctr) in pb_poly_real.constraints
         polynome = modeler_ctr.p
 
-        modeler_ctr.lb == -Inf-Inf*im || imag(modeler_ctr.lb) == 0 || error("get_JuMP_cartesian_model(): Found constraint with complex bound.\nOnly real models are valid at this point.")
-        modeler_ctr.ub == +Inf+Inf*im || imag(modeler_ctr.ub) == 0 || error("get_JuMP_cartesian_model(): Found constraint with complex bound.\nOnly real models are valid at this point.")
+        modeler_ctr.lb == -Inf-Inf*im || imag(modeler_ctr.lb) == 0 || error(LOGGER, "get_JuMP_cartesian_model(): Found constraint with complex bound.\nOnly real models are valid at this point.")
+        modeler_ctr.ub == +Inf+Inf*im || imag(modeler_ctr.ub) == 0 || error(LOGGER, "get_JuMP_cartesian_model(): Found constraint with complex bound.\nOnly real models are valid at this point.")
         lb = real(modeler_ctr.lb)
         ub = real(modeler_ctr.ub)
 
         precond = modeler_ctr.precond
         for value in values(polynome)
             if imag(value)!=0
-                error("Polynom coefficients have to be real numbers")
+                error(LOGGER, "Polynom coefficients have to be real numbers")
             end
         end
         my_timer = @elapsed s_ctr, ispolylinear = poly_to_NLexpression(m, variables_jump,polynome)
@@ -70,7 +72,7 @@ function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
                     ##TODO: sqrt constraints for Smax
                     ctr_jump[ctrname] = @NLconstraint(m, -Inf <= s_ctr <= ub)
                 else
-                    error("sqrt non applicable to $lb <= $s_ctr <= $ub")
+                    error(LOGGER, "sqrt non applicable to $lb <= $s_ctr <= $ub")
                 end
             else
                 ctr_jump[ctrname] = @NLconstraint(m, lb <= s_ctr <= ub)
@@ -93,7 +95,12 @@ end
 function poly_to_NLexpression(m::JuMP.Model, variables_jump::SortedDict{String, JuMP.Variable},polynome::Polynomial)
     s = 0
     ispolylinear = true
-    d = polynome.degree
+    d = compute_degree(polynome) #max degree on one variable, not total degree
+    for expo in keys(polynome.poly)
+        explsum, conjsum = get_sumdegs(expo)
+        d.explvar = max(d.explvar, explsum)
+        d.conjvar = max(d.conjvar,conjsum)
+    end
     if d.explvar + d.conjvar > 1
         ispolylinear = false
     end
@@ -108,7 +115,7 @@ function poly_to_NLexpression(m::JuMP.Model, variables_jump::SortedDict{String, 
                 end
             else
                 if degree.explvar != 1
-                    error("Exponent is supposed to be degree 1 since polynome is linear. ")
+                    error(LOGGER, "Exponent is supposed to be degree 1 since polynome is linear. ")
                 end
                 prod = @expression(m, variables_jump["$varname"])
             end

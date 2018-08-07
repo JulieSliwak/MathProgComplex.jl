@@ -47,12 +47,12 @@ Check wether `expo`, of kind `:Real` or `:Complex` is homogeneous or not.
 function is_homogeneous(expo::Exponent, kind::Symbol)
     explsum, conjsum = get_sumdegs(expo)
     if kind == :Real
-        (conjsum != 0) && error("is_homogeneous(): Exponent $expo has conjugated variables for a real hierarchy.")
+        (conjsum != 0) && error(LOGGER, "is_homogeneous(): Exponent $expo has conjugated variables for a real hierarchy.")
         return explsum % 2 == 0
     elseif kind == :Complex
         return explsum == conjsum
     else
-        error("is_homogeneous(expo, kind): kind should be either :Real or :Complex ($kind here).")
+        error(LOGGER, "is_homogeneous(expo, kind): kind should be either :Real or :Complex ($kind here).")
     end
 end
 
@@ -89,7 +89,7 @@ function get_cstrtype(cstr::Constraint)
     elseif (cstr.lb != -Inf-im*Inf) && (cstr.ub != Inf+im*Inf)
         return :ineqdouble
     else
-        error("get_cstrtype(): unknown constraint type.\nConstraint is $cstr")
+        error(LOGGER, "get_cstrtype(): unknown constraint type.\nConstraint is $cstr")
     end
 end
 

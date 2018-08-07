@@ -73,15 +73,15 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
             # # Deal with upper inequality, no recomputing of variables or moment matrix if possible
             # clique_keys_up, order_up = localizingmat_param[cstrname_up]
             # if collect(clique_keys) != collect(clique_keys_up)
-            #     warn("clique keys different from lower and upper side of double constraint")
-            #     length(clique_keys_up) == 1 || error("build_momentrelaxation(): constraint $cstrname spans several cliques ($clique_keys).\nNot supported yet.")
+            #     warn(LOGGER, "clique keys different from lower and upper side of double constraint")
+            #     length(clique_keys_up) == 1 || error(LOGGER, "build_momentrelaxation(): constraint $cstrname spans several cliques ($clique_keys).\nNot supported yet.")
             #     vars, cliquename = collect_cliquesvars(clique_keys_up, max_cliques)
 
             #     mmt = MomentMatrix(relax_ctx, vars, order_up, relax_ctx.symmetries,
             #                                                   relax_ctx.cstrtypes[cstrname_up],
             #                                                   var_to_cliques = var_to_cliques)
             # elseif order_up != order
-            #     warn("order different from lower and upper side of double constraint")
+            #     warn(LOGGER, "order different from lower and upper side of double constraint")
             #     mmt = MomentMatrix(relax_ctx, vars, order_up, relax_ctx.symmetries,
             #                                                   relax_ctx.cstrtypes[cstrname_up],
             #                                                   var_to_cliques = var_to_cliques)

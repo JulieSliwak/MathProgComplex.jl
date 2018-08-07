@@ -58,7 +58,7 @@ function print_quad_expo(io, expo::Exponent, cat::String, coeff, maxvarlen, maxc
   elseif length(vars_conj) == 0 && length(vars_lin) == 0
     print_dat_line(io, "CONST", cat, "NONE", "NONE", real(coeff), imag(coeff), maxvarlen, maxcstrlen)
   else
-    warn("print_quad_expo(): Exponent $expo not supported.")
+    warn(LOGGER, "print_quad_expo(): Exponent $expo not supported.")
   end
 end
 
@@ -126,7 +126,7 @@ function print_variables(io::IO, variables, pt::Point, maxvarlen, maxcstrlen)
     elseif isreal(var)
       var_type = "REAL"
     else
-      error("Export_to_dat(): unsuported variable type $(var.kind)")
+      error(LOGGER, "Export_to_dat(): unsuported variable type $(var.kind)")
     end
     val = 0
 
@@ -189,7 +189,7 @@ point `pt`. Output files are `real_minlp_instance.dat` and
 function export_to_dat(pb_optim::Problem, outpath::String; filename::String="real_minlp_instance.dat", point::Point=Point(), exportprecond=false)
   expos = SortedDict{Exponent, String}()
   precond_cstrs = SortedSet{String}()
-  
+
 
   ## First pass on problem for defining all monomials necessary for export
   collect_requiredmonomials!(pb_optim.objective, expos)
@@ -201,19 +201,19 @@ function export_to_dat(pb_optim::Problem, outpath::String; filename::String="rea
   ## Get max length varname
   maxvarlen = 4
   for var in pb_optim.variables
-    ismatch(r" ", var[1]) && error("export_to_dat(): Variable '$var' is not suitable for dat export - no spaces allowed.")
+    ismatch(r" ", var[1]) && error(LOGGER, "export_to_dat(): Variable '$var' is not suitable for dat export - no spaces allowed.")
     (length(var[1]) > maxvarlen) && (maxvarlen = length(var[1]))
   end
-  
+
   for exponame in values(expos)
-    ismatch(r" ", exponame) && error("export_to_dat(): Variable '$var' is not suitable for dat export - no spaces allowed.")
+    ismatch(r" ", exponame) && error(LOGGER, "export_to_dat(): Variable '$var' is not suitable for dat export - no spaces allowed.")
     (length(exponame) > maxvarlen) && (maxvarlen = length(exponame))
   end
 
   ## Get max length dat constraint name
   maxcstrlen = 9
   for cstrname in keys(pb_optim.constraints)
-    ismatch(r" ", cstrname) && error("export_to_dat(): Constraint '$cstrname' is not suitable for dat export - no spaces allowed.")
+    ismatch(r" ", cstrname) && error(LOGGER, "export_to_dat(): Constraint '$cstrname' is not suitable for dat export - no spaces allowed.")
     ((length(cstrname) > maxcstrlen)) && (maxcstrlen = length(cstrname))
   end
 
@@ -264,7 +264,7 @@ function export_to_dat(pb_optim::Problem, outpath::String; filename::String="rea
         print_string(outfile, cstrname, maxcstrlen)
         @printf(outfile, "%10s\n", "SQRT")
       else
-        warn("export_dat(): Unknown preconditionning for cstr $cstrname.")
+        warn(LOGGER, "export_dat(): Unknown preconditionning for cstr $cstrname.")
       end
     end
   end

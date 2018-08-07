@@ -1,4 +1,5 @@
-using MathProgComplex, DataStructures
+using MathProgComplex, DataStructures, Memento
+MPC = MathProgComplex
 
 @static if VERSION < v"0.7.0-DEV.2005"
     using Base.Test
@@ -6,8 +7,11 @@ else
     using Test
 end
 
+# suppress all messages less important than errors
+setlevel!(getlogger(MathProgComplex), "error")
+
 # Polynomial optimization problems
-@testset "Polynomial optim" begin
+@testset "MathProgComplex" begin
     include("basetypes.jl")
     include("cplx2real.jl")
     include("dat_importexport.jl")

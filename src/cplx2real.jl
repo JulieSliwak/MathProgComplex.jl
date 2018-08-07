@@ -163,7 +163,7 @@ function cplx2real_rec(vars::Array{Variable}, degs::Array{Degree}, realPart::Pol
 
 				return cplx2real_rec(vars, degs, realPart_new, imagPart_new, cur_ind, Degree(cur_deg.explvar-1, cur_deg.conjvar))
 			elseif cur_deg.conjvar > 0
-				cur_deg.explvar == 0 || warn("cur_deg.explvar should be 0 (and not $(cur_deg.explvar)), set to this value")
+				cur_deg.explvar == 0 || warn(LOGGER, "cur_deg.explvar should be 0 (and not $(cur_deg.explvar)), set to this value")
 				realPart_new = product(var_R, realPart)
 				add!(realPart_new,  product(var_I, imagPart))
 

@@ -19,11 +19,11 @@ function compare_dat(file1::String, file2::String; epsilon = 1e-10, display_leve
   lines2 = SortedSet([data2[i, 1]*data2[i, 2]*data2[i, 3]*data2[i, 4] for i=1:size(data2, 1)])
 
   if size(data1, 1) != size(data2, 1)
-    warn("dat files have different number of lines  ($(size(data1, 1)) and $(size(data2, 1)))")
+    warn(LOGGER, "dat files have different number of lines  ($(size(data1, 1)) and $(size(data2, 1)))")
   end
 
   if lines1 != lines2
-    warn("dat files have different key entries\nfile1 \\ file2: $(length(setdiff(lines1, lines2)))\nfile2 \\ file1: $(length(setdiff(lines2, lines1)))")
+    warn(LOGGER, "dat files have different key entries\nfile1 \\ file2: $(length(setdiff(lines1, lines2)))\nfile2 \\ file1: $(length(setdiff(lines2, lines1)))")
   end
 
   if display_level>0
@@ -41,7 +41,7 @@ function compare_dat(file1::String, file2::String; epsilon = 1e-10, display_leve
         push!(errors[cur_error], (i, data1[i, 1:4]))
       end
     else
-      # warn("Compare_dat(): line $i - mismatched on line entry")
+      # warn(LOGGER, "Compare_dat(): line $i - mismatched on line entry")
     end
   end
 

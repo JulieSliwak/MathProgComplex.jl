@@ -69,7 +69,7 @@ function run_knitro(pb_path::String; src_ampl_path::String=joinpath(Pkg.dir("Mat
         # run(`cmd /c ampl real_minlp.run '>' $(outlog)`)
         run(`cmd /c ampl real_minlp.run `)
     catch
-        warn("AMPL/Knitro failed, returning.")
+        warn(LOGGER, "AMPL/Knitro failed, returning.")
     end
 
     cd(root)
@@ -100,7 +100,7 @@ function read_Knitro_output(pb_path::String, pb::Problem)
 
   ## Read Knitro solution
   files = filter(x->ismatch(r"solution\S+csv", x), readdir(pwd()))
-  length(files) == 1 || warn("get_knitro_solutions(): $(length(files)) .csv files found in $(pb_path).\nExtracting solution from $(files[1]).")
+  length(files) == 1 || warn(LOGGER, "get_knitro_solutions(): $(length(files)) .csv files found in $(pb_path).\nExtracting solution from $(files[1]).")
 
   sol_data = readdlm(files[1], ';')
 
