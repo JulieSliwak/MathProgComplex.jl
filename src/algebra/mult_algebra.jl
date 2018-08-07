@@ -92,7 +92,7 @@ function *(expo::Exponent, λ::Number)
 end
 
 function *(p1::T, p2::U) where T<:Union{Number, AbstractPolynomial} where U<:Union{Number, AbstractPolynomial}
-    seek_efficiency() && (warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__); println(stacktrace()))
+    debug(LOGGER, "Inefficient implementation\n$(string(stacktrace()))")
     return product(p1, p2)
 end
 
@@ -100,14 +100,14 @@ end
 ## Division
 function divide(p1::Polynomial, p2::Polynomial)
     if length(p2) != 1
-        error("/(::Polynomial, ::Polynomial): Only allowed for monomial divisor ($(length(p2))-monomial polynomial here).")
+        error(LOGGER, "/(::Polynomial, ::Polynomial): Only allowed for monomial divisor ($(length(p2))-monomial polynomial here).")
     end
     expo, λ = collect(p2)[1]
     if expo.degree != Degree(0,0)
-        error("/(::Polynomial, ::Polynomial): Only allowed for constant divisor ($(expo.degree)-degree monomial here).")
+        error(LOGGER, "/(::Polynomial, ::Polynomial): Only allowed for constant divisor ($(expo.degree)-degree monomial here).")
     end
     if λ == 0
-        error("/(::Polynomial, ::Polynomial): Only allowed for non null constant divisor.")
+        error(LOGGER, "/(::Polynomial, ::Polynomial): Only allowed for non null constant divisor.")
     end
     return p1 * (1/λ)
 end
@@ -125,7 +125,7 @@ end
 
 ## Point
 function *(pt1::Point, λ::Number)
-    seek_efficiency() && (warn("Unefficient implementation\n", @__FILE__, " ", @__LINE__); println(stacktrace()))
+    debug(LOGGER, "Inefficient implementation\n$(string(stacktrace()))")
     pt = Point()
     if λ == 0
         return pt
@@ -136,4 +136,3 @@ function *(pt1::Point, λ::Number)
     return pt
 end
 *(λ::Number, pt1::Point) = pt1*λ
-

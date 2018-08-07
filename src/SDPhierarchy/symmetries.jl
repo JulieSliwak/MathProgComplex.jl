@@ -45,11 +45,11 @@ Check whether `expo` is phase invariant, i.e. the exponent value is the same whe
 function has_symmetry(relax_ctx, expo::Exponent, sym::T) where T<:Type{PhaseInvariance}
     explsum, conjsum = get_sumdegs(expo)
     if relax_ctx.hierarchykind == :Real
-        (conjsum != 0) && error("is_homogeneous(): Exponent $expo has conjugated variables for a real hierarchy.")
+        (conjsum != 0) && error(LOGGER, "is_homogeneous(): Exponent $expo has conjugated variables for a real hierarchy.")
         return explsum % 2 == 0
     elseif relax_ctx.hierarchykind == :Complex
         return explsum == conjsum
     else
-        error("is_homogeneous(expo, kind): kind should be either :Real or :Complex ($kind here).")
+        error(LOGGER, "is_homogeneous(expo, kind): kind should be either :Real or :Complex ($kind here).")
     end
 end

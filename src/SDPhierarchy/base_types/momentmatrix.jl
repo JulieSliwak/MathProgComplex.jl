@@ -106,10 +106,10 @@ function get_exponentclique(expo::Exponent, var_to_cliques::DictType{Variable, S
         cliques = intersect(cliques, var_to_cliques[var])
     end
 
-    length(cliques) == 0 && error("get_exponentclique(): $expo is split amongst several cliques.\nMaximal cliques provided are not suitable for this relaxation.")
+    length(cliques) == 0 && error(LOGGER, "get_exponentclique(): $expo is split amongst several cliques.\nMaximal cliques provided are not suitable for this relaxation.")
 
     clique = first(cliques)
-    # length(cliques) > 1 && warn("get_exponentclique(): $expo appears in $(length(cliques)) cliques : $cliques.\nChoosing first one $clique") ## TODO: better logging system
+    # length(cliques) > 1 && warn(LOGGER, "get_exponentclique(): $expo appears in $(length(cliques)) cliques : $cliques.\nChoosing first one $clique") ## TODO: better logging system
     return clique
 end
 

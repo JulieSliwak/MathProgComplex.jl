@@ -7,7 +7,7 @@ Build the sparsitty pattern and variables decomposition for laying out the momen
 """
 function build_sparsity(relax_ctx::RelaxationContext, problem::Problem, max_cliques::DictType{String, Set{Variable}})
 
-    ((relax_ctx.issparse == false) && (length(max_cliques) > 1)) && error("build_sparsity(): Relaxation is not sparse, one clique is expected (not $(length(max_cliques)))")
+    ((relax_ctx.issparse == false) && (length(max_cliques) > 1)) && error(LOGGER, "build_sparsity(): Relaxation is not sparse, one clique is expected (not $(length(max_cliques)))")
 
     # Build localizing constraints order and variable set.
     localizingmat_param = DictType{String, Tuple{Set{String}, Int}}()
@@ -27,7 +27,7 @@ function build_sparsity(relax_ctx::RelaxationContext, problem::Problem, max_cliq
                 localizingmat_param[ctrname_lo] = (ctrcliques, di_lo-ceil(ki_lo/2))
                 localizingmat_param[ctrname_up] = (ctrcliques, di_up-ceil(ki_up/2))
             else
-                error("build_sparsity(): Unknown relaxation kind $(relax_ctx.hierarchykind). Should be `:Real` or `:Complex`")
+                error(LOGGER, "build_sparsity(): Unknown relaxation kind $(relax_ctx.hierarchykind). Should be `:Real` or `:Complex`")
             end
         else # :ineqlo, :inequp, :eq
             di, ki = relax_ctx.di[get_cstrname(ctrname, ctrtype)], relax_ctx.ki[get_cstrname(ctrname, ctrtype)]
@@ -36,7 +36,7 @@ function build_sparsity(relax_ctx::RelaxationContext, problem::Problem, max_cliq
             elseif relax_ctx.hierarchykind == :Real
                 localizingmat_param[get_cstrname(ctrname, ctrtype)] = (ctrcliques, di-ceil(ki/2))
             else
-                error("build_sparsity(): Unknown relaxation kind $(relax_ctx.hierarchykind). Should be `:Real` or `:Complex`")
+                error(LOGGER, "build_sparsity(): Unknown relaxation kind $(relax_ctx.hierarchykind). Should be `:Real` or `:Complex`")
             end
         end
     end
@@ -121,8 +121,8 @@ function get_locctrcliques(p::Polynomial, max_cliques::DictType{String, Set{Vari
 
         # Hopefully all variables are treated that way. Else repeat this process by choosing a clique. Again, which one ?
         if length(unaffected_vars) != 0
-            # warn("get_locctrcliques(): length(unaffected_vars) = $(length(unaffected_vars))") # TODO: better logging system...
-            cliques_from_unaffvar = DictType{String, Int}()
+            # warn(LOGGER, "get_locctrcliques(): length(unaffected_vars) = $(length(unaffected_vars))") # TODO: better logging system...
+            cliques_from_unaffvar = Dict{String, Int}()
             for var in unaffected_vars
                 for clique in var_to_cliques[var]
                     haskey(cliques_from_unaffvar, clique) || (cliques_from_unaffvar[clique] = 0)

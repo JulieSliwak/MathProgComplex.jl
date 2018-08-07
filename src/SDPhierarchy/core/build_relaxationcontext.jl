@@ -16,9 +16,9 @@ function set_relaxation(pb::Problem; ismultiordered::Bool=false,
 
     # Check that all variables have a type fitting the hierarchy kind
     for (varname, vartype) in pb.variables
-        (vartype<:Int) && error("set_relaxation() : variable $varname,$vartype is integer, unfit for SOS relaxation.\nConsider relaxing it and adding a complementarity constraint.")
-        (hierarchykind==:Complex) && !(vartype<:Complex) && error("set_relaxation() : variable $varname,$vartype should be complex for complex hierarchy.")
-        (hierarchykind==:Real) && !(vartype<:Real) && error("set_relaxation() : variable $varname,$vartype should be real for real hierarchy.")
+        (vartype<:Int) && error(LOGGER, "set_relaxation() : variable $varname,$vartype is integer, unfit for SOS relaxation.\nConsider relaxing it and adding a complementarity constraint.")
+        (hierarchykind==:Complex) && !(vartype<:Complex) && error(LOGGER, "set_relaxation() : variable $varname,$vartype should be complex for complex hierarchy.")
+        (hierarchykind==:Real) && !(vartype<:Real) && error(LOGGER, "set_relaxation() : variable $varname,$vartype should be real for real hierarchy.")
     end
 
     relax_ctx = RelaxationContext()
@@ -50,7 +50,7 @@ function set_relaxation(pb::Problem; ismultiordered::Bool=false,
         if haskey(relax_ctx.relaxparams, param)
             relax_ctx.relaxparams[param] = val
         else
-            warn("set_relaxation(): Unhandled parameter $param")
+            warn(LOGGER, "set_relaxation(): Unhandled parameter $param")
         end
     end
 
@@ -106,7 +106,7 @@ end
 
 function relctx_setdi!(relax_ctx, pb::Problem, di, d)
     di_relax = relax_ctx.di
-    !((di == Dict{String, Int}()) && (d==-1)) || error("RelaxationContext(): Either di or d should be provided as input.")
+    !((di == Dict{String, Int}()) && (d==-1)) || error(LOGGER, "RelaxationContext(): Either di or d should be provided as input.")
 
     ## Checking order by constraint
     for (cstrname, cstr) in pb.constraints
@@ -117,7 +117,7 @@ function relctx_setdi!(relax_ctx, pb::Problem, di, d)
         if cstrtype == :ineqdouble
             cstrname_lo, cstrname_up = get_cstrname(cstrname, cstrtype)
             cur_ki = relax_ctx.ki[cstrname_lo]
-            (0 ≤ cur_order-ceil(cur_ki/2)) || warn("RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value ceil($cur_ki/2).")
+            (0 ≤ cur_order-ceil(cur_ki/2)) || warn(LOGGER, "RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value ceil($cur_ki/2).")
             # (cur_ki <= cur_order) || warn("RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value $cur_ki, hierarchy may be multiordered.")
             # di_relax[cstrname_lo] = cur_order
             # di_relax[cstrname_up] = cur_order
@@ -125,7 +125,7 @@ function relctx_setdi!(relax_ctx, pb::Problem, di, d)
             di_relax[cstrname_up] = max(cur_order, ceil(cur_ki/2))
         else # :eq, :ineqlo, :inequp
             cur_ki = relax_ctx.ki[get_cstrname(cstrname, cstrtype)]
-            (0 ≤ cur_order-ceil(cur_ki/2)) || warn("RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value ceil($cur_ki/2).")
+            (0 ≤ cur_order-ceil(cur_ki/2)) || warn(LOGGER, "RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value ceil($cur_ki/2).")
             # (cur_ki <= cur_order) || warn("RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value $cur_ki, hierarchy may be multiordered.")
             # di_relax[get_cstrname(cstrname, cstrtype)] = cur_order
             di_relax[get_cstrname(cstrname, cstrtype)] = max(cur_order, ceil(cur_ki/2))
@@ -144,7 +144,7 @@ function relctx_setdi!(relax_ctx, pb::Problem, di, d)
     # Checking order of objective
     obj_degree = max(pb.objective.degree.explvar, pb.objective.degree.conjvar)
     # if obj_degree > di_relax[get_momentcstrname()]
-    #     warn("RelaxationContext(): Moment matrix order $(di_relax[get_momentcstrname()]) is lower than objective degree ($obj_degree). \nUsing value $obj_degree, hierarchy may be multiordered.")
+    #     warn(LOGGER, "RelaxationContext(): Moment matrix order $(di_relax[get_momentcstrname()]) is lower than objective degree ($obj_degree). \nUsing value $obj_degree, hierarchy may be multiordered.")
     #     di_relax[get_momentcstrname()] = ceil(obj_degree/2)
     # end
 
@@ -155,7 +155,7 @@ end
 
 function rel_ctx_setsymetries!(relax_ctx, pb, symmetries)
     pbsymmetries = relax_ctx.symmetries
-    isa(symmetries, Array) || error("set_relaxation(): symmetries should be an Array of types.")
+    isa(symmetries, Array) || error(LOGGER, "set_relaxation(): symmetries should be an Array of types.")
     for symtype in symmetries
         if has_symmetry(relax_ctx, pb, symtype)
             push!(pbsymmetries, symtype)

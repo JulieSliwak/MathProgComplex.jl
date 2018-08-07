@@ -1,4 +1,4 @@
-using JuMP, Ipopt, MathProgComplex
+using JuMP, Ipopt
 
 @testset "Rosenbrock Ipopt" begin
     # min (1-x)^2 + 100*(y-x^2)^2
@@ -6,8 +6,8 @@ using JuMP, Ipopt, MathProgComplex
     # optimal objective 0
     rosenbrock = Problem()
 
-    x = MathProgComplex.Variable("x", Real)
-    y = MathProgComplex.Variable("y", Real)
+    x = MPC.Variable("x", Real)
+    y = MPC.Variable("y", Real)
     set_objective!(rosenbrock, (1-x)^2 + 100*(y-x^2)^2)
 
     mysolver = IpoptSolver(print_level = 0)
@@ -31,8 +31,8 @@ end
 
     qcqp = Problem()
 
-    x = MathProgComplex.Variable("x", Real)
-    y = MathProgComplex.Variable("y", Real)
+    x = MPC.Variable("x", Real)
+    y = MPC.Variable("y", Real)
 
     set_objective!(qcqp, x - y)
 
@@ -52,11 +52,22 @@ end
 
     ## Test slack functions
     slacks = get_slacks(qcqp, sol)
-    @test real(slacks.coords[MathProgComplex.Variable("x bounds", Complex)]) > 0
-    @test real(slacks.coords[MathProgComplex.Variable("y bounds", Complex)]) > 0
+    @test real(slacks.coords[MPC.Variable("x bounds", Complex)]) > 0
+    @test real(slacks.coords[MPC.Variable("y bounds", Complex)]) > 0
 
-    @test imag(slacks.coords[MathProgComplex.Variable("x bounds", Complex)]) == 0
-    @test imag(slacks.coords[MathProgComplex.Variable("y bounds", Complex)]) == 0
+    @test imag(slacks.coords[MPC.Variable("x bounds", Complex)]) == 0
+    @test imag(slacks.coords[MPC.Variable("y bounds", Complex)]) == 0
 
     @test get_minslack(qcqp, sol)[1] < 1e-6
+end
+
+
+@testset "Matpower case9 Ipopt" begin
+    instancepath = joinpath(Pkg.dir("MathProgComplex"), "test", "instances")
+    pb_real, ~ = import_from_dat(joinpath(instancepath,"case9real.dat"))
+
+    mysolver = IpoptSolver(print_level = 0)
+    m, variables_jump = get_JuMP_cartesian_model(pb_real, mysolver)
+    solve(m)
+    @test getobjectivevalue(m) ≈ 1.45883471040144e+003 atol=1e-6
 end

@@ -112,7 +112,7 @@ function get_ctrbounds(problem::SDP_Problem; debug = false)
       blc[id_ctr] = lb - cst
       buc[id_ctr] = ub - cst
     else
-      error("get_ctrbounds() : Unknown constraint kind $(ctr[2]) $(bkc[id_ctr]) $(MSK_BK_FX[1])")
+      error(LOGGER, "get_ctrbounds() : Unknown constraint kind $(ctr[2]) $(bkc[id_ctr]) $(MSK_BK_FX[1])")
     end
   end
 

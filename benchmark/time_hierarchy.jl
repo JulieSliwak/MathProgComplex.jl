@@ -11,8 +11,7 @@ function main(instance = case30pwl)
     # instancepath = getinstancepath("Matpower", "QCQP", "case300")
     println("\n\nWorking on $(splitdir(instancepath))")
 
-    seek_efficiency!(false)
-    @show seek_efficiency()
+    setlevel!(getlogger(MathProgComplex), "info")
     @show MathProgComplex.DictType
 
     pb_c, pt = import_from_dat(instancepath)
@@ -79,14 +78,13 @@ function main_work()
     instancepath = getinstancepath("Matpower", "QCQP", "case300")
     println("\nWorking on $(splitdir(instancepath))")
 
-    seek_efficiency!(true)
-    @show seek_efficiency()
+    setlevel!(getlogger(MathProgComplex), "debug")
     @show MathProgComplex.DictType
 
     pb_c, pt = import_from_dat(instancepath)
 
     pb_cplx2real(pb_c)
-    seek_efficiency!(false)
+    setlevel!(getlogger(MathProgComplex), "info")
 
     return
 end
