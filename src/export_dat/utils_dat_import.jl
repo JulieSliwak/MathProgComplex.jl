@@ -27,7 +27,7 @@ function import_from_dat(instancepath::String, precondfilename::String="")
         elseif line[2] == "C"
             var = Variable(line[3], Complex)
         else
-            error("import_to_dat(): Unknown variable type $(line[2]) for variable $(line[3]).")
+            error(LOGGER, "import_to_dat(): Unknown variable type $(line[2]) for variable $(line[3]).")
         end
 
         variables[line[3]] = var
@@ -139,7 +139,7 @@ function import_from_dat(instancepath::String, precondfilename::String="")
             elseif line[1] == "LB"
                 lb = λ
             else
-                error("import_from_dat(): Unknown variable type $(line[1]) for constraint $(line[2]).")
+                error(LOGGER, "import_from_dat(): Unknown variable type $(line[1]) for constraint $(line[2]).")
             end
 
             next_state = :ReadLine
@@ -153,7 +153,7 @@ function import_from_dat(instancepath::String, precondfilename::String="")
             cur_ctr = line[2]
             next_state = :AssembleCtr
         else
-            error("import_from_dat(): Unknown state $state")
+            error(LOGGER, "import_from_dat(): Unknown state $state")
         end
     end
 
@@ -172,7 +172,7 @@ function import_from_dat(instancepath::String, precondfilename::String="")
             if line[2] == "SQRT"
                 pb.constraints[line[1]].precond = :sqrt
             else
-                error("import_from_dat(): Unknown preconditioning $(line[2]) for constraint $(line[1]).")
+                error(LOGGER, "import_from_dat(): Unknown preconditioning $(line[2]) for constraint $(line[1]).")
             end
             l = readline(precond_str)
             line = matchall(r"\S+", l)

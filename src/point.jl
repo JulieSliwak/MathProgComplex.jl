@@ -22,18 +22,18 @@ struct Point
         dict_pt = SortedDict{Variable, Number}()
         for (var, val) in dict
             if !isa(var, Variable) || !isa(val, Number)
-                error("Point(): Expected pair of (Variable, Number), got ($var, $val) of type ($typeof(var), $typeof(val)) instead.")
+                error(LOGGER, "Point(): Expected pair of (Variable, Number), got ($var, $val) of type ($typeof(var), $typeof(val)) instead.")
             end
             if isbool(var)
                 booled = 0
                 if val != 0
                     booled = Int((val/abs(val) + 1) / 2)
                 end
-                (booled ≠ val) && warn("Point(): $var is $(var.kind), provided value is $val, $booled stored.")
+                (booled ≠ val) && warn(LOGGER, "Point(): $var is $(var.kind), provided value is $val, $booled stored.")
                 add_to_dict!(dict_pt, var, booled, isdense = isdense)
             elseif isreal(var)
                 realed = real(val)
-                (realed ≠ val) && warn("Point(): $var is $(var.kind), provided value is $val, $realed stored.")
+                (realed ≠ val) && warn(LOGGER, "Point(): $var is $(var.kind), provided value is $val, $realed stored.")
                 add_to_dict!(dict_pt, var, realed, isdense = isdense)
             else
                 add_to_dict!(dict_pt, var, val, isdense = isdense)
@@ -51,7 +51,7 @@ Point() = Point(SortedDict{Variable, Number}())
 
 function Point(vars::Array{Variable}, vals::Array{<:Number})
     if length(vars) != length(vals)
-        error("Point(): input arrays must have same size.")
+        error(LOGGER, "Point(): input arrays must have same size.")
     end
 
     pt = Point()

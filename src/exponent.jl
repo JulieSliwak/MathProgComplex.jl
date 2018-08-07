@@ -26,9 +26,9 @@ struct Exponent <: AbstractPolynomial
     function Exponent(expo::SortedDict{Variable, Degree})
         degexpl, degconj = 0,0
         for (var, degree) in expo
-            ((degree.explvar < 0) || (degree.conjvar < 0)) && error("Exponent(): Expected non negative exponent for variable $var (got $degree)")
-            (isreal(var) && degree.conjvar != 0) && error("Exponent(): Expected nul conj exponent for real variable $var (got $degree)")
-            (isbool(var) && degree.explvar ∉ SortedSet([0,1])) && error("Exponent(): Expected boolean exponent for bool $var (got $degree)")
+            ((degree.explvar < 0) || (degree.conjvar < 0)) && error(LOGGER, "Exponent(): Expected non negative exponent for variable $var (got $degree)")
+            (isreal(var) && degree.conjvar != 0) && error(LOGGER, "Exponent(): Expected nul conj exponent for real variable $var (got $degree)")
+            (isbool(var) && degree.explvar ∉ SortedSet([0,1])) && error(LOGGER, "Exponent(): Expected boolean exponent for bool $var (got $degree)")
             if degree != Degree(0,0)
                 degexpl = max(degexpl, degree.explvar)
                 degconj = max(degconj, degree.conjvar)

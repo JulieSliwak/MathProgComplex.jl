@@ -315,7 +315,7 @@ function print_typesfile(io::IO, block_to_vartype::Dict{String, Symbol})
             print_string(io, blockname, cstrlen)
             println(io, " $(string(vartype))")
         end
-        # warn("Ignoring variable $blockname of type $vartype") ## NOTE: better logging system.
+        # warn(LOGGER, "Ignoring variable $blockname of type $vartype") ## NOTE: better logging system.
     end
 end
 

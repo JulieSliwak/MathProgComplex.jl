@@ -36,7 +36,7 @@ function SDPPrimal_cplx2real(sdp::SDPPrimal{T}) where T<:Complex
     end
 
     for (block_name, coords) in matrix_terms
-        warn(block_name)
+        info(LOGGER, block_name)
         for (γ, δ) in coords
             @show γ, δ
             γ_re, γ_im = cplx2real_sdpctr(γ)
@@ -46,16 +46,16 @@ function SDPPrimal_cplx2real(sdp::SDPPrimal{T}) where T<:Complex
 
             sdpblocks[(Xi_ctrname_re, block_name, γ_re, δ_re)] =  1
             sdpblocks[(Xi_ctrname_re, block_name, γ_im, δ_im)] = -1
-            info("sdpblocks[($Xi_ctrname_re, $block_name, $γ_re, $δ_re)] =  1")
-            info("sdpblocks[($Xi_ctrname_re, $block_name, $γ_im, $δ_im)] = -1")
+            info(LOGGER, "sdpblocks[($Xi_ctrname_re, $block_name, $γ_re, $δ_re)] =  1")
+            info(LOGGER, "sdpblocks[($Xi_ctrname_re, $block_name, $γ_im, $δ_im)] = -1")
 
 
             Xi_ctrname_im = get_Xictrname_im(block_name, γ, δ)
 
             sdpblocks[(Xi_ctrname_im, block_name, γ_im, δ_re)] = 1
             sdpblocks[(Xi_ctrname_im, block_name, δ_im, γ_re)] = 1
-            info("sdpblocks[($Xi_ctrname_im, $block_name, $γ_im, $δ_re)] = 1")
-            info("sdpblocks[($Xi_ctrname_im, $block_name, $δ_im, $γ_re)] = 1")
+            info(LOGGER, "sdpblocks[($Xi_ctrname_im, $block_name, $γ_im, $δ_re)] = 1")
+            info(LOGGER, "sdpblocks[($Xi_ctrname_im, $block_name, $δ_im, $γ_re)] = 1")
 
         end
     end
@@ -99,7 +99,7 @@ function SDPPrimal_cplx2real(sdp::SDPPrimal{T}) where T<:Complex
         elseif vartype == :SymC
             block_to_vartype[block] = :Sym
         else
-            error("SDPPrimal_cplx2real(): Unhandled matrix type $vartype for $block")
+            error(LOGGER, "SDPPrimal_cplx2real(): Unhandled matrix type $vartype for $block")
         end
     end
 
