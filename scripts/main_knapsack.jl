@@ -7,7 +7,7 @@ function main()
     relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                         d = 1,
                                         binvar_d = 1,
-                                        params = Dict(:opt_outlev=>3,
+                                        params = Dict(:opt_outlev=>1,
                                                       :opt_pbsolved=>:MomentRelaxation,
                                                       :opt_solver=>:MosekCAPI))
 
@@ -47,6 +47,7 @@ function main()
     # println("sosrel = \n$sosrel")
 
     sdp_instance = build_SDP_Instance_from_SDPDual(momentrel)
+    # sdp_instance = build_SDP_Instance_from_SDPPrimal(sosrel)
 
 
     primal = SortedDict{Tuple{String,String,String}, Float64}()
@@ -54,7 +55,16 @@ function main()
 
     primobj, dualobj = solve_mosek(sdp_instance::SDP_Problem, primal, dual, sol_info=relax_ctx.relaxparams, optsense=:Min)
 
-    return primal, dual
+    for i=1:5
+        println("x$i:   ", primal[("clique1", "x$i", "1")])
+    end
+
+    for i=1:5
+        println("x$i^2:   ", primal[("clique1", "x$i", "x$i")])
+    end
+
+
+    return primal
 end
 
 main()
