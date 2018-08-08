@@ -20,3 +20,9 @@ The package is comprised of two submodules:
 ## Package outline
 
 [package outline]
+
+```@contents
+```
+
+```@index
+```

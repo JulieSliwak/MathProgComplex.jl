@@ -24,8 +24,8 @@ Parameters can be set in the `relaxparams` dictionnary of the `RelaxationContext
 - `:slv_sosrel_bytes`:
 - `:slv_fileexport_t`: Export to .sdp files time
 - `:slv_fileexport_bytes`:
-- `:slv_mskstruct_t`: Construction of the `SDP_Problem` struct time
-- `:slv_mskstruct_bytes`:
+- `:slv_SDPProblem_t`: Construction of the `SDP_Problem` struct time
+- `:slv_SDPProblem_bytes`:
 
 ## SDP solver (Mosek) return status and intel
 
@@ -49,7 +49,7 @@ Parameters can be set in the `relaxparams` dictionnary of the `RelaxationContext
 - `:opt_nb_cliques`: xxxxx. Default value is =>-1,
 - `:opt_exportsdp`: xxxxx. Default value is =>0,                      # 0: no, 1: export specified problem to:opt_exportsdppath
 - `:opt_exportsdppath`: xxxxx. Default value is =>"SDP_Problem",
-- `:opt_msk_maxtime`: xxxxx. Default value is =>-1,                   # Default -1 is no time limit; unit is seconds
+- `:opt_solver_maxit`: xxxxx. Default value is =>-1,                   # Default -1 is no time limit; unit is seconds
 - `:opt_outmode`: xxxxx. Default value is =>0,                        # 0: screen, 1: file, 2: both
 - `:opt_outlev`: xxxxx. Default value is =>1,                         # 0: none, 1:summary at moment relaxation, sos relaxation, 2: detailled information, 3: full problems
 - `:opt_outname`: xxxxx. Default value is =>"momentsos.log",
