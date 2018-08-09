@@ -37,12 +37,8 @@ function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::SDPDual{T
 
                     sdpblocks[key] = -λ
                 elseif mmt.matrixkind == :Null
-                    ## TODO: look into ht_keyindex2!, ht_keyindex for avoiding two dict table lookup
-                    # Maybe implement this operation (if haskey add, else set) using 'setindex!(h::Dict{K,V}, v0, key::K) where V where K' as inspiration
                     key = (moment, block_name, product(γ, δ))
                     val = -λ * (γ!=δ ? 2 : 1)
-
-                    # addindex!(sdplinsym, val, key)
 
                     haskey(sdplinsym, key) || (sdplinsym[key] = 0)
                     sdplinsym[key] += val
@@ -79,13 +75,10 @@ function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::SDPDual{T
         # Determine which moment to affect the current coefficient.
 
         # Constraints are fα - ∑ Bi.Zi = 0
-        # addindex!(sdpcst, fαβ, moment)
-
         if !haskey(sdpcst, moment)
             sdpcst[moment] = 0.0
         end
 
-        # Constraints are fα - ∑ Bi.Zi = 0
         sdpcst[moment] += fαβ
     end
 

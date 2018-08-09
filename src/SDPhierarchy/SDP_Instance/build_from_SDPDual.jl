@@ -198,8 +198,9 @@ function get_coupling_ctr_name(clique_ref, clique, var1, var2)
     return var1, var2, clique_ref*"_"*clique
 end
 
+
 """
-    α, β = split_expo(expo::Exponent)
+    clique, α, β = split_expo(expo::Exponent)
 
 Split the exponent into two exponents of conjugated and explicit variables in the complex case.
 Real case is not supported yet.
@@ -295,81 +296,4 @@ function set_blocks!(sdp_pb::SDP_Problem, sdpdual::SDPDual)
 
         end
     end
-end
-
-
-
-
-###########################################################################
-function get_formatedexpo(expo::Exponent)
-    if first(get_sumdegs(expo)) == 2
-        if length(expo) == 1
-            var1 = string(first(keys(expo)))
-            var2 = string(first(keys(expo)))
-        else
-            var1, var2 = string.(collect(keys(expo)))
-        end
-        linetype = "QUAD"
-    elseif first(get_sumdegs(expo)) == 1
-        var1 = string(first(keys(expo)))
-        var2 = "NONE"
-        linetype = "LIN"
-    elseif first(get_sumdegs(expo)) == 0
-        var1 = "NONE"
-        var2 = "NONE"
-        linetype = "CONST"
-    end
-
-    return var1, var2, linetype
-end
-
-function print_QCQPform(io::IO, momentrelax::SDPDual{T}) where T
-    maxvarlen = 15
-    maxcstrlen = 15
-
-    println(io, "Moment Relaxation Problem, QCQP form:")
-    for moment in sort(collect(keys(momentrelax.objective)))
-        expo = product(moment.expl_part, moment.conj_part)
-
-        var1, var2, linetype = get_formatedexpo(expo)
-
-        cstrname = "OBJ"
-        val1 = momentrelax.objective[moment]
-        val2 = 0
-        MathProgComplex.print_dat_line(io, linetype, cstrname, var1, var2, val1, val2, maxvarlen, maxcstrlen)
-    end
-
-    for (cstrname, blocname) in sort(collect(keys(momentrelax.constraints)))
-
-        if !ismatch(r"_lo", cstrname)
-            mmtmat = momentrelax.constraints[(cstrname, blocname)]
-
-            for (key, momentpoly) in mmtmat
-                for (moment, coeff) in momentpoly
-                    expo = product(moment.expl_part, moment.conj_part)
-
-                    var1, var2, linetype = get_formatedexpo(expo)
-
-                    val1 = coeff
-                    val2 = 0
-                    MathProgComplex.print_dat_line(io, linetype, cstrname, var1, var2, val1, val2, maxvarlen, maxcstrlen)
-                end
-            end
-        end
-
-    end
-
-    # println(io, "→ Moments clique overlap:")
-    # if length(momentrelax.moments_overlap) > 0
-    #     mmtlength = maximum(x->length(string(x)), keys(momentrelax.moments_overlap))
-    #     for moment in sort(collect(keys(momentrelax.moments_overlap)))
-    #         cliquenames = momentrelax.moments_overlap[moment]
-    #         print(io, " → ")
-    #         print_string(io, string(moment), mmtlength)
-    #         for clique in sort(collect(cliquenames)) print(io, "$clique, ") end
-    #         @printf(io, "\b\b \n")
-    #     end
-    # else
-    #     print(io, "  None")
-    # end
 end
