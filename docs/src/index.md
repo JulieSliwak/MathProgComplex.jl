@@ -4,7 +4,7 @@ A julia package for polynomial optimization in complex numbers.
 
 ## Package features
 
-The package is comprised of two submodules:
+The package is comprised of two sub-modules:
 
 - PolynomialOptim offers:
   - Variables, exponents, polynomials structures and natural algebra operations,
@@ -15,14 +15,14 @@ The package is comprised of two submodules:
   - high level workflow for building and solving SDP relaxations of input POP with given parameters
   - structures for primal and dual sdps
   - interface to Mosek using Mosek.jl C API, and interface to JuMP models
-  - file export fomat of SDP problems
+  - file export format of SDP problems
 
-## Package outline
-
-[package outline]
+## Package contents
 
 ```@contents
 ```
+
+## Index
 
 ```@index
 ```

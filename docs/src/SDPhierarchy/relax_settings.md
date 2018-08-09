@@ -1,6 +1,10 @@
 # Relaxation options
 
-Parameters can be set in the `relaxparams` dictionnary of the `RelaxationContext` object. Here is the list of available parameters, along with their default value.
+Parameters can be set in the `relaxparams` dictionary of the `RelaxationContext` object. Here is the list of available parameters, along with their default value.
+
+!!! warning
+
+    to be completed
 
 ## POP parameters
 
@@ -49,7 +53,7 @@ Parameters can be set in the `relaxparams` dictionnary of the `RelaxationContext
 - `:opt_nb_cliques`: xxxxx. Default value is =>-1,
 - `:opt_exportsdp`: xxxxx. Default value is =>0,                      # 0: no, 1: export specified problem to:opt_exportsdppath
 - `:opt_exportsdppath`: xxxxx. Default value is =>"SDP_Problem",
-- `:opt_solver_maxit`: xxxxx. Default value is =>-1,                   # Default -1 is no time limit; unit is seconds
+- `:opt_msk_maxtime`: xxxxx. Default value is =>-1,                   # Default -1 is no time limit; unit is seconds
 - `:opt_outmode`: xxxxx. Default value is =>0,                        # 0: screen, 1: file, 2: both
 - `:opt_outlev`: xxxxx. Default value is =>1,                         # 0: none, 1:summary at moment relaxation, sos relaxation, 2: detailled information, 3: full problems
 - `:opt_outname`: xxxxx. Default value is =>"momentsos.log",

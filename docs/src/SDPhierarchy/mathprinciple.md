@@ -2,6 +2,10 @@
 
 We refer the reader to the mentioned papers for exact description and results on the SDP hierarchy. We only recall the principle and the form of the problems to detail the implementation more precisely.
 
+!!! warning
+
+    to be completed
+
 ## A measure problem
 
 The starting problem is a polynomial optimization problem in complex variables, that is a finite dimensional non linear problem:
@@ -43,4 +47,3 @@ symmetries...
 ## Generic SDP problem form
 
 The general form of primal SDP problem accepted by most solvers can be described as follows:
-

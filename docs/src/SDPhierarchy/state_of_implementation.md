@@ -34,7 +34,7 @@ Each of these features is individually tested on few instances in the package te
 
 - Multi-ordered hierarchy: currently working but not tested, by lack of reference data. The only example giving a result on the multi-ordered hierarchy is the `WB5` *complex* SDP relaxation, which should be exact with order 2 relaxation on the power balance and voltage constraints associated with busses $\{4, 5\}$. The example also uses decomposition in two cliques; details are available in *Moment/sum-of-squares hierarchy for complex polynomial optimization*, p.27.
 
-## Working functionalities
+## Working high-level functionalities
 
 - csv export of all information
 
