@@ -9,8 +9,8 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedp
 
 
     logpath = relax_ctx.relaxparams[:opt_exportsdppath]
-    # ispath(logpath) && rm(logpath, recursive=true)
-    # mkpath(logpath)
+    ispath(logpath) && rm(logpath, recursive=true)
+    mkpath(logpath)
 
     if save_pbs
         open(joinpath(logpath, "pb_opt.log"), "w") do fout
@@ -87,6 +87,7 @@ function run_hierarchy(problem::Problem, relax_ctx::RelaxationContext; indentedp
                                                                 sol_info = relax_ctx.relaxparams,
                                                                 optsense = optsense)
         catch err
+            warn(LOGGER, "Mosek run resulted in error:\n", err.msg)
             relax_ctx.relaxparams[:slv_prosta] = err.msg
             relax_ctx.relaxparams[:slv_solsta] = "_"
         end
