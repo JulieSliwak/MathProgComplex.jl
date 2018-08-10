@@ -4,7 +4,7 @@ We refer the reader to the mentioned papers for exact description and results on
 
 !!! warning
 
-    to be completed
+    To be completed
 
 ## A measure problem
 
@@ -35,10 +35,12 @@ A moment $\mu$ is exactly described by the sequence of its moments $\int z^\alph
 
 Given an order $d$, one can therefore build the order $d$ moment relaxation, that is the following problem $\inf_{\mu \ge 0} \left\{ \int_K f(z)d\mu(z) \right\}$
 
-Equivalent, with moment description of the measure to: Moment Relaxation.
+Note:
 
-Note: difference between real and complex.
-symmetries...
+- difference between real and complex.
+- Equivalent, with moment description of the measure to: Moment Relaxation.
+- symmetries
+- multiorder
 
 ## The moment relaxation
 
@@ -47,3 +49,14 @@ symmetries...
 ## Generic SDP problem form
 
 The general form of primal SDP problem accepted by most solvers can be described as follows:
+
+```math
+\begin{aligned}
+& \min_{Z_i\succeq 0, x_i\in \mathbb{R}}
+& \sum_i A_{0i} \cdot Z_i + \sum_i b_{0i} x_i + c_0 \\
+& \text{s.t.}
+& \sum_i A_{ji} \cdot Z_i + \sum_i b_{ji} x_i + c_j =0\\
+&&Z_i \succeq 0, \; i=1,\ldots, n_{sdp}&\\
+&&x_i\in\mathbb{R}, \; i=1,\ldots,n_{scal}
+\end{aligned}
+```

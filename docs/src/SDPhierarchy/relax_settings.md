@@ -4,7 +4,7 @@ Parameters can be set in the `relaxparams` dictionary of the `RelaxationContext`
 
 !!! warning
 
-    to be completed
+    To be completed, relaxation options will be refactored
 
 ## POP parameters
 
