@@ -12,7 +12,7 @@ The complex hierarchy, working directly on a $POP-\mathbb C$ is not fully implem
 X = \left( \begin{array} \\ A & -B \\ B & A \end{array} \right) \in \mathcal S^{2n}
 ```
 
-See *Moment/sum-of-squares hierarchy for complex polynomial optimization*, p.3.
+See *Moment/sum-of-squares hierarchy for complex polynomial optimization*, p.3. A thorough explanation of how to convert a complex SDP problem into a real one is given in section 4 of [this research report](https://hal.inria.fr/hal-01422932v2): *Plea for a semidefinite optimization solver in complex numbers*, Jean Charles Gilbert, Cédric Josz, 2017.
 
 ## The real hierarchy
 

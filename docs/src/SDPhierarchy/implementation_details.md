@@ -17,32 +17,36 @@ The $POP-\mathbb R$ and $POP-\mathbb C$:
 ```math
 \begin{aligned}
 \min_{x\in\mathbb R^n} & f(x) &\\
-\text{s.t.} & gi(x) \ge 0 & i=1,\ldots, m\\
+\text{s.t.} & g_i(x) \ge 0 & i=1,\ldots, m\\
 \end{aligned}
 \qquad
 \begin{aligned}
 \min_{z\in\mathbb C^n} & f(z) &\\
-\text{s.t.} & gi(z) \ge 0 & i=1,\ldots, m\\
+\text{s.t.} & g_i(z) \ge 0 & i=1,\ldots, m\\
 \end{aligned}
 ```
 
+We then write $f(z) = \sum_i f_{\alpha, \beta} \bar{z}{\alpha_i} z^{\beta_i}$, $g_i(z) = \sum_i g_{i, \alpha, \beta} \bar{z}{\alpha_i} z^{\beta_i}$.
+
 ### Maximal cliques description
 
-From the input $POP$, a sparsity pattern can be constructed. It is the graph having one node per variable, and one edge for each pair of variables appearing in the same exponent. Given the relaxation order $d_i$ and the constraint polynomial degree $k_i$ of each constraint, if $d_i > k_i$, then edges have to be added to represent all the pair of variables appearing in the considered *constraint*.
+From the input $POP$, a sparsity pattern can be constructed. It is the graph having one node per variable, and one edge for each pair of variables appearing in the same *exponent*. For a constraint $i$, given the relaxation order $d_i$ and the constraint polynomial degree $k_i$. For constraints such that $d_i > k_i$, edges have to be added to represent all the pair of variables appearing in the contraint *polynomial*.
 
-Given this extended sparsity pattern, any chordal extension will provide a decomposition for the considered relaxation. One builds a chordal extension of a given graph by adding edges so that all cycles have length 4 or more have at least a chord (an edge between two non-consecutive nodes of the cycle).
+Given this "extended" sparsity pattern, any chordal extension will provide a valid decomposition for the considered relaxation. One builds a chordal extension of a given graph by adding edges so that all cycles of length 4 or more have at least one chord (an edge between two non-consecutive nodes of the cycle).
 
-The second expected input is the maximal clique decomposition of this chordal graph. It allows to decompose one large SDP matrix into several smaller ones, tied with coupling constraints. For dense decompositions, only one clique containing all variables should be provided. It can by constructed by calling `get_maxcliques`:
+The second expected input is this chordal graph, in the form of a maximal clique decomposition. It allows to decompose one large SDP matrix variable into several smaller ones, tied with coupling constraints. For dense decompositions, only one clique containing all variables should be provided. It can by constructed by calling `get_maxcliques`:
 
 ```julia
 max_cliques = get_maxcliques(relax_ctx, problem)
 ```
 
-See *Moment/sum-of-squares hierarchy for complex polynomial optimization*, p.27 for an example.
+Note that the multiordered feature of the hierarchy allows to actually reduce the size of the SDP problem only if decomposition is used. Indeed for each clique of $POP$ variables an SDP matrix variable is associated, whose size $n$ is the number of exponents that can be built from the clique variables, with global degree inferior or equal the highest constraint relaxation order expressed with this clique. Therefore in a dense setting, the one matrix variable associated with the only clique has to represent all possibles exponents having degree up to $\max_i d_i$. Therefore setting all $d_i$ to this value is possible and the increase in each constraint matrix variable matrix size is negligeable compared to the variable matrix size.
+
+See *Moment/sum-of-squares hierarchy for complex polynomial optimization*, p.27 for an example of a multiordered sparse problem.
 
 ### `RelaxationContext`
 
-The `RelaxationContext` serves as a general structure for holding the user choices, some pre-computed information such as the relaxation, polynomial degree and constraint type of each constraint, or added constraints for binary variables of the input $POP$. Besides it also holds the `relaxparams` ordered dictionary, that serves to hold all timings and measures made while running the hierarchy, printed in the final csv. It is constructed by calling `set_relaxation`.
+The `RelaxationContext` serves as a general structure for holding the user choices, some pre-computed information such as the relaxation, polynomial degree and constraint type of each constraint, or added constraints for binary variables of the input $POP$. Besides it also holds the `relaxparams` ordered dictionary, that serves to hold all timings and measures made while running the hierarchy, possibly printed in a final csv file. It is constructed by calling `set_relaxation`.
 
 ## Building the moment relaxation
 
@@ -70,9 +74,9 @@ In this context of decomposed problems, a moment $y_{\alpha, \beta, l}$ is uniqu
 
 The matrices $\mathcal M_{d_l^{cl}}(y, C_l)$ have elements at all indexes $(\bar{z}^\gamma, z^\delta)$, where $|\gamma|, |\delta| \le d_l^{cl}$ and $z$ has vars in clique $C_l$. The element at index $(\bar{z}^\gamma, z^\delta)$ of this matrix is the moment $y_{\gamma, \delta, l}$ associated with clique $l$.
 
-The matrices $\mathcal M_{d_i-k_i}(g_i y, I_i)$ have elements at all indexes $(\bar{z}^\gamma, z^\delta)$, where $|\gamma|, |\delta| \le d_i-k_i$ and $z$ has vars in variables set $I_i$. The element at index $(\bar{z}^\gamma, z^\delta)$ of this matrix is the linear combination of moments $\sum_{\alpha, \beta} g_{\alpha, \beta} y_{\alpha+\gamma, \beta+\delta, l}$ associated with one of the cliques making up $I_i$ and comprising all variables from exponent $\bar{z}^{\alpha+\delta} z^{\beta+\gamma}$. Currently, one clique is arbitrarily chosen.
+The matrices $\mathcal M_{d_i-k_i}(g_i y, I_i)$ have elements at all indexes $(\bar{z}^\gamma, z^\delta)$, where $|\gamma|, |\delta| \le d_i-k_i$ and $z$ has vars in variables set $I_i$. The element at index $(\bar{z}^\gamma, z^\delta)$ of this matrix is the linear combination of moments $\sum_{\alpha, \beta} g_{i, \alpha, \beta} y_{\alpha+\gamma, \beta+\delta, l}$ associated with one of the cliques making up $I_i$ and comprising all variables from exponent $\bar{z}^{\alpha+\delta} z^{\beta+\gamma}$. Currently, one clique is arbitrarily chosen.
 
-### moment relaxation parameters
+### Moment relaxation parameters
 
 The following parameters are obtained by calling `build_sparsity(relax_ctx, problem, max_cliques)`:
 
@@ -98,16 +102,22 @@ struct SDPDual{T}
 end
 ```
 
+Note that all `MomentMatrix` objects are symmetric, and therefore only the *lower triangular part* is stored.
+
 It is assembled as follows:
 
-1. First the objective of the $POP$ $\sum_{\alpha, \beta} f_{\alpha, \beta} \bar{z}^\alpha z^\beta$ is converted to a linear combination of moment $\sum_{\alpha, \beta} f_{\alpha, \beta} y_{\alpha, \beta, clique_i}$. Each moment has to be associated with a clique that fully supports it.
+1. First the objective of the $POP$ $\sum_{\alpha, \beta} f_{\alpha, \beta} \bar{z}^\alpha z^\beta$ is converted to a linear combination of moment $\sum_{\alpha, \beta} f_{\alpha, \beta} y_{\alpha, \beta, clique_i}$. Each moment has to be associated with a clique that fully supports it. For exponent supported by several cliques, only the moment associated with one clique is used. Other choices could be made.
 
 2. Each clique $C_l$ result in a `MomentMatrix`, representing $\mathcal M_{d_l^{cl}}(y, C_l)$. Here all moments are attached to the clique $C_l$.
 
-3. Each one-sided inequality of the input $POP$ is then put on the form $\sum_{\alpha, \beta} g_{i, \alpha, \beta} \bar{z}^\alpha z^\beta \ge 0$, from which a `MomentMatrix` representing $\mathcal M_{d_i-k_i}(g_i y, I_i)$ is built. Double sided inequalities are split into two one sided inequalities.
+3. Each one-sided inequality of the input $POP$ is then put on the form $\sum_{\alpha, \beta} g_{i, \alpha, \beta} \bar{z}^\alpha z^\beta \ge 0$, from which a `MomentMatrix` representing $\mathcal M_{d_i-k_i}(g_i y, I_i)$ is built. Double-sided inequalities are split into two one-sided inequalities.
     Equality constraint $g_i(z)$ can either be treated as two constraints $g_i(z) \le 0$ and $g_i(z) \ge 0$, or as imposing the localizing matrix $\mathcal M_{d_i-k_i}(g_i y, I_i)$ to be null.
 
 4. Finally, if decomposition is used, the list of exponents that can be expressed in at least two cliques is computed, in order to lay out the right coupling constraint.
+
+### Dealing with equality constraints
+
+One-sided and double-sided inequalities are easily transformed into either one or two constraints $g_i(z) \ge 0$. Equlity constraints arising in the input $POP$ can be either dealt with as a double-sided inequality constraint, leading to two similar SDP constraints in the moment relaxation (equal up to a -1 product actually), or it can be transformed into a contraint $g_i(z) = 0$, which leads to a matrix constraint $\mathcal M_{d_i-k_i}(g_i y) = 0$. This matrix constraint can be split into as many scalar constraints as there are lower triangular terms in the matrix, resulting in a more compact valid representation of the input constraint.
 
 ## Building the SOS relaxation
 
@@ -123,11 +133,28 @@ mutable struct SDPPrimal{T}
 end
 ```
 
-It is built from a `SDPDual` instance, as its lagrangian dual.
+It is built from a `SDPDual` instance, as its lagrangian dual. It results in a problem of the form:
+
+```math
+\begin{aligned}
+& \min_{Z_i\succeq 0, x_i\in \mathbb{R}}
+& \sum_i A_{0, 0, i} \cdot Z_i + \sum_i b_{0, 0, i} \cdot x_i + c_{0, 0} & \\
+& \text{s.t.}
+& \sum_i A_{\alpha, \beta, i} \cdot Z_i + \sum_i b_{\alpha, \beta, i} \cdot x_i + c_{\alpha, \beta} =0 \qquad & \alpha, \beta \neq 0, 0\\
+&&Z_i \succeq 0, \; i=1,\ldots, n_{SDP \; var}&\\
+&&x_i\in\mathbb{R}, \; i=1,\ldots,n_{scal \; var}&
+\end{aligned}
+```
+
+where:
+
+- the quantity $n_{SDP \; var}$ counts the number of SDP constraints of the moment relaxation;
+- the quantity $n_{scal \; var}$ counts the number of constraints required for expressing each constraint $\mathcal M_{d_i-k_i}(g_i y) = 0$ lower triangular part as scalar constraints, and the number of coupling constraints of the moment problem;
+- there are as many constraints as there are non-null moments (*i.e.* exponents associated with cliques) in the moment problem.
 
 ## Storing and solving SDPs
 
-In order to separate the process of building SDP problems and solving them, a structure `SDP_Problem` has been defined. It carries a problem indexed with string keys to keep readability, and mappings from string to integers for passing to solvers. The problem is expected to be in the following form:
+In order to separate the process of building SDP problems and solving them, a structure `SDP_Problem` has been defined. It carries a problem indexed with string keys to keep readability, and mappings from string to integers for passing the problem to solvers. The problem is expected to be in the following form:
 
 ```math
 \begin{aligned}

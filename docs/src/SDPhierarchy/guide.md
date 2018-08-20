@@ -1,28 +1,30 @@
 # Guide
 
-This page aims to present the main features of the SDPhierarchy module, the simple high-level workflow and the lower-level workflow. Details on how to set the hierarchy high-level call is available at this page ???, a mathematic description of each problem along with important implementation choices is available at this page ????.
+This page aims to present the main features of the `SDPhierarchy` submodule, and both high-level and low-level workflows. Details on how to set the hierarchy high-level parameters is available at the page [Relaxation options](@ref), a mathematic description of each problem along with important implementation details is available at [Implementation details](@ref).
 
-## Purpose - general principle of relaxation
+## Purpose
 
-This module aims to implement a hierarchy of *Semi-Definite Positive* problems for Polynomials Optimization Problems, modeled with the PolynomialOptim sub-module of MathProgComplex. Given an input $POP$, one can choose to build a more or less tight SDP relaxation, leading to more or less large and tractable problems. This hierarchy was first laid out by J.B. Lasserre for real polynomial optimization problems. It was extended to complex polynomial optimization problems by C. Josz and D. Molzahn in order to leverage the structure available in complex polynomial problems, lost when converted to real polynomial problems by expliciting real and imaginary parts. Such complex polynomial optimization problems, $POP-\mathbb C$ arise when working on AC models of current transmission networks, for which current at each node of the network is modeled as a complex variable.
+This module aims to implement a hierarchy of *Semi-Definite Positive* relaxations for Polynomials Optimization Problems ($POP$), modeled with the `PolynomialOptim` sub-module of MathProgComplex. Given an input $POP$, one can choose to build a more or less tight SDP relaxation having certain properties, leading to more or less large and numerically tractable problems. This hierarchy was first laid out by J.B. Lasserre for real polynomial optimization problems. It was extended to complex polynomial optimization problems by C. Josz and D. Molzahn in order to leverage the underlying structure present in complex polynomial problems, lost when converted to euivalent real polynomial problems by expliciting real and imaginary parts. Such complex polynomial optimization problems, $POP-\mathbb C$ arise for example when working on AC models of current transmission networks ($ACOPF$) - for which current at each node of the network is modeled as a complex variable.
 
-The SDP hierarchy applied to $POP-\mathbb R$, the $POP-\mathbb C$ converted to real variables, yields exact relaxations for orders of either 1 or 2 in general. However, problems with hundreds or more variables, the order 2 SDP relaxation cannot be solved by current state of the art SDP solvers. Hence the will to use the structure lying in complex problems, exploit symmetries, specify relaxation orders constraint-wise and not problem-wise and apply decomposition techniques.
+The SDP hierarchy applied to $POP-\mathbb R$, the $POP-\mathbb C$ converted to real variables, yields exact relaxations with orders of either 1 or 2 empirically for $ACPOF$. However, when dealing with problems having hundreds or more variables, the order 2 SDP relaxation is too large to be handled and solved by current state-of-the-art SDP solvers. Hence the will to use the structure present in complex problems, exploit symmetries, specify relaxation orders constraint-wise (and not problem-wise) and decompose variables.
 
 ### References
 
-- 2001 Lasserre paper.
-- Multi-ordered Lasserre hierarchy for large scale polynomial optimization in real and complex variables, *Josz, Cedric and Molzahn, Daniel K*, arXiv preprint arXiv:1709.04376, 2017
-- Moment/sum-of-squares hierarchy for complex polynomial optimization, *Josz, Cédric and Molzahn, Daniel K*, arXiv preprint arXiv:1508.02068, 2015
+- Global optimization with polynomials and the problem of moments, *Lasserre, Jean B*, SIAM Journal on optimization, 2001;
+- Moment/sum-of-squares hierarchy for complex polynomial optimization, *Josz, Cédric and Molzahn, Daniel K*, arXiv preprint arXiv:1508.02068, 2015;
+- Multi-ordered Lasserre hierarchy for large scale polynomial optimization in real and complex variables, *Josz, Cedric and Molzahn, Daniel K*, arXiv preprint arXiv:1709.04376, 2017.
 
 ## Features of the hierarchy
 
 The following list details the main features of the implemented SDP hierarchy:
 
-- *real or complex hierarchy*: given a $POP-\mathbb C$, one can build a complex SDP relaxation, generally more tractable than its real counterpart. Ideally, this problem would be solved by complex SDP solvers, however no such solvers mature enough exist as of yet. Therefore the complex SDP is converted to a real SDP and then solved, which is still generally preferable to switching to real numbers at the POP stage.
-- *multi-ordered*: one $POP$ can lead to many more or less tights relaxations, depending on a global relaxation order. Actually, one can choose the relaxation orders at a constraint level. The resulting problem will equivalent in size to the problem with all constraint relaxed to the maximum relaxation order set for the multi-ordered version, unless a good decomposition is used at the same time.
-- *dense or sparse*: given a $POP$ with a relaxation order $d$, the resulting SDP problem will have a matrix with as many rows and columns as exponents of global degree up to $d$ can be formed from the variables of the $POP$. Hence the exponentially increasing size of SDP relaxations with growing orders $d$. However one can build decomposed versions of this problem, based of the monomials of each constraint, which allow to split this large SDP matrix into smaller ones, along with coupling constraints. Finding the best decomposition given an input POP and constraint wise relaxation orders is a difficult problem.
-- *symmetries*: it is known that if the input POP objective and constraints polynomials show a certain symmetry, all non-null moments of the SDP relaxations will feature this symmetry, which allows to set some coefficients of the SDP variables to 0. One symmetry arising on current transmission network is phase invariance: $\forall z\in \mathbb C, \theta\in [0, 2\pi[,\quad p(z) = p(e^{i \theta}z)$.
-- *binary variables*: a variable $b\in\{0,1\}$ appearing in an optimization problem can be treated as a continuous variable $x^b$ with the added polynomial constraint $x^b (1-x^b)=0$, which fits the framework of the POP hierarchy.
+- *real or complex hierarchy*: given a $POP-\mathbb C$, one can build a complex SDP relaxation, generally more tractable than its real counterpart. Ideally, this problem would be solved by complex SDP solvers, however we don't know of any existing complex SDP solvers mature enough at this date. Therefore the complex SDP is converted to a real SDP and then solved, which is still generally preferable to switching to real numbers at the POP stage. Of course, the real hierarchy can also be constructed from the $POP-\mathbb R$.
+- *multi-ordered*: one $POP$ can lead to many more or less tights relaxations, depending on a global relaxation order $d$ [^1]. Actually, one can choose the relaxation orders at a constraint level. This feature can yield intermediate sized SDPs assuming a good decomposition is used. More details are available at section [Maximal cliques description](@ref).
+- *dense or sparse*: given a $POP$ with a relaxation order $d$, the resulting SDP problem will have a matrix variable with as many rows and columns as exponents of global degree up to $d$ that can be formed from the variables of the $POP$. Therefore the size of SDO relaxations grow exponentially with the global order $d$ (or maximal constraint order $d_i$). However one can build decomposed versions of this problem, allowing to split this large SDP matrix into smaller ones, along with coupling constraints. Finding the best decomposition given an input $POP$ and constraint wise relaxation orders is a difficult open problem, not tackled by this module.
+- *symmetries*: it is known that if the input $POP$ objective and constraints polynomials show a certain symmetry, all non-null moments of the SDP relaxation solutions will also respect this symmetry, which allows to set some coefficients of the SDP variables to 0 from the begining. One symmetry arising on current transmission network is *phase invariance*: $\forall z\in \mathbb C, \theta\in [0, 2\pi[,\quad p(z) = p(e^{i \theta}z)$.
+- *binary variables*: a variable $b\in\{0,1\}$ appearing in an optimization problem can be treated as a continuous variable $x^b$ with the added polynomial constraint $x^b (1-x^b)=0$, which fits well the framework of the POP hierarchy.
+
+[^1]: The global degree of an exponent $\bar{z}^\alpha z^\beta = \prod_i \bar{z}^{\alpha_i} z^{\beta_i}$ is $d = |\alpha| + |\beta| = \sum_i \alpha_i + \beta_i$.
 
 ## Hierarchy workflow
 
@@ -30,17 +32,23 @@ The hierarchy workflow is as follows.
 
 Expected input is :
 
-- the POP: $\min\left\{ f(x) : g_i(x) \ge 0,  i=1, ..., m\right\}$
+- the $POP$: $\min\left\{ f(x) : g_i(x) \ge 0,  i=1, ..., m\right\}$,
 - a `RelaxationContext` object containing all relaxation choices,
-- a `max_cliques` object relevant to the decomposed version of the hierarchy. For the dense hierarchy, it can be built with `get_maxcliques(relax_ctx, problem)`.
+- a `max_cliques` object, describing the decomposition chosen for the relaxation. For a dense relaxation, it can be built with `get_maxcliques(relax_ctx, problem)`.
 
 Then several steps are taken:
 
-- Parameters defining the constraints of the SDP problem are computed. Specifically, they give the orders $d_i$, $d_i - k_i$ and relevant variables for the moment matrix $\mathcal M_{d_i^{Cl_i}}(y_i)$ and localizing matrices $\mathcal M_{d_i-k_i}(g_i y_i)$
+- Parameters defining the constraints of the SDP problem are computed. Specifically, they give the orders $d_i$, $d_i - k_i$ and relevant variables for the moment matrix $\mathcal M_{d_i^{Cl_i}}(y_i)$ and localizing matrices $\mathcal M_{d_i-k_i}(g_i y_i)$. See [Building the moment relaxation](@ref) for more details.
+- The moment relaxation of order $(d_1, \ldots, d_m)$, stored as a `SDPDual` object is computed,
+- Its lagrangian dual, the sum of squares (SOS) relaxation, stored as a `SDPPrimal` can be computed, possibly stored to a formatted file format,
+- either one of the relaxation problems can be converted into a `SDP_Instance`, which holds the SDP problem as a primal problem, with integer indexation for solvers,
+- The `SDP_Instance` can be passed to the Mosek solver with the C API, or converted into a JuMP problem, that can be solved with any JuMP(compatible SDP solver (Mosek, CSDP, SCS, ...).
 
 ![global_workflow](../images/hierarchy_workflow.png)
 
 ## Simple "high level" workflow
+
+All parameters are hold by the `RelaxationContext` object, the previously described workflow is executed upon calling `run_hierarchy`. Options are detailed at section [Relaxation options](@ref)
 
 ```julia
 ## Build polynomial problem
@@ -62,8 +70,6 @@ relax_ctx = set_relaxation(problem; hierarchykind=:Real,
 ## Build the order 1 SOS relaxation and pass it to Mosek via the C API.
 primobj, dualobj = run_hierarchy(problem, relax_ctx);
 ```
-
-Set important options, get objective values, get solution values, set order, symmetries, sparse
 
 ## Simple "lower level" example
 
