@@ -27,7 +27,7 @@ testcases = OrderedSet([("WB2", 1),
                                                 d = d,
                                                 params = Dict(:opt_outlev=>0,
                                                                 :opt_solver=>testsolver,
-                                                                :opt_pbsolved=>pbsolved))
+                                                                :opt_relaxationkind=>pbsolved))
 
             primobj, dualobj = run_hierarchy(problem, relax_ctx);
 

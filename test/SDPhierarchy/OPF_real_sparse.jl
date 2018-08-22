@@ -24,7 +24,7 @@ testfolder = joinpath(Pkg.dir("MathProgComplex"), "Mosek_runs", "tests", "sos_ex
                                                 params = Dict(:opt_outlev=>1,
                                                             :opt_logpath=>logpath,
                                                             :opt_solver=>testsolver,
-                                                            :opt_pbsolved=>pbsolved))
+                                                            :opt_relaxationkind=>pbsolved))
 
             max_cliques = get_WB5cliques(relax_ctx, problem)
             @assert length(max_cliques) == 2
@@ -57,7 +57,7 @@ testfolder = joinpath(Pkg.dir("MathProgComplex"), "Mosek_runs", "tests", "sos_ex
                                                 params = Dict(:opt_outlev=>1,
                                                             :opt_logpath=>logpath,
                                                             :opt_solver=>testsolver,
-                                                            :opt_pbsolved=>pbsolved))
+                                                            :opt_relaxationkind=>pbsolved))
 
             max_cliques = get_case9cliques(relax_ctx, problem)
             @assert length(max_cliques) == 3

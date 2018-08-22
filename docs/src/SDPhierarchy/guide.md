@@ -64,7 +64,7 @@ add_constraint!(problem, "eq_rot1", (cos(θ1)*x1+sin(θ1)*x2) == 0)
 relax_ctx = set_relaxation(problem; hierarchykind=:Real,
                                     d = 1,
                                     params = Dict(:opt_outlev=>1,
-                                                  :opt_pbsolved=>:SOSRelaxation,
+                                                  :opt_relaxationkind=>:SOSRelaxation,
                                                   :opt_solver=>:MosekCAPI))
 
 ## Build the order 1 SOS relaxation and pass it to Mosek via the C API.

@@ -68,8 +68,8 @@ function main(args)
                                         params = Dict(:opt_outlev=>1,
                                                       :opt_outmode=>1,
                                                       :opt_outcsv=>1,
-                                                    #   :opt_msk_maxtime=>2*3600,
-                                                      :opt_pbsolved=>pbsolved,
+                                                    #   :opt_solver_maxtime=>2*3600,
+                                                      :opt_relaxationkind=>pbsolved,
                                                       :opt_solver=>:None,
                                                       :opt_outname=>joinpath(logpath, "momentsos.log"),
                                                       :opt_outcsvname=>joinpath(logpath, "momentsos_solve.csv")))

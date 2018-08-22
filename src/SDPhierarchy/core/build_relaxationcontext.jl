@@ -43,7 +43,7 @@ function set_relaxation(pb::Problem; ismultiordered::Bool=false,
 
     relax_ctx.issparse = issparse
     relaxparams[:opt_issparse] = issparse
-    relaxparams[:opt_hierarchykind] = hierarchykind
+    relaxparams[:opt_hierarchyalgebra] = hierarchykind
     relaxparams[:opt_multiordered] = ismultiordered
     relaxparams[:opt_globalorder] = relax_ctx.di[get_momentcstrname()]
     (PhaseInvariance in symmetries) && (relaxparams[:opt_sym_phaseinv] = true)
@@ -214,7 +214,9 @@ function log_POPcharact!(relax_ctx::RelaxationContext, pb::Problem)
 end
 
 function get_defaultparams()
-    defparams = OrderedDict{Symbol, Any}(:pb_name=>"",          # POP parameters
+    defparams = OrderedDict{Symbol, Any}(
+                        ## POP description
+                        :pb_name=>"",
                         :pb_nvar=>0,
                         :pb_nvar_cplx=>0,
                         :pb_nvar_real=>0,
@@ -225,14 +227,50 @@ function get_defaultparams()
                         :pb_nctr_ineqdouble=>-1,
                         :pb_maxpolydeg=>-1,
                         :pb_isphaseinv=>false,
-                        :slv_mmtrel_t=>-1.0,                    # Moment relaxation time and memory consumption
-                        :slv_mmtrel_bytes=>-1,
-                        :slv_sosrel_t=>-1.0,                    # Conversion from moment to SOS relaxation
-                        :slv_sosrel_bytes=>-1,
-                        :slv_fileexport_t=>-1,                  # Export to .sdp of solved problem
-                        :slv_fileexport_bytes=>-1,
-                        :slv_mskstruct_t=>-1.0,                 # Construction of the SDP_Problem struct
-                        :slv_mskstruct_bytes=>-1,
+                        ## Hierarchy parameters
+                        :opt_hierarchyalgebra=>:Undef,          # either :Real, :Complex
+                        :opt_relaxationkind=>:MomentRelaxation, # either :MomentRelaxation or :SOSRelaxation
+                        :opt_sym_phaseinv=>false,
+                        :opt_multiordered=>false,
+                        :opt_globalorder=>-1,
+                        :opt_issparse=>false,
+                        :opt_nb_cliques=>-1,
+                        ### sdp export parameters
+                        :opt_exportsdp=>0,                      # 0: no, 1: export specified problem to :opt_exportsdppath
+                        #:opt_sdpexporttype=>:sdpformat,         # Unimplemented. Look into *SDPA* and possibly SeDuMi conventional formats
+                        :opt_exportsdppath=>"Mosek_runs",
+                        ### log parameters
+                        :opt_outmode=>0,                        # 0: screen, 1: file, 2: both
+                        :opt_outlev=>1,                         # 0: none, 1:summary at moment relaxation, sos relaxation, 2: detailled information, 3: full problems
+                        :opt_outname=>"hierarchy_momentsos.log",
+                        #### csv parameters
+                        :opt_outcsv=>0,                         # 0: no csv is written, 1: csv is written
+                        :opt_outcsvname=>"hierarchy_momentsos.csv",
+                        ## Hierarchy information
+                        :slv_relaxparams_t=>-1,                 # Relaxation parameters computation time in seconds (constraint wise order and variable set)
+                        :slv_relaxparams_bytes=>-1,             # Relaxation parameters structure memory size (in bytes)
+                        # :slv_relaxparams_allocbytes=>-1,        # Not implemented. Relaxation parameters construction memory allocations (in bytes)
+                        :slv_momentrel_t=>-1,                   # Moment relaxation construction time (in seconds)
+                        :slv_momentrel_bytes=>-1,               # Moment relaxation structure memory size (in bytes)
+                        # :slv_momentrel_allocbytes=>-1,          # Not implemented. Moment relaxation construction memory allocations (in bytes)
+                        :slv_SOSrel_t=>-1,                      # SOS relaxation construction time (in seconds)
+                        :slv_SOSrel_bytes=>-1,                  # SOS relaxation structure memory size (in bytes)
+                        # :slv_SOSrel_allocbytes=>-1,             # Not implemented. SOS relaxation construction memory allocations (in bytes)
+                        :slv_SDPProblem_t=>-1,                  # SDP_Problem construction time (in seconds)
+                        :slv_SDPProblem_bytes=>-1,              # SDP_Problem structure memory size (in bytes)
+                        # :slv_SDPProblem_allocbytes=>-1,         # Not implemented. SDP_Problem construction memory allocations (in bytes)
+                        :slv_fileexport_t=>-1,                  # SDP_Problem file export time (in seconds)
+                        :slv_fileexport_allocbytes=>-1,         # SDP_Problem file export memory allocations (in bytes)
+                        ## Solver options
+                        :opt_solver=>:MosekCAPI,                # Default :MosekCAPI, else JuMP solvers :MosekSolver, :CSDPSolver, :SCSSolver or :None
+                        :opt_solver_maxtime=>-1,                # Default -1 is no time limit; unit is seconds
+                        # :opt_solver_maxit=>-1,                          # Not implemented.
+                        # :opt_solver_primtol=>-1,                        # Not implemented.
+                        # :opt_solver_dualtol=>-1,                        # Not implemented.
+                        # :opt_solver_objtol=>-1,                         # Not implemented.
+                        # :opt_solver_outmode=>0,                         # Not implemented.
+                        # :opt_solver_outname=>"SDPpb_resolution.log",    # Not implemented.
+                        ## Solver information
                         :slv_prosta=>"",                        # SDP solution values
                         :slv_solsta=>"",
                         :slv_primobj=>-1.0,
@@ -240,23 +278,6 @@ function get_defaultparams()
                         :slv_primfeas=>-1.0,
                         :slv_dualfeas=>-1.0,
                         :slv_solvetime=>-1.0,
-                        :opt_hierarchykind=>:Undef,
-                        :opt_pbsolved=>:MomentRelaxation,       # either :MomentRelaxation or :SOSRelaxation
-                        :opt_issparse=>false,                   # Relaxation parameters
-                        :opt_multiordered=>false,
-                        :opt_globalorder=>-1,
-                        :opt_sym_phaseinv=>false,
-                        :opt_nb_cliques=>-1,
-                        :opt_logpath=>".",
-                        :opt_exportsdp=>0,                      # 0: no, 1: export specified problem to :opt_exportsdppath
-                        :opt_exportsdppath=>"Mosek_runs",
-                        :opt_solver=>:MosekCAPI,                # Default :MosekCAPI, else JuMP solvers :MosekSolver, :SCSSolver, or :None
-                        :opt_msk_maxtime=>-1,                   # Default -1 is no time limit; unit is seconds
-                        :opt_outmode=>0,                        # 0: screen, 1: file, 2: both
-                        :opt_outlev=>1,                         # 0: none, 1:summary at moment relaxation, sos relaxation, 2: detailled information, 3: full problems
-                        :opt_outname=>"momentsos.log",
-                        :opt_outcsv=>0,                         # 0: no csv is written, 1: csv is written
-                        :opt_outcsvname=>"momentsos_solve.csv"
                         )
 
     return defparams

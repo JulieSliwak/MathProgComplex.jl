@@ -37,7 +37,7 @@ function main()
                                             params = Dict(:opt_outlev=>1,
                                                           :opt_outmode=>2,
                                                           :opt_outcsv=>0,
-                                                          :opt_pbsolved=>:SOSRelaxation,
+                                                          :opt_relaxationkind=>:SOSRelaxation,
                                                           :opt_solver=>:MosekSolver,
                                                           :opt_debug=>true))
 
@@ -50,7 +50,7 @@ function main()
                                                 params = Dict(:opt_outlev=>1,
                                                             :opt_outmode=>2,
                                                             :opt_outcsv=>0,
-                                                            :opt_pbsolved=>:SOSRelaxation,
+                                                            :opt_relaxationkind=>:SOSRelaxation,
                                                             :opt_solver=>:MosekCAPI,
                                                             :opt_debug=>true))
 
@@ -116,7 +116,7 @@ function main()
     primobj, dualobj = MPC.solve_JuMP(sdp_instance_sos, :CSDPSolver, primal, dual;
                                                                 logname = "Mosek_run.log",
                                                                 printlog = false,
-                                                                msk_maxtime = relax_ctx.relaxparams[:opt_msk_maxtime],
+                                                                msk_maxtime = relax_ctx.relaxparams[:opt_solver_maxtime],
                                                                 sol_info = relax_ctx.relaxparams,
                                                                 optsense = :Max)
 

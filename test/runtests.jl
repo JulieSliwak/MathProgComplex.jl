@@ -21,7 +21,7 @@ end
 
 const mosek_optgap = 1.0e-6
 
-const testsolver = :CSDPSolver
+const testsolver = :MosekCAPI
 
 struct RelaxSol
     instance::String

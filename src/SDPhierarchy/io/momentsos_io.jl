@@ -38,7 +38,7 @@ function print_build_relctx(relax_ctx, pb)
         if relaxparams[:opt_outlev] ≥ 1
             println(outstr, "\n=== set_relaxation()")
 
-            print(outstr, "Relaxation is ", string(relaxparams[:opt_hierarchykind]))
+            print(outstr, "Relaxation is ", string(relaxparams[:opt_hierarchyalgebra]))
             relaxparams[:opt_issparse] && print(outstr, ", sparse")
             relaxparams[:opt_multiordered] && print(outstr, ", multiordered")
             println(outstr, ".")

@@ -40,7 +40,7 @@ function main()
                                             di = di,
                                             params = Dict(:opt_outlev=>1,
                                                           :opt_outmode=>0,
-                                                          :opt_pbsolved=>:MomentRelaxation,
+                                                          :opt_relaxationkind=>:MomentRelaxation,
                                                           :opt_solver=>:MosekCAPI))
 
     primal = SortedDict{Tuple{String,String,String}, Float64}()

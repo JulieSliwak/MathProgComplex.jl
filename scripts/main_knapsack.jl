@@ -8,7 +8,7 @@ function main()
                                         d = 1,
                                         binvar_d = 1,
                                         params = Dict(:opt_outlev=>1,
-                                                      :opt_pbsolved=>:MomentRelaxation,
+                                                      :opt_relaxationkind=>:MomentRelaxation,
                                                       :opt_solver=>:MosekCAPI))
 
 
