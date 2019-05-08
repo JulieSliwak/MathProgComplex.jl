@@ -29,29 +29,47 @@ function isless(exp1::Exponent, exp2::Exponent)
         return false
     end
 
-    state1 = start(exp1)
-    state2 = start(exp2)
-    while !done(exp1, state1) && !done(exp2, state2)
-        (i1, state1) = next(exp1, state1)
-        (i2, state2) = next(exp2, state2)
+    iter_result1 = iterate(exp1)
+    iter_result2 = iterate(exp2)
+    while iter_result1 !== nothing  && iter_result2 !== nothing
+
+          (i1, state1) = iter_result1
+          (i2, state2) = iter_result2
+
+    # state1 = start(exp1)
+    # state2 = start(exp2)
+    #while !done(exp1, state1) && !done(exp2, state2)
+    #     (i1, state1) = next(exp1, state1)
+    #     (i2, state2) = next(exp2, state2)
+
 
         if isequal(i1, i2)
-            continue
+            # continue
         else
             return isless(i1,i2)
         end
-        if done(exp1, state1) && done(exp2, state2)
+        # if done(exp1, state1) && done(exp2, state2)
+        #     return false
+        # elseif done(exp1, state1) && !done(exp2, state2)
+        #     return true
+        # elseif !done(exp1, state1) && done(exp2, state2)
+        #     return false
+        # end
+        iter_result1 = iterate(exp1, state1)
+        iter_result2 = iterate(exp2, state2)
+
+        if iter_result1 === nothing && iter_result2 === nothing
             return false
-        elseif done(exp1, state1) && !done(exp2, state2)
+        elseif iter_result1 === nothing && iter_result2 !== nothing
             return true
-        elseif !done(exp1, state1) && done(exp2, state2)
+        elseif iter_result1 !== nothing && iter_result2 === nothing
             return false
         end
     end
 
+
     return false
 end
-
 """
     isless_degree(exp1::Exponent, exp2::Exponent)
 
@@ -61,17 +79,30 @@ end
 function isless_degree(exp1::Exponent, exp2::Exponent)
     # First order level: sum of degrees
     exp1_deg = 0
-    state1 = start(exp1)
-    while !done(exp1, state1)
-        (i1, state1) = next(exp1, state1)
+    #state1 = start(exp1)
+    iter_result1 = iterate(exp1)
+    # while !done(exp1, state1)
+    #     (i1, state1) = next(exp1, state1)
+    #     exp1_deg += i1[2].explvar + i1[2].conjvar
+    # end
+
+    while iter_result1 !== nothing
+        (i1, state1) = iter_result1
         exp1_deg += i1[2].explvar + i1[2].conjvar
+        iter_result1 = iterate(exp1, state1)
     end
 
     exp2_deg = 0
-    state2 = start(exp2)
-    while !done(exp2, state2)
-        (i2, state2) = next(exp2, state2)
+    # state2 = start(exp2)
+    iter_result2 = iterate(exp2)
+    # while !done(exp2, state2)
+    #     (i2, state2) = next(exp2, state2)
+    #     exp2_deg += i2[2].explvar + i2[2].conjvar
+    # end
+    while iter_result2 !== nothing
+        (i2, state2) = iter_result2
         exp2_deg += i2[2].explvar + i2[2].conjvar
+        iter_result2 = iterate(exp2, state2)
     end
 
     if exp1_deg < exp2_deg
@@ -81,22 +112,38 @@ function isless_degree(exp1::Exponent, exp2::Exponent)
     end
 
     # Second order level: sort with variables and degrees
-    state1 = start(exp1)
-    state2 = start(exp2)
-    while !done(exp1, state1) && !done(exp2, state2)
-        (i1, state1) = next(exp1, state1)
-        (i2, state2) = next(exp2, state2)
+    # state1 = start(exp1)
+    # state2 = start(exp2)
+    iter_result1 = iterate(exp1)
+    iter_result2 = iterate(exp2)
+    while iter_result1 !== nothing && iter_result2 !== nothing
+        # (i1, state1) = next(exp1, state1)
+        # (i2, state2) = next(exp2, state2)
+
+        (i1, state1) = iter_result1
+        (i2, state2) = iter_result2
 
         if isequal(i1, i2)
-            continue
+            #continue
         else
             return isless(i1,i2)
         end
-        if done(exp1, state1) && done(exp2, state2)
+        # if done(exp1, state1) && done(exp2, state2)
+        #     return false
+        # elseif done(exp1, state1) && !done(exp2, state2)
+        #     return true
+        # elseif !done(exp1, state1) && done(exp2, state2)
+        #     return false
+        # end
+
+        iter_result1 = iterate(exp1, state1)
+        iter_result2 = iterate(exp2, state2)
+
+        if iter_result1 === nothing && iter_result2 === nothing
             return false
-        elseif done(exp1, state1) && !done(exp2, state2)
+        elseif iter_result1 === nothing && iter_result2 !== nothing
             return true
-        elseif !done(exp1, state1) && done(exp2, state2)
+        elseif iter_result1 !== nothing && iter_result2 === nothing
             return false
         end
     end

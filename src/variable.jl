@@ -40,7 +40,7 @@ mutable struct Variable <: AbstractPolynomial
 
     function Variable(name, kind)
         validtypes = Set([Complex, Real, Bool])
-        if true ∉ map(x-> kind <: x, validtypes) || typeof(name) ∉ Set([String, SubString{String}])
+        if true ∉ Set(kind <: x for x=validtypes) || typeof(name) ∉ Set([String, SubString{String}])
             error(LOGGER, "Variable() : attempting to define a variable $name of type $kind, supported types are {Complex, Real, Bool}")
         end
         return new(String(name), kind)

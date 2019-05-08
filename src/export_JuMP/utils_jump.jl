@@ -92,7 +92,7 @@ function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
     return m, variables_jump, ctr_jump, ctr_exp
 end
 
-function poly_to_NLexpression(m::JuMP.Model, variables_jump::SortedDict{String, JuMP.Variable},polynome::Polynomial)
+function poly_to_NLexpression(m::JuMP.Model, variables_jump#=::SortedDict{String, JuMP.Variable}=#,polynome::Polynomial)
     s = 0
     ispolylinear = true
     d = compute_degree(polynome) #max degree on one variable, not total degree

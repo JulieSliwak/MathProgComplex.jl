@@ -1,5 +1,8 @@
-using MathProgComplex, DataStructures, Memento
-MPC = MathProgComplex
+# using MathProgComplex, DataStructures, Memento
+# MPC = MathProgComplex
+
+include("..\\src\\MathProgComplex.jl")
+using DataStructures, Memento, Test
 
 @static if VERSION < v"0.7.0-DEV.2005"
     using Base.Test
