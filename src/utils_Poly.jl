@@ -62,11 +62,14 @@ end
 function get_sumdegs(expo::Exponent)
     explsum = conjsum = 0
 
-    state1 = start(expo)
-    while !done(expo, state1)
-        (i1, state1) = next(expo, state1)
+    # state1 = start(expo)
+    iter_result1 = iterate(expo)
+    while iter_result1 !== nothing
+        # (i1, state1) = next(expo, state1)
+        (i1, state1) = iter_result1
         explsum += last(i1).explvar
         conjsum += last(i1).conjvar
+        iter_result1 = iterate(expo,state1)
     end
 
     return explsum, conjsum

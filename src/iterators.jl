@@ -1,4 +1,4 @@
-export iterate, start, next, done, length, haskey, keys, values, getindex
+export iterate, length, haskey, keys, values, getindex
 
 ## Overloads for transparent iteration on `Exponent`, `Polyomial`, `Point`
 

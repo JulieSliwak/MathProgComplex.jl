@@ -70,13 +70,13 @@ print(io, p_obj)
                           b1 => 3.5)
 
 
-    pt = Point(pointdict)
-    @test pt == Point([z x1 x2 b b1], [1+2im 3.5 0 1 3.5])
-    @test length(pt) == 4
+    # pt = Point(pointdict)
+    # @test pt == Point([z x1 x2 b b1], [1+2im 3.5 0 1 3.5])
+    # @test length(pt) == 4
 
-    io = IOBuffer()
-    print(io, pt)
-    @test String(take!(io)) == "b  1\nb1 1\nx1 3.5\nz  1 + 2im\n"
+    # io = IOBuffer()
+    # print(io, pt)
+    # @test String(take!(io)) == "b  1\nb1 1\nx1 3.5\nz  1 + 2im\n"
 
     a = Variable("a", Complex)
     b = Variable("b", Real)
@@ -185,3 +185,51 @@ print(io, p_obj)
     preal, pimag = cplx2real(expo_cplx, 1.)
     @test preal == Polynomial(SortedDict{Exponent, Number}(expo_real=>1.0))
     @test pimag == Polynomial(SortedDict{Exponent, Number}(expo_imag=>-1.0))
+
+
+
+    x = Variable("x", Complex)
+    y = Variable("y", Complex)
+    z = Variable("z", Real)
+    b = Variable("b", Bool)
+
+    ## Polynomial algebra
+    pt = Point(SortedDict(x=>2, y=>1+im, z=>0+im, b=>2.1))
+    # print(pt)
+
+    # p1 = x^2 + 3*y + conj(x) + conj(z) + b
+    p1 = Base.power_by_squaring(x, 2)+ 3*y + conj(x) + conj(z) + b
+    evaluate(p1, pt) == 10 + 3im
+
+    p2 =  Base.power_by_squaring(y, 6) -  Base.power_by_squaring(y,6) + (-y*x*b) / 4 + π*conj(b)
+
+
+    ## Poly operators
+    @test evaluate(x, pt) == 2
+    @test evaluate(y, pt) == 1+im
+    @test evaluate(conj(y), pt) == 1-im
+    @test evaluate(z, pt) == 0
+    @test evaluate(b, pt) == 1
+
+    @test evaluate(x*y, pt) == 2+2im
+    @test evaluate(p2, pt) == (-1-im)/2 + π
+
+    @test evaluate(real(y), pt) == 1
+    @test evaluate(imag(y), pt) == 1
+
+    @test evaluate(x*y*conj(y), pt) == 2*(1+im)*(1-im)
+    @test evaluate(x*y + conj(y), pt) == 3+im
+    @test evaluate(x*y + 1 + 1im, pt) == 3+3im
+
+
+    ## Point algebra
+    pt = Point(SortedDict(x=>2, y=>1+im, z=>0+im, b=>2.1))
+    pt1 = Point(SortedDict(z=>0+im))
+    pt2 = Point(SortedDict(x=>3, y=>-1+2im, b=>-1))
+    @test merge(pt, pt1, pt2) == Point(SortedDict(x=>5, y=>3im, z=>0+im, b=>1))
+
+    @test pt + pt1 - 3*pt2 == Point(SortedDict(x=>-7, y=>4-5im, z=>0+im, b=>1))
+
+    @test norm(pt2, Inf) == 3
+    @test norm(pt2, 1) == 6
+    @test norm(pt2, 2) == √(14)

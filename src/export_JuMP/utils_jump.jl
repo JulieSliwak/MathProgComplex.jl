@@ -138,7 +138,7 @@ end
 function get_JuMP_solution(m, variables_jump, pb::Problem)
     sol = Point()
     for (varname, vartype) in pb.variables
-        sol[MathProgComplex.Variable(varname, vartype)] = convert(vartype, getvalue(variables_jump[varname]))
+        sol[#=MathProgComplex.=#Variable(varname, vartype)] = convert(vartype, getvalue(variables_jump[varname]))
     end
     return sol
 end
