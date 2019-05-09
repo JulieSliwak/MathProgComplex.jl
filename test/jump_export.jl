@@ -36,7 +36,7 @@ end
 
     set_objective!(qcqp, x - y)
 
-    add_constraint!(qcqp, "ctr", (x + x^2 + x*y + y^2) << 1)
+    add_constraint!(qcqp, "ctr", (x + Base.power_by_squaring(x, 2) + x*y + Base.power_by_squaring(y,2)) << 1)
     add_constraint!(qcqp, "x bounds", -2 << x << 2)
     add_constraint!(qcqp, "y bounds", -2 << y << 2)
 
@@ -63,7 +63,8 @@ end
 
 
 @testset "Matpower case9 Ipopt" begin
-    instancepath = joinpath(Pkg.dir("MathProgComplex"), "test", "instances")
+    instancepath = joinpath(pwd(), "test", "instances")
+    # instancepath = joinpath(Pkg.dir("MathProgComplex"), "test", "instances")
     pb_real, ~ = import_from_dat(joinpath(instancepath,"case9real.dat"))
 
     mysolver = IpoptSolver(print_level = 0)

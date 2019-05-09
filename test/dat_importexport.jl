@@ -22,7 +22,8 @@ using JuMP, Ipopt
     add_constraint!(qcqp, "y_bounds", -2 << y << 2)
 
     point = Point([x], [3])
-    dat_exportpath = joinpath(Pkg.dir("MathProgComplex"), "tmp_datexport")
+    dat_exportpath = joinpath(pwd(),"tmp_datexport")
+    # dat_exportpath = joinpath(Pkg.dir("MathProgComplex"), "tmp_datexport")
     mkpath(splitdir(dat_exportpath)[1])
 
     export_to_dat(qcqp, dat_exportpath, filename="POP.dat", point=point)
@@ -48,7 +49,8 @@ using JuMP, Ipopt
 end
 
 @testset "WB5.dat import and Ipopt solve" begin
-    instancepath = joinpath(Pkg.dir("MathProgComplex"), "test", "instances")
+    instancepath = joinpath(pwd(), "test", "instances")
+    # instancepath = joinpath(Pkg.dir("MathProgComplex"), "test", "instances")
     WB5_cplx, initpt = import_from_dat(joinpath(instancepath, "WB5.dat"))
 
     WB5 = pb_cplx2real(WB5_cplx)

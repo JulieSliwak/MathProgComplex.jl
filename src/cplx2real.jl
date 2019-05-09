@@ -235,7 +235,7 @@ end
 function real2cplx(pt::Point)
 	ptC = Point()
 	for (var, val) in pt
-		if ismatch(r"_Re$", var.name)
+		if occursin(r"_Re$", var.name)
 			var_c = Variable(var.name[1:end-3], Complex)
 			if !haskey(ptC, var_c)
 				ptC[var_c] = val
@@ -243,7 +243,7 @@ function real2cplx(pt::Point)
 				ptC[var_c] += val
 			end
 
-		elseif ismatch(r"_Im$", var.name)
+		elseif occursin(r"_Im$", var.name)
 			var_c = Variable(var.name[1:end-3], Complex)
 			if !haskey(ptC, var_c)
 				ptC[var_c] = val*im

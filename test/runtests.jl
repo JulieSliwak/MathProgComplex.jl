@@ -1,4 +1,4 @@
-using MathProgComplex, DataStructures, Memento, Printf
+using MathProgComplex, DataStructures, Memento, Printf, Pkg
 MPC = MathProgComplex
 
 using DataStructures, Memento, Test
