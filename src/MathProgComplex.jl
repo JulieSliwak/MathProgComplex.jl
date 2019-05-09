@@ -1,24 +1,24 @@
-# isdefined(Base, :__precompile__) && __precompile__()
+isdefined(Base, :__precompile__) && __precompile__()
 
-# module MathProgComplex
+module MathProgComplex
 
 using DataStructures, JuMP, Printf, LinearAlgebra
 
 # see https://invenia.github.io/Memento.jl/latest/faq/pkg-usage.html#Using-Memento-in-Julia-packages?-1
-# using Memento
-# using Compat: @__MODULE__
-# const LOGGER = getlogger(@__MODULE__)
-# __init__() = Memento.register(LOGGER)
-#
-# # message hierarchy: debug < info < warn < error
-# # do not print efficiency-related warnings
-# setlevel!(LOGGER, "info")
+using Memento
+using Compat: @__MODULE__
+const LOGGER = getlogger(@__MODULE__)
+__init__() = Memento.register(LOGGER)
 
-# print efficiency-related warnings
+# message hierarchy: debug < info < warn < error
+# do not print efficiency-related warnings
+setlevel!(LOGGER, "info")
+
+#print efficiency-related warnings
 # setlevel!(LOGGER, "debug")
 
 
-import Base: ==, !=, <<, >>, isless, isconst, isreal, isnull, isequal
+import Base: ==, !=, <<, >>, isless, isconst, isreal, isequal
 import Base: +, -, *, /, ^, conj, conj!, abs2, real, imag
 import Base: show, print, convert, copy, hash, merge
 import Base: iterate, length, setindex!, getindex, haskey, keys, values, deepcopy
@@ -63,4 +63,4 @@ include(joinpath("export_JuMP", "utils_jump.jl"))
 # SDPhierarchy function
 #include(joinpath("SDPhierarchy", "SDPhierarchy.jl"))
 
-# end
+end

@@ -1,5 +1,7 @@
-julia 0.6
+julia 0.7
 JuMP 0.17 0.19-
 DataStructures 0.8.3
+Compat
+Printf
 Mosek
 Memento
