@@ -18,7 +18,8 @@ function import_from_dat(instancepath::String, precondfilename::String="")
 
 
     ## Collect and define variables
-    line = matchall(r"\S+", l)
+    # line = matchall(r"\S+", l)
+    line = collect(( m.match for m=eachmatch(r"\S+", l) ))
     while line[1] == "VAR_TYPE" && !eof(instance_str)
         if line[2] == "REAL"
             var = Variable(line[3], Real)
@@ -33,20 +34,20 @@ function import_from_dat(instancepath::String, precondfilename::String="")
         variables[line[3]] = var
         add_variable!(pb, var)
 
-        setindex!(point, convert(var.kind, parse(line[5]) + im*parse(line[6])), var)
+        setindex!(point, convert(var.kind, parse.(Float64, line[5]) + im*parse.(Float64,line[6])), var)
 
         ## Mark where objective definition begins
         mark(instance_str)
 
         l = readline(instance_str)
-        line = matchall(r"\S+", l)
+        line = collect(( m.match for m=eachmatch(r"\S+", l) ))
     end
 
 
     ## Move forward to the monomial definition section
     while line[1] != "MONO_DEF" && !eof(instance_str)
         l = readline(instance_str)
-        line = matchall(r"\S+", l)
+        line = collect(( m.match for m=eachmatch(r"\S+", l) ))
     end
 
     ## Build all monomials
@@ -56,9 +57,9 @@ function import_from_dat(instancepath::String, precondfilename::String="")
         if !haskey(exponents, exponame)
             exponents[exponame] = Exponent()
         end
-        exponents[exponame] = product(exponents[exponame], Exponent(SortedDict(var=>Degree(parse(line[5]), parse(line[6])))))
+        exponents[exponame] = product(exponents[exponame], Exponent(SortedDict(var=>Degree(parse.(Float64,line[5]), parse.(Float64,line[6])))))
         l = readline(instance_str)
-        line = matchall(r"\S+", l)
+        line = collect(( m.match for m=eachmatch(r"\S+", l) ))
     end
 
     ## Add final monomial
@@ -68,13 +69,13 @@ function import_from_dat(instancepath::String, precondfilename::String="")
         if !haskey(exponents, exponame)
             exponents[exponame] = Exponent()
         end
-        exponents[exponame] = product(exponents[exponame], Exponent(SortedDict(var=>Degree(parse(line[5]), parse(line[6])))))
+        exponents[exponame] = product(exponents[exponame], Exponent(SortedDict(var=>Degree(parse.(Float64,line[5]), parse.(Float64,line[6])))))
     end
 
     ## Reset stream to the objective defintion
     reset(instance_str)
     l = readline(instance_str)
-    line = matchall(r"\S+", l)
+    line = collect(( m.match for m=eachmatch(r"\S+", l) ))
 
     ## Build polynomial objective
     p = Polynomial()
@@ -90,7 +91,7 @@ function import_from_dat(instancepath::String, precondfilename::String="")
             add!(p, Polynomial(SortedDict{Exponent, Number}(quad_expo=>λ)))
         end
         l = readline(instance_str)
-        line = matchall(r"\S+", l)
+        line = collect(( m.match for m=eachmatch(r"\S+", l) ))
     end
     set_objective!(pb, p)
 
@@ -109,7 +110,7 @@ function import_from_dat(instancepath::String, precondfilename::String="")
         if state == :ReadLine
             ## Readline
             l = readline(instance_str)
-            line = matchall(r"\S+", l)
+            line = collect(( m.match for m=eachmatch(r"\S+", l) ))
 
             var1, var2 = line[3:4]
             λ = parse_λ(line[5], line[6])
@@ -167,7 +168,7 @@ function import_from_dat(instancepath::String, precondfilename::String="")
         precond_str = open(joinpath(splitdir(instancepath)[1], precondfilename))
 
         l = jump_comments!(precond_str)
-        line = matchall(r"\S+", l)
+        line = collect(( m.match for m=eachmatch(r"\S+", l) ))
         while !eof(precond_str)
             if line[2] == "SQRT"
                 pb.constraints[line[1]].precond = :sqrt
@@ -175,7 +176,7 @@ function import_from_dat(instancepath::String, precondfilename::String="")
                 error(LOGGER, "import_from_dat(): Unknown preconditioning $(line[2]) for constraint $(line[1]).")
             end
             l = readline(precond_str)
-            line = matchall(r"\S+", l)
+            line = collect(( m.match for m=eachmatch(r"\S+", l) ))
         end
         close(precond_str)
     end
@@ -194,7 +195,7 @@ function jump_comments!(io::IOStream)
     l = ""
     while !eof(io)
         l = readline(io)
-        ismatch(r"\s*#", l) || break
+        occursin(r"\s*#", l) || break
     end
     return l
 end
@@ -206,7 +207,7 @@ function parse_λ(realpart::T, imagpart::T) where T <: Union{String, SubString}
     elseif realpart == "-Inf"
         λ += -Inf
     else
-        λ += parse(realpart)
+        λ += parse.(Float64,realpart)
     end
 
     if imagpart == "Inf"
@@ -214,7 +215,7 @@ function parse_λ(realpart::T, imagpart::T) where T <: Union{String, SubString}
     elseif imagpart == "-Inf"
         λ += -Inf*im
     else
-        λ += parse(imagpart)*im
+        λ += parse.(Float64,imagpart)*im
     end
     return λ
 end

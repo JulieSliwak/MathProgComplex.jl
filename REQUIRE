@@ -1,6 +1,8 @@
 julia 0.7
 JuMP 0.17 0.19-
 DataStructures 0.8.3
+LinearAlgebra
+Dates
 Compat
 Printf
 Mosek

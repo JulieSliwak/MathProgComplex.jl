@@ -15,8 +15,8 @@ using JuMP, Ipopt
 
     set_objective!(qcqp, x - y)
 
-    add_constraint!(qcqp, "ctr1", (x + x^2 + x*y + y^2) << 1)
-    add_constraint!(qcqp, "ctr2", (x^3 + (1.0+3im)*conj(x^2)*x*y + y^2) << (1 + 2im))
+    add_constraint!(qcqp, "ctr1", (x + Base.power_by_squaring(x,2) + x*y + Base.power_by_squaring(y,2)) << 1)
+    add_constraint!(qcqp, "ctr2", (Base.power_by_squaring(x,3) + (1.0+3im)*conj(Base.power_by_squaring(x,2))*x*y + Base.power_by_squaring(y,2)) << (1 + 2im))
     add_constraint!(qcqp, "ctr3", -3im << (5*b + 5im*y) << 1)
     add_constraint!(qcqp, "x_bounds", -2 << x << 2)
     add_constraint!(qcqp, "y_bounds", -2 << y << 2)
@@ -55,9 +55,9 @@ end
 
     WB5 = pb_cplx2real(WB5_cplx)
 
-    mysolver = IpoptSolver(print_level = 0)
+    mysolver = Ipopt.Optimizer
     m, variables_jump, ctr_jump, ctr_exp = get_JuMP_cartesian_model(WB5, mysolver)
-    solve(m)
+    optimize!(m)
 
     sol = get_JuMP_solution(m, variables_jump, WB5)
 

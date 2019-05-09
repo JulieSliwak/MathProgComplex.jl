@@ -2,7 +2,7 @@ isdefined(Base, :__precompile__) && __precompile__()
 
 module MathProgComplex
 
-using DataStructures, JuMP, Printf, LinearAlgebra
+using DataStructures, JuMP, Printf, LinearAlgebra, Dates
 
 # see https://invenia.github.io/Memento.jl/latest/faq/pkg-usage.html#Using-Memento-in-Julia-packages?-1
 using Memento
