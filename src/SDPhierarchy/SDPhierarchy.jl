@@ -2,7 +2,7 @@
 
 # using MathProgComplex
 # using DataStructures
-using OPFInstances
+#using OPFInstances
 
 export RelaxationContext, Moment, MomentMatrix, SDPDual, SDPPrimal
 export SDP_Instance, SDP_Block, SDP_Moment, SDP_Problem

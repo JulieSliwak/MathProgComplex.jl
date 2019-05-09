@@ -26,24 +26,20 @@ function add(p1::Polynomial, p2::Polynomial)
 end
 
 function +(p::T) where T<:AbstractPolynomial
-    # debug(LOGGER, "Inefficient implementation\n$(string(stacktrace()))")
-    # @warn("Inefficient implementation\n$(string(stacktrace()))")
+    debug(LOGGER, "Inefficient implementation\n$(string(stacktrace()))")
     return convert(Polynomial, p)
 end
 
 function +(p1::T, p2::U) where T<:AbstractPolynomial where U<:AbstractPolynomial
-    # debug(LOGGER, "Inefficient implementation\n$(string(stacktrace()))")
-    # @warn("Inefficient implementation\n$(string(stacktrace()))")
+    debug(LOGGER, "Inefficient implementation\n$(string(stacktrace()))")
     return add(convert(Polynomial, p1), convert(Polynomial, p2))
 end
 function +(p1::Number, p2::T) where T<:AbstractPolynomial
-    # debug(LOGGER, "Inefficient implementation\n$(string(stacktrace()))")
-    # @warn("Inefficient implementation\n$(string(stacktrace()))")
+    debug(LOGGER, "Inefficient implementation\n$(string(stacktrace()))")
     return add(convert(Polynomial, p1), convert(Polynomial, p2))
 end
 function +(p1::T, p2::Number) where T<:AbstractPolynomial
-    # debug(LOGGER, "Inefficient implementation\n$(string(stacktrace()))")
-    # @warn("Inefficient implementation\n$(string(stacktrace()))")
+    debug(LOGGER, "Inefficient implementation\n$(string(stacktrace()))")
     return add(convert(Polynomial, p1), convert(Polynomial, p2))
 end
 
@@ -81,8 +77,7 @@ function add!(pt1::Point, pt2::Point)
 end
 
 function add(pt1::Point, pt2::Point)
-    # debug(LOGGER, "Inefficient implementation\n$(string(stacktrace()))")
-    # @warn("Inefficient implementation\n$(string(stacktrace()))")
+    debug(LOGGER, "Inefficient implementation\n$(string(stacktrace()))")
     pt_coord = deepcopy(pt1.coords)
     pt = Point(pt_coord)
     add!(pt, pt2)
@@ -90,8 +85,7 @@ function add(pt1::Point, pt2::Point)
 end
 
 function +(pt1::Point, pt2::Point)
-    # debug(LOGGER, "Inefficient implementation\n$(string(stacktrace()))")
-    # @warn("Inefficient implementation\n$(string(stacktrace()))")
+    debug(LOGGER, "Inefficient implementation\n$(string(stacktrace()))")
     add(pt1, pt2)
 end
 
