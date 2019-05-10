@@ -1,15 +1,16 @@
 export buildPOP_1v1c, buildPOP_1v2c, buildPOP_1v2, buildPOP_EllJoszMolc
+export buildPOP_WB2, buildPOP_WB5
 export lasserre_ex1, lasserre_ex2, lasserre_ex3, lasserre_ex5
-export test_gloptipoly_ex1, test_gloptipoly_ex2
 export get_WB5cliques, get_case9cliques
 
-############################################
-### Small toy geometric problems
-############################################
+############################
+### Geometric problems
+############################
 
 function buildPOP_1v1c()
     z = Variable("z", Complex)
     problem = Problem()
+    add_variable!(problem, z)
     set_objective!(problem, -real(z))
     add_constraint!(problem, "ineq", abs2(z) << 4)
     return problem
@@ -18,6 +19,7 @@ end
 function buildPOP_1v2c()
     z = Variable("z", Complex)
     problem = Problem()
+    add_variable!(problem, z)
     set_objective!(problem, imag(z))
     add_constraint!(problem, "ineq_brn", abs2(z) << 1)
     θ = π/3
@@ -26,11 +28,12 @@ function buildPOP_1v2c()
 end
 
 function buildPOP_1v2()
-    x1 = Variable("x", Real)
-    x2 = Variable("y", Real)
+    x1 = Variable("x1", Real)
+    x2 = Variable("x2", Real)
     problem = Problem()
+    add_variable!(problem, x1); add_variable!(problem, x2)
     set_objective!(problem, -1.0*x1)
-    add_constraint!(problem, "ineq", (x1^2+x2^2) << 4)
+    add_constraint!(problem, "ineq", (x1^2+x2^2) << 1)
     θ1 = π/3
     add_constraint!(problem, "eq_rot1", (cos(θ1)*x1+sin(θ1)*x2) == 0)
     # θ2 = -π/3
@@ -41,12 +44,13 @@ end
 """
     problem = buildPOP_2v3c
 
-Elliptic example problemp from Josz, Molzahn 2018 paper.
+    Elliptic example problemp from Josz, Molzahn 2018 paper.
 """
 function buildPOP_EllJoszMolc()
     z1 = Variable("z1", Complex)
     z2 = Variable("z2", Complex)
     problem = Problem()
+    add_variable!(problem, z1); add_variable!(problem, z2);
     set_objective!(problem, 3-abs2(z1)-0.5*im*z1*conj(z2)^2+0.5im*z2^2*conj(z1))
     add_constraint!(problem, "eq1", (abs2(z1)-0.25*z1^2-0.25*conj(z1)^2) == 1)
     add_constraint!(problem, "eq2", (abs2(z1)+abs2(z2)) == 3)
@@ -55,183 +59,161 @@ function buildPOP_EllJoszMolc()
     return problem
 end
 
+############################
+### OPF problems
+############################
 
-############################################
+function buildPOP_WB2(; v2max = 0.976, rmeqs = false, setnetworkphase=false, addball=false)
+    # OPFpbs = load_OPFproblems(MatpowerInput, joinpath("..", "data", "data_Matpower", "matpower", "WB2.m"))
+    # problem_c = build_globalpb!(OPFpbs)
+    problem_c, pt = import_from_dat(getinstancepath("Matpower", "QCQP", "WB2"))
+
+    ## Converting to real ineq. only problem
+    !rmeqs || change_eq_to_ineq!(problem_c)
+    problem = pb_cplx2real(problem_c)
+
+    if setnetworkphase
+        ## Fixing volt phase of last bus to 0
+        lastctr = problem.constraints["BaseCase_2_Volt_VOLTM_Re"]
+        rm_constraint!(problem, "BaseCase_2_Volt_VOLTM_Re")
+
+        ## Setting imag part to 0
+        # pt = Point(SortedDict(Variable("BaseCase_2_VOLT_Im", Real)=>0.0), isdense=true)
+        # infer_problem!(problem, pt)
+
+        add_constraint!(problem, "BaseCase_2_Volt_VOLTM_Re", sqrt(lastctr.lb) << Variable("BaseCase_2_VOLT_Re", Real) << v2max)
+        add_constraint!(problem, "BaseCase_2_Volt_VOLTM_Im", Variable("BaseCase_2_VOLT_Im", Real) == 0)
+    elseif v2max != 0.976
+        problem.constraints["BaseCase_2_Volt_VOLTM_Re"].ub = v2max^2
+    end
+
+    ## Adding ball constraint
+    if addball
+        p = Polynomial()
+        for var in problem.variables
+            p += Variable(var[1], var[2])^2
+        end
+        ub = problem.constraints["BaseCase_1_Volt_VOLTM_Re"].ub + v2max^2
+        add_constraint!(problem, "Ball_ctr", p << ub)
+    end
+
+    return problem
+end
+
+function buildPOP_WB5(; q5min = 1.05, rmeqs = false)
+    # OPFpbs = load_OPFproblems(MatpowerInput, joinpath("..", "data", "data_Matpower", "matpower", "WB5.m"))
+    problem_c, pt = import_from_dat(getinstancepath("Matpower", "QCQP", "WB5"))
+
+    # Sgen = OPFpbs["BaseCase"].ds.bus["BUS_5"]["Gen_1"].power_min
+    # OPFpbs["BaseCase"].ds.bus["BUS_5"]["Gen_1"].power_min = real(Sgen) + im*q5min
+    # problem_c = build_globalpb!(OPFpbs)
+
+    ## Converting to real ineq. only problem
+    !rmeqs || change_eq_to_ineq!(problem_c)
+    return pb_cplx2real(problem_c)
+end
+
+
+
+############################
 ### Global Optim pbs from Lasserre2001
-############################################
+############################
 
 """
     problem, relax_ctx = lasserre_ex1()
 
-From Lasserre2001, global minimum : (3) -0.2428.
+    From Lasserre2001, global minimum : (3) -0.2428.
 """
 function lasserre_ex1()
     x1 = Variable("x1", Real)
     x2 = Variable("x2", Real)
     problem = Problem()
+    add_variable!(problem, x1); add_variable!(problem, x2)
     set_objective!(problem, (x1^2+1)^2 + (x2^2+1)^2 + (x1+x2+1)^2)
 
-    ε_abs=1e-2
-    order_to_obj = OrderedDict(2=>2.5074)
-
-    return problem, order_to_obj, ε_abs
+    relax_ctx = set_relaxation(problem; hierarchykind=:Real,
+                                        d = 2)
+    return problem, relax_ctx
 end
 
 """
     problem, relax_ctx = lasserre_ex2()
 
-From Lasserre2001, global minimum : -11.4581.
+    From Lasserre2001, global minimum : -11.4581.
 """
 function lasserre_ex2()
     x1 = Variable("x1", Real)
     x2 = Variable("x2", Real)
     problem = Problem()
+    add_variable!(problem, x1); add_variable!(problem, x2)
     set_objective!(problem, (x1^2+1)^2 + (x2^2+1)^2 -2*(x1+x2+1)^2)
 
-    ε_abs=1e-3
-    order_to_obj = OrderedDict(3=>-11.4581)
-
-    return problem, order_to_obj, ε_abs
+    relax_ctx = set_relaxation(problem; hierarchykind=:Real,
+                                        d = 2)
+    return problem, relax_ctx
 end
 
 """
     problem, relax_ctx = lasserre_ex3()
 
-From Lasserre2001, global minimum : -1/27, x1*² = x2*² = 1/3.
+    From Lasserre2001, global minimum : -1/27, x1*² = x2*² = 1/3.
 """
 function lasserre_ex3()
     x1 = Variable("x1", Real)
     x2 = Variable("x2", Real)
     problem = Problem()
+    add_variable!(problem, x1); add_variable!(problem, x2)
     set_objective!(problem, x1^2 * x2^2 * (x1^2 + x2^2 - 1))
-    add_constraint(problem, "ball_constraint", (x1^2 + x2^2) << 10^2)
 
-    ε_abs=1e-3
-    order_to_obj = OrderedDict(3=>-1/27)
-
-    return problem, order_to_obj, ε_abs
+    relax_ctx = set_relaxation(problem; hierarchykind=:Real,
+                                        d = 3)
+    return problem, relax_ctx
 end
 
 """
     problem, relax_ctx = lasserre_ex5()
 
-From Lasserre2001, global minimum : -2, for (1, 2).
-Relaxation : order 1 -> -3; order 2 -> -2.
-http://www.ii.uib.no/~lennart/drgrad/Lasserre2001.pdf
+    From Lasserre2001, global minimum : -2, for (1, 2).
+    Relaxation : order 1 -> -3; order 2 -> -2.
 """
 function lasserre_ex5(;d = 2)
     x1 = Variable("x1", Real)
     x2 = Variable("x2", Real)
     problem = Problem()
+    add_variable!(problem, x1); add_variable!(problem, x2)
     set_objective!(problem, -(x1-1)^2 -(x1-x2)^2 -(x2-3)^2)
     add_constraint!(problem, "crt1", (1-(x1-1)^2) >> 0)
     add_constraint!(problem, "crt2", (1-(x1-x2)^2) >> 0)
     add_constraint!(problem, "crt3", (1-(x2-3)^2) >> 0)
 
-    ε_abs=1e-3
-    order_to_obj = OrderedDict(1=>-3.0000,
-                            2=>-2.0000)
-
-    return problem, order_to_obj, ε_abs
+    relax_ctx = set_relaxation(problem; hierarchykind=:Real,
+                                        d = d)
+    return problem, relax_ctx
 end
 
 
-"""
-    problem, order_to_obj, ε_abs = test_gloptipoly_ex1()
-
-Return the problem, order to solution value and absolute tolerance
-for the SDP test case taken from the gloptimoly doc:
-http://homepages.laas.fr/henrion/papers/gpcocos.pdf p7
-
-Order : 
-  - 1 -> -6.0000
-  - 2 -> -5.6923
-  - 3 -> -4.0685
-  - 3 -> -4.0000 (exact)
-"""
-function test_gloptipoly_ex1()
-    problem = Problem()
-    x1 = Variable("x1", Real)
-    x2 = Variable("x2", Real)
-    x3 = Variable("x3", Real)
-
-    set_objective!(problem, -2*x1+x2-x3)
-    add_constraint!(problem, "ctr1", (x1*(4*x1-4*x2+4*x3-20)+x2*(2*x2-2*x3+9)+x3*(2*x3-13)+24) >> 0)
-    add_constraint!(problem, "ctr2", (x1+x2+x3) << 4)
-    add_constraint!(problem, "ctr3", (3*x2+x3) << 6)
-    add_constraint!(problem, "def_x1", 0 << x1 << 2)
-    add_constraint!(problem, "def_x2", 0 << x2)
-    add_constraint!(problem, "def_x3", 0 << x3 << 3)
-
-    ε_abs=1e-3
-    order_to_obj = OrderedDict(1=>-6.0000,
-                            2=>-5.6923,
-                            3=>-4.0685)
-
-    return problem, order_to_obj, ε_abs
-end
-
-"""
-    problem, order_to_obj, ε_abs = test_gloptipoly_ex2()
-
-Return the problem, order to solution value and absolute tolerance
-for the SDP test case taken from the gloptimoly doc:
-http://homepages.laas.fr/henrion/papers/gloptipoly.pdf p14
-
-Order : 
-  - 1 -> primal infeasible
-  - 2 -> 17.9189
-  - 3 -> 17.0000 (exact)
-"""
-function test_gloptipoly_ex2()
-    problem = Problem()
-    x1 = Variable("x1", Real)
-    x2 = Variable("x2", Real)
-    x3 = Variable("x3", Real)
-    x4 = Variable("x4", Real)
-    x5 = Variable("x5", Real)
-
-    set_objective!(problem, 42*x1+44*x2+45*x3+47*x4+47.5*x5-50*(x1^2+x2^2+x3^2+x4^2+x5^2))
-    add_constraint!(problem, "ctr1", (20*x1+12*x2+11*x3+7*x4+4*x5) << 40)
-    add_constraint!(problem, "def_x1", 0 << x1 << 1)
-    add_constraint!(problem, "def_x2", 0 << x2 << 1)
-    add_constraint!(problem, "def_x3", 0 << x3 << 1)
-    add_constraint!(problem, "def_x4", 0 << x4 << 1)
-    add_constraint!(problem, "def_x5", 0 << x5 << 1)
-
-    ε_abs=1e-3
-    order_to_obj = SortedDict(2=>-17.9189)      # order 1 relaxation is primal infeasable
-
-    return problem, order_to_obj, ε_abs
-end
-
-
-
-############################################
-### Clique decomposition of small OPF instances
-############################################
 
 function get_WB5cliques(relax_ctx, problem)
     if !relax_ctx.issparse
         return get_maxcliques(relax_ctx, problem)
     else
-        maxcliques = DictType{String, Set{Variable}}()
+        maxcliques = Dict{String, Set{Variable}}()
         maxcliques["clique1"] = Set{Variable}([
-            Variable("VOLT_1_Im", Real),
-            Variable("VOLT_1_Re", Real),
-            Variable("VOLT_2_Im", Real),
-            Variable("VOLT_2_Re", Real),
-            Variable("VOLT_3_Im", Real),
-            Variable("VOLT_3_Re", Real)])
+            Variable("BaseCase_1_VOLT_Im", Real),
+            Variable("BaseCase_1_VOLT_Re", Real),
+            Variable("BaseCase_2_VOLT_Im", Real),
+            Variable("BaseCase_2_VOLT_Re", Real),
+            Variable("BaseCase_3_VOLT_Im", Real),
+            Variable("BaseCase_3_VOLT_Re", Real)])
         maxcliques["clique2"] = Set{Variable}([
-            Variable("VOLT_2_Im", Real),
-            Variable("VOLT_2_Re", Real),
-            Variable("VOLT_3_Im", Real),
-            Variable("VOLT_3_Re", Real),
-            Variable("VOLT_4_Im", Real),
-            Variable("VOLT_4_Re", Real),
-            Variable("VOLT_5_Im", Real),
-            Variable("VOLT_5_Re", Real)])
+            Variable("BaseCase_2_VOLT_Im", Real),
+            Variable("BaseCase_2_VOLT_Re", Real),
+            Variable("BaseCase_3_VOLT_Im", Real),
+            Variable("BaseCase_3_VOLT_Re", Real),
+            Variable("BaseCase_4_VOLT_Im", Real),
+            Variable("BaseCase_4_VOLT_Re", Real),
+            Variable("BaseCase_5_VOLT_Im", Real),
+            Variable("BaseCase_5_VOLT_Re", Real)])
         return maxcliques
     end
 end
@@ -240,40 +222,40 @@ function get_case9cliques(relax_ctx, problem)
     if !relax_ctx.issparse
         return get_maxcliques(relax_ctx, problem)
     else
-        maxcliques = DictType{String, Set{Variable}}()
+        maxcliques = Dict{String, Set{Variable}}()
         maxcliques["clique1"] = Set{Variable}([
-            Variable("VOLT_1_Im", Real),
-            Variable("VOLT_1_Re", Real),
-            Variable("VOLT_5_Im", Real),
-            Variable("VOLT_5_Re", Real),
-            Variable("VOLT_4_Im", Real),
-            Variable("VOLT_4_Re", Real),
-            Variable("VOLT_9_Im", Real),
-            Variable("VOLT_9_Re", Real),
-            Variable("VOLT_8_Im", Real),
-            Variable("VOLT_8_Re", Real)])
+            Variable("BaseCase_1_VOLT_Im", Real),
+            Variable("BaseCase_1_VOLT_Re", Real),
+            Variable("BaseCase_5_VOLT_Im", Real),
+            Variable("BaseCase_5_VOLT_Re", Real),
+            Variable("BaseCase_4_VOLT_Im", Real),
+            Variable("BaseCase_4_VOLT_Re", Real),
+            Variable("BaseCase_9_VOLT_Im", Real),
+            Variable("BaseCase_9_VOLT_Re", Real),
+            Variable("BaseCase_8_VOLT_Im", Real),
+            Variable("BaseCase_8_VOLT_Re", Real)])
         maxcliques["clique2"] = Set{Variable}([
-            Variable("VOLT_2_Im", Real),
-            Variable("VOLT_2_Re", Real),
-            Variable("VOLT_9_Im", Real),
-            Variable("VOLT_9_Re", Real),
-            Variable("VOLT_8_Im", Real),
-            Variable("VOLT_8_Re", Real),
-            Variable("VOLT_7_Im", Real),
-            Variable("VOLT_7_Re", Real),
-            Variable("VOLT_6_Im", Real),
-            Variable("VOLT_6_Re", Real)])
+            Variable("BaseCase_2_VOLT_Im", Real),
+            Variable("BaseCase_2_VOLT_Re", Real),
+            Variable("BaseCase_9_VOLT_Im", Real),
+            Variable("BaseCase_9_VOLT_Re", Real),
+            Variable("BaseCase_8_VOLT_Im", Real),
+            Variable("BaseCase_8_VOLT_Re", Real),
+            Variable("BaseCase_7_VOLT_Im", Real),
+            Variable("BaseCase_7_VOLT_Re", Real),
+            Variable("BaseCase_6_VOLT_Im", Real),
+            Variable("BaseCase_6_VOLT_Re", Real)])
         maxcliques["clique3"] = Set{Variable}([
-            Variable("VOLT_3_Im", Real),
-            Variable("VOLT_3_Re", Real),
-            Variable("VOLT_7_Im", Real),
-            Variable("VOLT_7_Re", Real),
-            Variable("VOLT_6_Im", Real),
-            Variable("VOLT_6_Re", Real),
-            Variable("VOLT_5_Im", Real),
-            Variable("VOLT_5_Re", Real),
-            Variable("VOLT_4_Im", Real),
-            Variable("VOLT_4_Re", Real)])
+            Variable("BaseCase_3_VOLT_Im", Real),
+            Variable("BaseCase_3_VOLT_Re", Real),
+            Variable("BaseCase_7_VOLT_Im", Real),
+            Variable("BaseCase_7_VOLT_Re", Real),
+            Variable("BaseCase_6_VOLT_Im", Real),
+            Variable("BaseCase_6_VOLT_Re", Real),
+            Variable("BaseCase_5_VOLT_Im", Real),
+            Variable("BaseCase_5_VOLT_Re", Real),
+            Variable("BaseCase_4_VOLT_Im", Real),
+            Variable("BaseCase_4_VOLT_Re", Real)])
         return maxcliques
     end
 end

@@ -1,12 +1,8 @@
 # MathProgComplex.jl
 
-Master:
+Dev:
 [![Build Status](https://travis-ci.org/JulieSliwak/MathProgComplex.jl.svg?branch=master)](https://travis-ci.org/JulieSliwak/MathProgComplex.jl)
 [![codecov](https://codecov.io/gh/JulieSliwak/MathProgComplex.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JulieSliwak/MathProgComplex.jl)
-
-Hierarchy branch:
-[![Build Status](https://api.travis-ci.org/JulieSliwak/MathProgComplex.jl.svg?branch=hierarchy)](https://travis-ci.org/JulieSliwak/MathProgComplex.jl)
-[![codecov](https://codecov.io/gh/JulieSliwak/MathProgComplex.jl/branch/hierarchy/graph/badge.svg)](https://codecov.io/gh/JulieSliwak/MathProgComplex.jl)
 
 The `MathProgComplex` module is a tool for polynomial optimization problems with complex variables. These problems consist in optimizing a generic complex multivariate polynomial function, subject to some complex polynomial equality and inequality constraints.
 The `MathProgComplex` module enables:
@@ -132,9 +128,9 @@ add_constraint!(pb, "Cstr 3", p_cstr2 == 0) # 2 + (5.0)*a * b + b^2 = 0
 
 
 print(pb)
-# ▶ variables: a b
+# ▶ variables: a b 
 # ▶ objective: 2 + conj(a) * a + b^2
-# ▶ constraints:
+# ▶ constraints: 
 #  →     Cstr 1: 2 + (3.0)*a + b < 3 + 5im
 #  →     Cstr 2: 2 - 1im < 2 + (5.0)*a * b + b^2 < 3 + 7im
 #  →     Cstr 3: 2 + (5.0)*a * b + b^2 = 0

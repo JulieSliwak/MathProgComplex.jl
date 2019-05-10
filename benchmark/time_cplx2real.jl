@@ -5,8 +5,8 @@ tic();
 using MathProgComplex
 toc();
 
-function main(instance = "case300")
-    instancepath = getinstancepath("Matpower", "QCQP", instance)
+function main()
+    instancepath = getinstancepath("Matpower", "QCQP", "case300")
     println("\nWorking on $(splitdir(instancepath))")
 
     setlevel!(getlogger(MathProgComplex), "debug")
@@ -43,5 +43,4 @@ end
 
 
 # main_work()
-# main("case300")
-# main("case1354pegase")
+main()

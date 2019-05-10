@@ -1,20 +1,16 @@
 export build_SOSrelaxation
 
 function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::SDPDual{T}; debug=false) where T<:Number
-    sdpblocks = DictType{Tuple{CtrName, String, Exponent, Exponent}, T}()
-    sdplinsym = DictType{Tuple{CtrName, String, Exponent}, T}()
-    sdplin = DictType{Tuple{CtrName, Exponent}, T}()
-    sdpcst = DictType{CtrName, T}()
-    block_to_vartype = DictType{String, Symbol}()
+    sdpblocks = Dict{Tuple{Moment, String, Exponent, Exponent}, T}()
+    sdplinsym = Dict{Tuple{Moment, String, Exponent}, T}()
+    sdplin = Dict{Tuple{Moment, Exponent}, T}()
+    sdpcst = Dict{Moment, T}()
+    block_to_vartype = Dict{String, Symbol}()
 
     ## Build blocks dict
     for ((cstrname, cliquename), mmt) in mmtrelax_pb.constraints
         block_name = get_blockname(cstrname, cliquename, mmtrelax_pb)
-        if mmt.matrixkind == :Null
-            block_to_vartype[block_name] = (relaxctx.hierarchykind == :Real)?:Sym:SymC
-        else
-            block_to_vartype[block_name] = mmt.matrixkind
-        end
+        block_to_vartype[block_name] = mmt.matrixkind
 
         for ((γ, δ), poly) in mmt.mm
             for (moment, λ) in poly
@@ -36,16 +32,16 @@ function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::SDPDual{T
                     debug && (@assert !haskey(sdpblocks, key))
 
                     sdpblocks[key] = -λ
-                elseif mmt.matrixkind == :Null
+                elseif mmt.matrixkind == :Sym || mmt.matrixkind == :SymC
                     ## TODO: look into ht_keyindex2!, ht_keyindex for avoiding two dict table lookup
                     # Maybe implement this operation (if haskey add, else set) using 'setindex!(h::Dict{K,V}, v0, key::K) where V where K' as inspiration
                     key = (moment, block_name, product(γ, δ))
                     val = -λ * (γ!=δ ? 2 : 1)
 
-                    # addindex!(sdplinsym, val, key)
+                    addindex!(sdplinsym, val, key)
 
-                    haskey(sdplinsym, key) || (sdplinsym[key] = 0)
-                    sdplinsym[key] += val
+                    # haskey(sdplinsym, key) || (sdplinsym[key] = 0)
+                    # sdplinsym[key] += val
                 else
                     error(LOGGER, "build_SOSrelaxation(): Unhandled matrix kind $(mmt.matrixkind) for ($cstrname, $cliquename)")
                 end
@@ -79,14 +75,14 @@ function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::SDPDual{T
         # Determine which moment to affect the current coefficient.
 
         # Constraints are fα - ∑ Bi.Zi = 0
-        # addindex!(sdpcst, fαβ, moment)
+        addindex!(sdpcst, fαβ, moment)
 
-        if !haskey(sdpcst, moment)
-            sdpcst[moment] = 0.0
-        end
+        # if !haskey(sdpcst, moment)
+        #     sdpcst[moment] = 0.0
+        # end
 
-        # Constraints are fα - ∑ Bi.Zi = 0
-        sdpcst[moment] += fαβ
+        # # Constraints are fα - ∑ Bi.Zi = 0
+        # sdpcst[moment] += fαβ
     end
 
     sosrelaxation = SDPPrimal{T}(block_to_vartype, sdpblocks, sdplinsym, sdplin, sdpcst)
@@ -94,3 +90,24 @@ function build_SOSrelaxation(relaxctx::RelaxationContext, mmtrelax_pb::SDPDual{T
     print_build_SOSrelax(relaxctx, sosrelaxation)
     return sosrelaxation
 end
+
+
+# """
+#     α, β = split_expo(expo::Exponent)
+
+#     Split the exponent into two exponents of conjugated and explicit variables in the complex case.
+#     Real case is not supported yet.
+# """
+# function split_expo(relaxctx::RelaxationContext, expo::Exponent)
+#     α, β = Exponent(), Exponent()
+
+#     for (var, deg) in expo
+#         product!(α, Exponent(Dict(var=>Degree(0, deg.conjvar))))
+#         product!(β, Exponent(Dict(var=>Degree(deg.explvar, 0))))
+#     end
+
+#     if (relaxctx.hierarchykind == :Real) && (α.degree != Degree(0,0))
+#         error(LOGGER, "split_expo(): Inconsistent degree $α, $β found for $(relaxctx.hierarchykind) hierarchy.")
+#     end
+#     return α, β
+# end

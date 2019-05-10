@@ -1,20 +1,13 @@
-using Documenter, MathProgComplex, DataStructures
+using Documenter, MathProgComplex
 
 makedocs(
-    modules = [MathProgComplex],
     format = :html,
-    sitename = "MathProgComplex.jl",
+    sitename = "MathProgComplex documentation",
     pages = [
-        "Home" => "index.md",
-        "Polynomial Optimization" => Any[
-            "PolynomialOptim/polynomialoptim_structures.md"
-        ],
-        "SDP hierarchy" => Any[
-            "SDPhierarchy/purpose.md",
-            "SDPhierarchy/mathprinciple.md",
-            "SDPhierarchy/relax_settings.md",
-            "SDPhierarchy/problems.md",
-            "SDPhierarchy/solving.md"
-            ]
-        ]
+        # "Main functions" => "main_functions.md"
+        # "General structures" => "general_structures.md"
+        # "MatpowerInput" => "indexmatpower.md"
+        # "GOCInput" => "indexGOC.md"
+        "Exhaustive function list" => "polynomialoptim_structures.md"
+    ]
 )

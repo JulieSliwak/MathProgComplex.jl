@@ -11,11 +11,11 @@ function MomentMatrix{T}(relax_ctx::RelaxationContext, vars::Set{Variable},
                                                        symmetries::Set{DataType},
                                                        matrixkind::Symbol;
                                                        default_clique::String="",
-                                                       var_to_cliques::DictType{Variable, Set{String}}=DictType{Variable, Set{String}}()) where T<:Number
+                                                       var_to_cliques::Dict{Variable, Set{String}}=Dict{Variable, Set{String}}()) where T<:Number
 
-    mm = DictType{Tuple{Exponent, Exponent}, DictType{Moment, T}}()
+    mm = Dict{Tuple{Exponent, Exponent}, Dict{Moment, T}}()
 
-    @assert default_clique!="" || var_to_cliques!=DictType{Variable, Set{String}}()
+    @assert default_clique!="" || var_to_cliques!=Dict{Variable, Set{String}}()
 
     ## Computing exponents for available variables
     realexpos = compute_exponents(vars, d)
@@ -35,11 +35,11 @@ function MomentMatrix{T}(relax_ctx::RelaxationContext, vars::Set{Variable},
 
                 # Get exponent clique
                 expo_clique = default_clique
-                if var_to_cliques != DictType{Variable, Set{String}}()
+                if var_to_cliques!=Dict{Variable, Set{String}}()
                     expo_clique = get_exponentclique(expo, var_to_cliques)
                 end
 
-                mm[(cexp, rexp)] = DictType{Moment, T}(Moment(expo, expo_clique)=>convert(T, 1))
+                mm[(cexp, rexp)] = Dict{Moment, T}(Moment(expo, expo_clique)=>convert(T, 1))
             end
         end
     end
@@ -79,14 +79,6 @@ function print(io::IO, mm::MomentMatrix{T}) where T<:Number
     print(io, " $(mm.matrixkind)")
 end
 
-start(mmtmat::MomentMatrix) = start(mmtmat.mm)
-next(mmtmat::MomentMatrix, state) = next(mmtmat.mm, state)
-done(mmtmat::MomentMatrix, state) = done(mmtmat.mm, state)
-length(mmtmat::MomentMatrix) = length(mmtmat.mm)
-haskey(mmtmat::MomentMatrix, key) = haskey(mmtmat.mm, key)
-keys(mmtmat::MomentMatrix) = keys(mmtmat.mm)
-values(mmtmat::MomentMatrix) = values(mmtmat.mm)
-getindex(mmtmat::MomentMatrix, expo1::Exponent, expo2::Exponent) = poly.mm[expo1, expo2]
 
 
 """
@@ -95,11 +87,11 @@ getindex(mmtmat::MomentMatrix, expo1::Exponent, expo2::Exponent) = poly.mm[expo1
     Determine which clique expo fits in, that is which cliques contain all variables of expo.
     Error if no such clique are found.
 """
-function get_exponentclique(expo::Exponent, var_to_cliques::DictType{Variable, Set{String}})
+function get_exponentclique(expo::Exponent, var_to_cliques::Dict{Variable, Set{String}})
     cliques = Set{String}()
 
     ## If expo is one, return default clique
-    expo == Exponent() && return "clique1"
+    expo == Exponent() && return "clique_un"
 
     union!(cliques, var_to_cliques[first(expo)[1]])
     for (var, deg) in expo
@@ -118,27 +110,27 @@ end
 # ##########################
 
 ## AbstractPolynomial types
-function product!(mm::MomentMatrix{M}, p::T, var_to_cliques::DictType{Variable, Set{String}}) where T<:Union{AbstractPolynomial, Number} where M<:Number
+function product!(mm::MomentMatrix{M}, p::T, var_to_cliques::Dict{Variable, Set{String}}) where T<:Union{AbstractPolynomial, Number} where M<:Number
     for (key, momentpoly) in mm.mm
         mm.mm[key] = product(momentpoly, p, var_to_cliques)
     end
     return nothing
 end
 
-function product(momentpoly::DictType{Moment, M}, p::T, var_to_cliques::DictType{Variable, Set{String}}) where T<:Union{AbstractPolynomial, Number} where M<:Number
+function product(momentpoly::Dict{Moment, M}, p::T, var_to_cliques::Dict{Variable, Set{String}}) where T<:Union{AbstractPolynomial, Number} where M<:Number
     return product(momentpoly, convert(Polynomial, p), var_to_cliques)
 end
 
-function product(momentpoly::DictType{Moment, M}, p::Polynomial, var_to_cliques::DictType{Variable, Set{String}}) where M<:Number
-    resmpoly = DictType{Moment, M}()
+function product(momentpoly::Dict{Moment, M}, p::Polynomial, var_to_cliques::Dict{Variable, Set{String}}) where M<:Number
+    resmpoly = Dict{Moment, M}()
 
     for (expo, val1) in p
         for (moment, val2) in momentpoly
             resmoment = product(moment, expo, var_to_cliques)
 
-            haskey(resmpoly, resmoment) || (resmpoly[resmoment] = convert(M, 0.0))
-            resmpoly[resmoment] += val1*val2
-            # addindex!(resmpoly, val1*val2, resmoment)
+            # haskey(resmpoly, resmoment) || (resmpoly[resmoment] = convert(M, 0.0))
+            # resmpoly[resmoment] += val1*val2
+            addindex!(resmpoly, val1*val2, resmoment)
 
             isnull(resmpoly[resmoment]) && delete!(resmpoly, resmoment)
         end
@@ -147,7 +139,7 @@ function product(momentpoly::DictType{Moment, M}, p::Polynomial, var_to_cliques:
     return resmpoly
 end
 
-function product(moment::Moment, expo::Exponent, var_to_cliques::DictType{Variable, Set{String}})
+function product(moment::Moment, expo::Exponent, var_to_cliques::Dict{Variable, Set{String}})
     resexpo = product(moment.conj_part, moment.expl_part)
     product!(resexpo, expo)
 

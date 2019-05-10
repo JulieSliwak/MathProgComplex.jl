@@ -7,12 +7,12 @@ export build_momentrelaxation
 """
 function build_momentrelaxation(relax_ctx::RelaxationContext,
                                 problem::Problem,
-                                momentmat_param::DictType{String, Int},
-                                localizingmat_param::DictType{String, Tuple{Set{String}, Int}},
-                                max_cliques::DictType{String, Set{Variable}};
+                                momentmat_param::Dict{String, Int},
+                                localizingmat_param::Dict{String, Tuple{Set{String}, Int}},
+                                max_cliques::Dict{String, Set{Variable}};
                                 T=Float64)
 
-    var_to_cliques = DictType{Variable, Set{String}}()
+    var_to_cliques = Dict{Variable, Set{String}}()
     for (clique, vars) in max_cliques
         for var in vars
             haskey(var_to_cliques, var) || (var_to_cliques[var] = Set{String}())
@@ -21,7 +21,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
     end
 
     ## Building linear-in-moments objective
-    objective = DictType{Moment, T}()
+    objective = Dict{Moment, T}()
     for (expo, val) in problem.objective
         clique = get_exponentclique(expo, var_to_cliques)
         objective[Moment(expo, clique)] = val
@@ -29,7 +29,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
 
 
     ## Building linear matrix inequalities
-    momentmatrices = DictType{Tuple{String, String}, MomentMatrix{T}}()
+    momentmatrices = Dict{Tuple{String, String}, MomentMatrix{T}}()
 
     ## Build moment matrix
     for (cliquename, vars) in max_cliques
@@ -55,7 +55,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
                                                           relax_ctx.cstrtypes[cstrname_lo],
                                                           var_to_cliques = var_to_cliques)
             # print_with_color(:green, "$cstrname, :Lo\n") ##NOTE: find better logging system.
-            product!(mmt, get_normalizedpoly(cstr, :ineqlo), var_to_cliques)
+            product!(mmt, cstr.p - cstr.lb, var_to_cliques)
             momentmatrices[(cstrname_lo, cliquename)] = mmt
 
             # Deal with upper inequality
@@ -67,7 +67,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
                                                           relax_ctx.cstrtypes[cstrname_up],
                                                           var_to_cliques = var_to_cliques)
             # print_with_color(:green, "$cstrname, :Up\n") ##NOTE: find better logging system.
-            product!(mmt, get_normalizedpoly(cstr, :inequp), var_to_cliques)
+            product!(mmt, cstr.ub - cstr.p, var_to_cliques)
             momentmatrices[(cstrname_up, cliquename)] = mmt
 
             # # Deal with upper inequality, no recomputing of variables or moment matrix if possible
@@ -78,18 +78,18 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
             #     vars, cliquename = collect_cliquesvars(clique_keys_up, max_cliques)
 
             #     mmt = MomentMatrix(relax_ctx, vars, order_up, relax_ctx.symmetries,
-            #                                                   relax_ctx.cstrtypes[cstrname_up],
+            #                                                   relax_ctx.cstrtypes[cstrname_hi],
             #                                                   var_to_cliques = var_to_cliques)
             # elseif order_up != order
             #     warn(LOGGER, "order different from lower and upper side of double constraint")
             #     mmt = MomentMatrix(relax_ctx, vars, order_up, relax_ctx.symmetries,
-            #                                                   relax_ctx.cstrtypes[cstrname_up],
+            #                                                   relax_ctx.cstrtypes[cstrname_hi],
             #                                                   var_to_cliques = var_to_cliques)
             # end
 
 
         else
-            # either cstrtype == :ineqlo, :inequp, :eq
+            # either cstrtype == :ineqlo, :ineqhi, :eq
             clique_keys, order = localizingmat_param[get_cstrname(cstrname, cstrtype)]
             vars, cliquename = collect_cliquesvars(clique_keys, max_cliques)
             # length(clique_keys) == 1 || error(LOGGER, "build_momentrelaxation(): constraint $cstrname spans several cliques ($clique_keys).\nNot supported yet.")
@@ -107,7 +107,7 @@ function build_momentrelaxation(relax_ctx::RelaxationContext,
     end
 
     ## Locate clique overlapping moments
-    expo_to_cliques = DictType{Exponent, Set{String}}()
+    expo_to_cliques = Dict{Exponent, Set{String}}()
 
     # Collect Exponents per clique (moment matrix)
     for ((ctrobj, clique), mmtmat) in momentmatrices

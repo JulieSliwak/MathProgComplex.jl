@@ -3,7 +3,7 @@ export set_relaxation, get_defaultparams
 """
     relax_ctx = set_relaxation(pb::Problem; ismultiordered=false, issparse=false, symmetries=Set(), hierarchykind=:Complex, renamevars=false, di=Dict{String, Int}(), d=-1)
 
-Build a `relax_ctx` object containing relaxation choices and problem features : order by constraint, relaxation order by constraint...
+    Build a `relax_ctx` object containing relaxation choices and problem features : order by constraint, relaxation order by constraint...
 """
 function set_relaxation(pb::Problem; ismultiordered::Bool=false,
                                      issparse::Bool=false,
@@ -25,9 +25,6 @@ function set_relaxation(pb::Problem; ismultiordered::Bool=false,
 
     relaxparams = relax_ctx.relaxparams
 
-    # Collect binary variables
-    relctx_setbinaryvariables(relax_ctx, pb)
-
     # Compute each constraint degree
     relctx_setki!(relax_ctx, pb)
 
@@ -39,7 +36,9 @@ function set_relaxation(pb::Problem; ismultiordered::Bool=false,
 
     rel_ctx_setsymetries!(relax_ctx, pb, symmetries)
 
-    relax_ctx.issparse = issparse
+
+    log_POPcharact!(relax_ctx, pb)
+
     relaxparams[:opt_issparse] = issparse
     relaxparams[:opt_hierarchykind] = hierarchykind
     relaxparams[:opt_multiordered] = ismultiordered
@@ -54,19 +53,10 @@ function set_relaxation(pb::Problem; ismultiordered::Bool=false,
         end
     end
 
-    log_POPcharact!(relax_ctx, pb)
     init_output(relax_ctx)
 
     print_build_relctx(relax_ctx, pb)
     return relax_ctx
-end
-
-function relctx_setbinaryvariables(relax_ctx::RelaxationContext, pb::Problem)
-    for (varname, vartype) in pb.variables
-        vartype <: Bool && push!(relax_ctx.binaryvariables, Variable(varname, vartype))
-    end
-
-    return nothing
 end
 
 
@@ -95,7 +85,7 @@ function relctx_setSDPmulttypes!(relax_ctx, pb::Problem, hierarchykind)
             ctrtypes[cstrname_lo] = (hierarchykind==:Complex ? :SDPC : :SDP)
             ctrtypes[cstrname_up] = (hierarchykind==:Complex ? :SDPC : :SDP)
         elseif cstrtype == :eq
-            ctrtypes[get_cstrname(cstrname, cstrtype)] = :Null
+            ctrtypes[get_cstrname(cstrname, cstrtype)] = (hierarchykind==:Complex ? :SymC : :Sym)
         else
             ctrtypes[get_cstrname(cstrname, cstrtype)] = (hierarchykind==:Complex ? :SDPC : :SDP)
         end
@@ -118,17 +108,17 @@ function relctx_setdi!(relax_ctx, pb::Problem, di, d)
             cstrname_lo, cstrname_up = get_cstrname(cstrname, cstrtype)
             cur_ki = relax_ctx.ki[cstrname_lo]
             (0 ≤ cur_order-ceil(cur_ki/2)) || warn(LOGGER, "RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value ceil($cur_ki/2).")
-            # (cur_ki <= cur_order) || warn("RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value $cur_ki, hierarchy may be multiordered.")
-            # di_relax[cstrname_lo] = cur_order
-            # di_relax[cstrname_up] = cur_order
-            di_relax[cstrname_lo] = max(cur_order, ceil(cur_ki/2))
-            di_relax[cstrname_up] = max(cur_order, ceil(cur_ki/2))
-        else # :eq, :ineqlo, :inequp
+            # (cur_ki <= cur_order) || warn(LOGGER, "RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value $cur_ki, hierarchy may be multiordered.")
+            di_relax[cstrname_lo] = cur_order
+            di_relax[cstrname_up] = cur_order
+            # di_relax[cstrname_lo] = max(cur_order, ceil(cur_ki/2))
+            # di_relax[cstrname_up] = max(cur_order, ceil(cur_ki/2))
+        else # :eq, :ineqlo, :ineqhi
             cur_ki = relax_ctx.ki[get_cstrname(cstrname, cstrtype)]
             (0 ≤ cur_order-ceil(cur_ki/2)) || warn(LOGGER, "RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value ceil($cur_ki/2).")
-            # (cur_ki <= cur_order) || warn("RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value $cur_ki, hierarchy may be multiordered.")
-            # di_relax[get_cstrname(cstrname, cstrtype)] = cur_order
-            di_relax[get_cstrname(cstrname, cstrtype)] = max(cur_order, ceil(cur_ki/2))
+            # (cur_ki <= cur_order) || warn(LOGGER, "RelaxationContext(): Provided order ($cur_order) is lower than constraint $cstrname order ($cur_ki). \nUsing value $cur_ki, hierarchy may be multiordered.")
+            di_relax[get_cstrname(cstrname, cstrtype)] = cur_order
+            # di_relax[get_cstrname(cstrname, cstrtype)] = max(cur_order, ceil(cur_ki/2))
         end
     end
 
@@ -205,13 +195,11 @@ function get_defaultparams()
                         :pb_nctr_ineqdouble=>-1,
                         :pb_maxpolydeg=>-1,
                         :pb_isphaseinv=>false,
-                        :slv_mmtrel_t=>-1.0,                    # Moment relaxation time and memory consumption
+                        :slv_mmtrel_t=>-1.0,                    # Relaxation time and memory consumption
                         :slv_mmtrel_bytes=>-1,
-                        :slv_sosrel_t=>-1.0,                    # Conversion from moment to SOS relaxation
+                        :slv_sosrel_t=>-1.0,
                         :slv_sosrel_bytes=>-1,
-                        :slv_fileexport_t=>-1,                  # Export to .sdp of solved problem
-                        :slv_fileexport_bytes=>-1,
-                        :slv_mskstruct_t=>-1.0,                 # Construction of the SDP_Problem struct
+                        :slv_mskstruct_t=>-1.0,
                         :slv_mskstruct_bytes=>-1,
                         :slv_prosta=>"",                        # SDP solution values
                         :slv_solsta=>"",
@@ -221,23 +209,17 @@ function get_defaultparams()
                         :slv_dualfeas=>-1.0,
                         :slv_solvetime=>-1.0,
                         :opt_hierarchykind=>:Undef,
-                        :opt_pbsolved=>:MomentRelaxation,       # either :MomentRelaxation or :SOSRelaxation
                         :opt_issparse=>false,                   # Relaxation parameters
                         :opt_multiordered=>false,
                         :opt_globalorder=>-1,
                         :opt_sym_phaseinv=>false,
                         :opt_nb_cliques=>-1,
-                        :opt_logpath=>".",
-                        :opt_exportsdp=>0,                      # 0: no, 1: export specified problem to :opt_exportsdppath
-                        :opt_exportsdppath=>"Mosek_runs",
-                        :opt_solver=>:MosekCAPI,                # Default :MosekCAPI, else JuMP solvers :MosekSolver, :SCSSolver, or :None
-                        :opt_msk_maxtime=>-1,                   # Default -1 is no time limit; unit is seconds
+                        :opt_msk_maxtime=>-1,                   # Default -1 is no time limit
                         :opt_outmode=>0,                        # 0: screen, 1: file, 2: both
                         :opt_outlev=>1,                         # 0: none, 1:summary at moment relaxation, sos relaxation, 2: detailled information, 3: full problems
                         :opt_outname=>"momentsos.log",
                         :opt_outcsv=>0,                         # 0: no csv is written, 1: csv is written
-                        :opt_outcsvname=>"momentsos_solve.csv"
-                        )
+                        :opt_outcsvname=>"momentsos_solve.csv")
 
     return defparams
 end

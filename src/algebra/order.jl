@@ -19,18 +19,14 @@ end
 #############################
 ## Exponent
 #############################
-"""
-    isless_simple(exp1::Exponent, exp2::Exponent)
-
-    Generic sort function applyied to exponents. One exponent has to be handled beforehand,
-    as it is represented by an empty structure.
-    WARNING: this order still does not fit the expected properties of isless order, therefore
-    keys get lost in dictionaries. Not used.
-"""
-function isless_simple(exp1::Exponent, exp2::Exponent)
+function isless(exp1::Exponent, exp2::Exponent)
     ## Handle one exponent, empty structures are not handled by following general sort alg.
-    if exp1 == Exponent() #length(exp1) == 0        # if exp1 == 1
+    if length(exp1) == 0        # if exp1 == 1
         return length(exp2) > 0
+    end
+
+    if length(exp2) == 0        # exp1!=1, if exp2 == 1
+        return false
     end
 
     state1 = start(exp1)
@@ -57,12 +53,12 @@ function isless_simple(exp1::Exponent, exp2::Exponent)
 end
 
 """
-    isless(exp1::Exponent, exp2::Exponent)
+    isless_degree(exp1::Exponent, exp2::Exponent)
 
     Order sorting elements on their sum of degrees at a first level.
     Test show performance is comparable to previous sorting function.
 """
-function isless(exp1::Exponent, exp2::Exponent)
+function isless_degree(exp1::Exponent, exp2::Exponent)
     # First order level: sum of degrees
     exp1_deg = 0
     state1 = start(exp1)

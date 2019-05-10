@@ -1,6 +1,6 @@
-export export_SDPPrimal
+export export_SDP
 
-function export_SDPPrimal(sdp::SDPPrimal, path; indentedprint=true, renamemoments=true)
+function export_SDP(sdp::SDPPrimal, path; indentedprint=true, renamemoments=true)
 
     # Build moment shortname dict if required
     momentdict = build_momentdict(sdp, renamemoments)
@@ -62,7 +62,7 @@ end
     NOTE: should be extended to Variable and (String, Variable) later...
 """
 function build_momentdict(sdp, renamemoments::Bool)
-    momentdict = DictType{Exponent, String}()
+    momentdict = Dict{Exponent, String}()
 
     n_moment=0
     n_matvar=0
@@ -122,7 +122,7 @@ function build_momentdict(sdp, renamemoments::Bool)
 end
 
 function build_ctrkeysset(sdp::SDPPrimal{T}) where T
-    ctr_keys = Set{CtrName}()
+    ctr_keys = Set{Moment}()
 
     for ((moment, blockname, γ, δ), λ) in sdp.blocks
         push!(ctr_keys, moment)
@@ -140,21 +140,17 @@ function build_ctrkeysset(sdp::SDPPrimal{T}) where T
 end
 
 
-function print_blocksfile_header(io)
-    println(io, "## Description of the matrices A_ji for the problem:")
-    println(io, "##         max     ∑ A_0i[k,l] × Zi[k,l] + ∑ b_0[k] × x[k] + c_0")
-    println(io, "##         s.t.    ∑ A_ji[k,l] × Zi[k,l] + ∑ b_j[k] × x[k] + c_j  ==  0")
-    println(io, "## Constraints keys are j → (j_conj, j_expl, clique).")
-    println(io, "## Objective keys are 0 → (1,1, *) for any *.")
-    println(io, "#")
-end
-
-function print_blocksfile(io::IO, sdpblocks::DictType{Tuple{CtrName, String, Exponent, Exponent}, T};
-                                                        momentdict::DictType{Exponent, String}=DictType{Exponent, String}(),
+function print_blocksfile(io::IO, sdpblocks::Dict{Tuple{Moment, String, Exponent, Exponent}, T};
+                                                        momentdict::Dict{Exponent, String}=Dict{Exponent, String}(),
                                                         indentedprint=false,
                                                         print_header=true) where T
     if print_header
-        print_blocksfile_header(io)
+        println(io, "## Description of the matrices A_ji for the problem:")
+        println(io, "##         max     ∑ A_0i[k,l] × Zi[k,l] + ∑ b_0[k] × x[k] + c_0")
+        println(io, "##         s.t.    ∑ A_ji[k,l] × Zi[k,l] + ∑ b_j[k] × x[k] + c_j  ==  0")
+        println(io, "## Constraints keys are j → (j_conj, j_expl, clique).")
+        println(io, "## Objective keys are 0 → (1,1, *) for any *.")
+        println(io, "#")
     end
 
     cstrlenα = maximum(x->length(haskey(momentdict, x[1].conj_part)?momentdict[x[1].conj_part]: string(x[1].conj_part)), keys(sdpblocks))
@@ -195,21 +191,17 @@ function print_blocksfile(io::IO, sdpblocks::DictType{Tuple{CtrName, String, Exp
 end
 
 
-function print_linfile_header(io::IO)
-    println(io, "## Description of the vectors b_j for the problem:")
-    println(io, "##         max     ∑ A_0i[k,l] × Zi[k,l] + ∑ b_0[k] × x[k] + c_0")
-    println(io, "##         s.t.    ∑ A_ji[k,l] × Zi[k,l] + ∑ b_j[k] × x[k] + c_j  ==  0")
-    println(io, "## Constraints keys are j → (j_conj, j_expl, clique).")
-    println(io, "## Objective keys are 0 → (1,1, *) for any *.")
-    println(io, "#")
-end
-
-function print_linfile(io::IO, sdplin::DictType{Tuple{CtrName, Exponent}, T}, sdplinsym::DictType{Tuple{CtrName, String, Exponent}, T};
-                                                                     momentdict::DictType{Exponent, String}=DictType{Exponent, String}(),
+function print_linfile(io::IO, sdplin::Dict{Tuple{Moment, Exponent}, T}, sdplinsym::Dict{Tuple{Moment, String, Exponent}, T};
+                                                                     momentdict::Dict{Exponent, String}=Dict{Exponent, String}(),
                                                                      indentedprint=false,
                                                                      print_header=true) where T
     if print_header
-        print_linfile_header(io)
+        println(io, "## Description of the vectors b_j for the problem:")
+        println(io, "##         max     ∑ A_0i[k,l] × Zi[k,l] + ∑ b_0[k] × x[k] + c_0")
+        println(io, "##         s.t.    ∑ A_ji[k,l] × Zi[k,l] + ∑ b_j[k] × x[k] + c_j  ==  0")
+        println(io, "## Constraints keys are j → (j_conj, j_expl, clique).")
+        println(io, "## Objective keys are 0 → (1,1, *) for any *.")
+        println(io, "#")
     end
 
     cstrlenα = 0
@@ -265,22 +257,18 @@ function print_linfile(io::IO, sdplin::DictType{Tuple{CtrName, Exponent}, T}, sd
 end
 
 
-function print_cstfile_header(io::IO)
-    println(io, "## Description of the scalars c_j for the problem:")
-    println(io, "##         max     ∑ A_0i[k,l] × Zi[k,l] + ∑ b_0[k] × x[k] + c_0")
-    println(io, "##         s.t.    ∑ A_ji[k,l] × Zi[k,l] + ∑ b_j[k] × x[k] + c_j  ==  0")
-    println(io, "## Constraints keys are j → (j_conj, j_expl, clique).")
-    println(io, "## Objective keys are 0 → (1,1, *) for any *.")
-    println(io, "#")
-end
-
-function print_cstfile(io::IO, sdpcst::DictType{CtrName, T};
-                                momentdict::DictType{Exponent, String}=DictType{Exponent, String}(),
-                                ctr_keys::Set{CtrName}=Set{CtrName}(),
+function print_cstfile(io::IO, sdpcst::Dict{Moment, T};
+                                momentdict::Dict{Exponent, String}=Dict{Exponent, String}(),
+                                ctr_keys::Set{Moment}=Set{Moment}(),
                                 indentedprint=false,
                                 print_header=true) where T
     if print_header
-        print_cstfile_header(io)
+        println(io, "## Description of the scalars c_j for the problem:")
+        println(io, "##         max     ∑ A_0i[k,l] × Zi[k,l] + ∑ b_0[k] × x[k] + c_0")
+        println(io, "##         s.t.    ∑ A_ji[k,l] × Zi[k,l] + ∑ b_j[k] × x[k] + c_j  ==  0")
+        println(io, "## Constraints keys are j → (j_conj, j_expl, clique).")
+        println(io, "## Objective keys are 0 → (1,1, *) for any *.")
+        println(io, "#")
     end
 
     cstrlenα = maximum(x->length(haskey(momentdict, x.conj_part)?momentdict[x.conj_part]: string(x.conj_part)), union(ctr_keys, keys(sdpcst)))
@@ -308,17 +296,13 @@ function print_cstfile(io::IO, sdpcst::DictType{CtrName, T};
 end
 
 
-function print_typesfile_header(io::IO)
+function print_typesfile(io::IO, block_to_vartype::Dict{String, Symbol})
     println(io, "## Description of the matrix and scalar variables Zi and x[k] for the problem:")
     println(io, "##         max     ∑ A_0i[k,l] × Zi[k,l] + ∑ b_0[k] × x[k] + c_0")
     println(io, "##         s.t.    ∑ A_ji[k,l] × Zi[k,l] + ∑ b_j[k] × x[k] + c_j  ==  0")
     println(io, "## Matrix variable types Zi are \"SDPC\" or \"SDP\".")
     println(io, "## By default, scalar variables x[k] are assumed to be real, free.")
     println(io, "#")
-end
-
-function print_typesfile(io::IO, block_to_vartype::DictType{String, Symbol})
-    print_typesfile_header(io)
 
     cstrlen = maximum(x->length(x), keys(block_to_vartype))
     cstrlen = max(cstrlen, length("#Zi"))
@@ -336,7 +320,7 @@ function print_typesfile(io::IO, block_to_vartype::DictType{String, Symbol})
 end
 
 
-function print_namesfile_header(io)
+function print_namesfile(io::IO, momentdict::Dict{Exponent, String})
     println(io, "## Description of the scalars c_j for the problem:")
     println(io, "##         max     ∑ A_0i[k,l] × Zi[k,l] + ∑ b_0[k] × x[k] + c_0")
     println(io, "##         s.t.    ∑ A_ji[k,l] × Zi[k,l] + ∑ b_j[k] × x[k] + c_j  ==  0")
@@ -344,10 +328,6 @@ function print_namesfile_header(io)
     println(io, "## Objective keys are 0 → (1,1, *) for any *.")
     println(io, "#")
     println(io, "#shortname  Explicit_name")
-end
-
-function print_namesfile(io::IO, momentdict::DictType{Exponent, String})
-    print_namesfile_header(io)
 
     for α in sort(collect(keys(momentdict)))
         shortname = momentdict[α]

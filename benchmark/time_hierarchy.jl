@@ -44,7 +44,7 @@ function main(instance = case30pwl)
 
     path = joinpath(pwd(), "Mosek_runs", "worksdp")
     mkpath(path)
-    export_SDPPrimal(sdpinstance, path)
+    export_SDP(sdpinstance, path)
     sdp_instance = read_SDPPrimal(path)
 
     println("--- time read_SDPPrimal")
