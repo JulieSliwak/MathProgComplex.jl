@@ -40,9 +40,12 @@ From `Variable` type, `Exponent` and `Polynomial` can be constructed by calling 
 
 ```julia
 expo1 = a*b
-expo2 = conj(a)^3*b^5
+expo2 = Base.power_by_squaring(conj(a),3)*Base.power_by_squaring(b,5)
 expo3 = abs2(a) # =a*conj(a)
 ```
+
+> **_NOTE:_** `x^p` has been replaced by `Base.power_by_squaring(x,p)` in Julia 1.0.3
+
 
 - A `Polynomial` is a sum of `Exponents` times complex numbers.
 
@@ -113,8 +116,8 @@ using MathProgComplex
 a = Variable("a", Complex)
 b = Variable("b", Real)
 p_obj = abs2(a) + abs2(b) + 2
-p_cstr1 = 3a + b + 2
-p_cstr2 = abs2(b) + 5a*b + 2
+p_cstr1 = 3*a + b + 2
+p_cstr2 = abs2(b) + 5*a*b + 2
 
 pb = Problem()
 
@@ -128,9 +131,9 @@ add_constraint!(pb, "Cstr 3", p_cstr2 == 0) # 2 + (5.0)*a * b + b^2 = 0
 
 
 print(pb)
-# ▶ variables: a b 
+# ▶ variables: a b
 # ▶ objective: 2 + conj(a) * a + b^2
-# ▶ constraints: 
+# ▶ constraints:
 #  →     Cstr 1: 2 + (3.0)*a + b < 3 + 5im
 #  →     Cstr 2: 2 - 1im < 2 + (5.0)*a * b + b^2 < 3 + 7im
 #  →     Cstr 3: 2 + (5.0)*a * b + b^2 = 0
