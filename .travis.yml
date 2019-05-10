@@ -19,6 +19,7 @@ before_install:
   - julia -e 'if !("OPFInstances" in keys(Pkg.installed())) Pkg.clone("https://github.com/JulieSliwak/OPFInstances.jl.git") end'
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+  - using Pkg
   - julia -e 'Pkg.clone(pwd())'
   - julia -e 'Pkg.test("MathProgComplex", coverage=true)'
 after_success:
