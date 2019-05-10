@@ -12,6 +12,7 @@ addons:
   - gfortran
 before_install:
     # don't keep an old version of the code in the cache
+  - using Pkg
   - julia -e 'if "MathProgComplex" in keys(Pkg.installed()) Pkg.rm("MathProgComplex"); Pkg.rm("MathProgComplex") end'
   - julia -e 'Pkg.update()' #make sure we get the latest version of METADATA
   - julia -e 'if !("Coverage" in keys(Pkg.installed())) Pkg.add("Coverage") end'
@@ -19,7 +20,6 @@ before_install:
   - julia -e 'if !("OPFInstances" in keys(Pkg.installed())) Pkg.clone("https://github.com/JulieSliwak/OPFInstances.jl.git") end'
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - using Pkg
   - julia -e 'Pkg.clone(pwd())'
   - julia -e 'Pkg.test("MathProgComplex", coverage=true)'
 after_success:
