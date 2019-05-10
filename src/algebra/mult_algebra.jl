@@ -38,7 +38,7 @@ function product(exp1::Exponent, exp2::Exponent)
     expod = Exponent()
     product!(expod, exp1)
     product!(expod, exp2)
-    return expod
+    return Exponent(expod)
 end
 
 ## Polynomial

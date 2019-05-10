@@ -28,17 +28,17 @@ print(m)
 """
 function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
     pb_poly_real = problem_poly
-    m = Model(with_optimizer(mysolver))
-    variables_jump = SortedDict{String, JuMP.VariableRef}()
+    m = Model(solver = mysolver)
+    variables_jump = SortedDict{String, JuMP.Variable}()
 
     ## Define JuMP variables
     startReal = 1.1
     startBool = 0
     for (varname, vartype) in pb_poly_real.variables
         if vartype==Real
-            variables_jump["$varname"] = @variable(m, base_name="$varname", start=startReal)
+            variables_jump["$varname"] = @variable(m, basename="$varname", start=startReal)
         elseif vartype==Bool
-            variables_jump["$varname"] = @variable(m, category=:Bin, base_name="$varname", start=startBool)
+            variables_jump["$varname"] = @variable(m, category=:Bin, basename="$varname", start=startBool)
         else
             error(LOGGER, "$varname must be of type Real or Bool, here type is $vartype")
         end
@@ -92,7 +92,7 @@ function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
     return m, variables_jump, ctr_jump, ctr_exp
 end
 
-function poly_to_NLexpression(m::JuMP.Model, variables_jump#=::SortedDict{String, JuMP.Variable}=#,polynome::Polynomial)
+function poly_to_NLexpression(m::JuMP.Model, variables_jump::SortedDict{String, JuMP.Variable},polynome::Polynomial)
     s = 0
     ispolylinear = true
     d = compute_degree(polynome) #max degree on one variable, not total degree
@@ -138,7 +138,7 @@ end
 function get_JuMP_solution(m, variables_jump, pb::Problem)
     sol = Point()
     for (varname, vartype) in pb.variables
-        sol[MathProgComplex.Variable(varname, vartype)] = convert(vartype, JuMP.value(variables_jump[varname]))
+        sol[MathProgComplex.Variable(varname, vartype)] = convert(vartype, getvalue(variables_jump[varname]))
     end
     return sol
 end
@@ -230,8 +230,8 @@ function get_JuMP_polar_model(pb::Problem, mysolver)
     jump_vars = SortedDict{String, JuMP.Variable}()
     for (varname, vartype) in pb.variables
         mod = "ρ_$varname"
-        jump_vars["ρ_$varname"] = @variable(m, base_name="ρ_$varname")
-        jump_vars["θ_$varname"] = @variable(m, base_name="θ_$varname")
+        jump_vars["ρ_$varname"] = @variable(m, basename="ρ_$varname")
+        jump_vars["θ_$varname"] = @variable(m, basename="θ_$varname")
     end
     ctr_jump = SortedDict{String,JuMP.ConstraintRef}()
     for (ctr, modeler_ctr) in pb.constraints

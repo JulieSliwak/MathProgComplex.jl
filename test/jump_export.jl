@@ -8,11 +8,11 @@ using JuMP, Ipopt
 
     x = MPC.Variable("x", Real)
     y = MPC.Variable("y", Real)
-    set_objective!(rosenbrock, Base.power_by_squaring((1-x),2) + 100*Base.power_by_squaring((y-Base.power_by_squaring(x,2)),2))
+    set_objective!(rosenbrock, (1-x)^2 + 100*(y-x^2)^2)
 
-    mysolver = Ipopt.Optimizer
+    mysolver = IpoptSolver(print_level = 0)
     m, variables_jump, ctr_jump, ctr_exp = get_JuMP_cartesian_model(rosenbrock, mysolver)
-    optimize!(m)
+    solve(m)
 
     sol = get_JuMP_solution(m, variables_jump, rosenbrock)
 
@@ -36,13 +36,13 @@ end
 
     set_objective!(qcqp, x - y)
 
-    add_constraint!(qcqp, "ctr", (x + Base.power_by_squaring(x, 2) + x*y + Base.power_by_squaring(y,2)) << 1)
+    add_constraint!(qcqp, "ctr", (x + x^2 + x*y + y^2) << 1)
     add_constraint!(qcqp, "x bounds", -2 << x << 2)
     add_constraint!(qcqp, "y bounds", -2 << y << 2)
 
-    mysolver = Ipopt.Optimizer
+    mysolver = IpoptSolver(print_level = 0)
     m, variables_jump, ctr_jump, ctr_exp = get_JuMP_cartesian_model(qcqp, mysolver)
-    optimize!(m)
+    solve(m)
 
     sol = get_JuMP_solution(m, variables_jump, qcqp)
 
@@ -63,12 +63,11 @@ end
 
 
 @testset "Matpower case9 Ipopt" begin
-    instancepath = joinpath(pwd(), "test", "instances")
-    # instancepath = joinpath(Pkg.dir("MathProgComplex"), "test", "instances")
+    instancepath = joinpath(Pkg.dir("MathProgComplex"), "test", "instances")
     pb_real, ~ = import_from_dat(joinpath(instancepath,"case9real.dat"))
 
-    mysolver = Ipopt.Optimizer
+    mysolver = IpoptSolver(print_level = 0)
     m, variables_jump = get_JuMP_cartesian_model(pb_real, mysolver)
-    optimize!(m)
-    @test JuMP.objective_value(m) ≈ 1.45883471040144e+003 atol=1e-6
+    solve(m)
+    @test getobjectivevalue(m) ≈ 1.45883471040144e+003 atol=1e-6
 end

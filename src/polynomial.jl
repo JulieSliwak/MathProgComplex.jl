@@ -54,17 +54,15 @@ function ==(p1::Polynomial, p2::Polynomial)
     return false
   end
 
-  iter_result1 = iterate(p1)
-  iter_result2 = iterate(p2)
-  while iter_result1 !== nothing && iter_result2 !== nothing
-    (i1, state1) = iter_result1
-    (i2, state2) = iter_result2
+  state1 = start(p1)
+  state2 = start(p2)
+  while !done(p1, state1) && !done(p2, state2)
+    (i1, state1) = next(p1, state1)
+    (i2, state2) = next(p2, state2)
 
     if !(i1 == i2)
       return false
     end
-    iter_result1 = iterate(p1,state1)
-    iter_result2 = iterate(p2,state2)
   end
   return true
 end

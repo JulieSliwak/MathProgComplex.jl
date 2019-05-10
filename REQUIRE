@@ -1,9 +1,7 @@
-julia 0.7
+julia 0.6
 JuMP 0.17 0.19-
 DataStructures 0.8.3
-LinearAlgebra
-Dates
-Compat
-Printf
 Mosek
+SCS
+CSDP
 Memento

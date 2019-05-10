@@ -8,10 +8,10 @@
     pt = Point(SortedDict(x=>2, y=>1+im, z=>0+im, b=>2.1))
     # print(pt)
 
-    p1 = Base.power_by_squaring(x, 2) + 3*y + conj(x) + conj(z) + b
+    p1 = x^2 + 3*y + conj(x) + conj(z) + b
     evaluate(p1, pt) == 10 + 3im
 
-    p2 = Base.power_by_squaring(y,6) - Base.power_by_squaring(y,6) + (-y*x*b) / 4 + π*conj(b)
+    p2 = y^6 - y^6 + (-y*x*b) / 4 + π*conj(b)
 
 
     ## Poly operators

@@ -1,3 +1,5 @@
+export get_sumdegs
+
 """
     exponents = get_exponents(variables, dmax::Int)
 
@@ -27,7 +29,7 @@ end
 """
     ishomo = is_homogeneous(p, kind)
 
-    Check wether `p`, of kind `:Real` or `:Complex` is homogeneous or not.
+Check wether `p`, of kind `:Real` or `:Complex` is homogeneous or not.
 """
 function is_homogeneous(p::Polynomial, kind::Symbol)
     ishomo = true
@@ -40,7 +42,7 @@ end
 """
     ishomo = is_homogeneous(expo, kind)
 
-    Check wether `expo`, of kind `:Real` or `:Complex` is homogeneous or not.
+Check wether `expo`, of kind `:Real` or `:Complex` is homogeneous or not.
 """
 function is_homogeneous(expo::Exponent, kind::Symbol)
     explsum, conjsum = get_sumdegs(expo)
@@ -57,16 +59,16 @@ end
 """
     explsum, conjsum = get_sumdegs(expo)
 
-    Compute `|α|`, `|β|` the sum of the real variables exponents and conjugated variables exponents.
+Compute `|α|`, `|β|` the sum of the real variables exponents and conjugated variables exponents.
 """
 function get_sumdegs(expo::Exponent)
     explsum = conjsum = 0
-    iter_result1 = iterate(expo)
-    while iter_result1 !== nothing
-        (i1, state1) = iter_result1
+
+    state1 = start(expo)
+    while !done(expo, state1)
+        (i1, state1) = next(expo, state1)
         explsum += last(i1).explvar
         conjsum += last(i1).conjvar
-        iter_result1 = iterate(expo,state1)
     end
 
     return explsum, conjsum
@@ -75,13 +77,13 @@ end
 """
     cstrtype = get_cstrtype(cstr::Constraint)
 
-    Return a cstraint type among `:eq`, `:ineqhi`, `:ineqlo`, `:ineqdouble`.
+Return a cstraint type among `:eq`, `:inequp`, `:ineqlo`, `:ineqdouble`.
 """
 function get_cstrtype(cstr::Constraint)
     if cstr.lb == cstr.ub && isfinite(cstr.ub)
         return :eq
     elseif (cstr.lb == -Inf-im*Inf) && (cstr.ub != Inf+im*Inf)
-        return :ineqhi
+        return :inequp
     elseif (cstr.lb != -Inf-im*Inf) && (cstr.ub == Inf+im*Inf)
         return :ineqlo
     elseif (cstr.lb != -Inf-im*Inf) && (cstr.ub != Inf+im*Inf)

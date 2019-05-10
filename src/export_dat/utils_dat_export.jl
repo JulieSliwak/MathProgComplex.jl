@@ -65,14 +65,14 @@ end
 function print_constraint(io::IO, cstrname::String, cstr::Constraint, maxvarlen::Int, maxcstrlen::Int, expos::SortedDict{Exponent, String})
   print_poly!(io, cstr.p, cstrname, maxvarlen, maxcstrlen, expos)
 
-  if occursin(r"_Re", cstrname)
+  if ismatch(r"_Re", cstrname)
     if real(cstr.lb) != -Inf
       print_dat_line(io, "LB", cstrname, "NONE", "NONE", real(cstr.lb), imag(cstr.lb), maxvarlen, maxcstrlen)
     end
     if real(cstr.ub) != Inf
       print_dat_line(io, "UB", cstrname, "NONE", "NONE", real(cstr.ub), imag(cstr.ub), maxvarlen, maxcstrlen)
     end
-  elseif occursin(r"_Im", cstrname)
+  elseif ismatch(r"_Im", cstrname)
     if imag(cstr.lb) != -Inf
       print_dat_line(io, "LB", cstrname, "NONE", "NONE", real(cstr.lb), imag(cstr.lb), maxvarlen, maxcstrlen)
     end
@@ -92,7 +92,7 @@ nb_from_str(string::String) = parse(matchall(r"\d+", string)[1])
 get_scenario(string::String) = String(split(string, "_")[1])
 
 function print_doc(io, filename)
-  println(io, "# $filename - exported $(Dates.now())")
+  println(io, "# $filename - exported $(now())")
   println(io, "# Description of a QCQP optimization problem. 3 sections:")
   println(io, "#  - List of all variables in the problem, along with type, name, and possibly complex value.")
   println(io, "#    Grouped by \"VAR_TYPE\" tag (col 1). Type is \"C\" Complex, \"REAL\" Real, \"BOOL\" Boolean (col 2). ")
@@ -201,19 +201,19 @@ function export_to_dat(pb_optim::Problem, outpath::String; filename::String="rea
   ## Get max length varname
   maxvarlen = 4
   for var in pb_optim.variables
-    occursin(r" ", var[1]) && error(LOGGER, "export_to_dat(): Variable '$var' is not suitable for dat export - no spaces allowed.")
+    ismatch(r" ", var[1]) && error(LOGGER, "export_to_dat(): Variable '$var' is not suitable for dat export - no spaces allowed.")
     (length(var[1]) > maxvarlen) && (maxvarlen = length(var[1]))
   end
 
   for exponame in values(expos)
-    occursin(r" ", exponame) && error(LOGGER, "export_to_dat(): Variable '$var' is not suitable for dat export - no spaces allowed.")
+    ismatch(r" ", exponame) && error(LOGGER, "export_to_dat(): Variable '$var' is not suitable for dat export - no spaces allowed.")
     (length(exponame) > maxvarlen) && (maxvarlen = length(exponame))
   end
 
   ## Get max length dat constraint name
   maxcstrlen = 9
   for cstrname in keys(pb_optim.constraints)
-    occursin(r" ", cstrname) && error(LOGGER, "export_to_dat(): Constraint '$cstrname' is not suitable for dat export - no spaces allowed.")
+    ismatch(r" ", cstrname) && error(LOGGER, "export_to_dat(): Constraint '$cstrname' is not suitable for dat export - no spaces allowed.")
     ((length(cstrname) > maxcstrlen)) && (maxcstrlen = length(cstrname))
   end
 
@@ -289,8 +289,8 @@ end
 
 #   ## Sort constraints by type (voltm, unit and rest), and build dat constraint name
 #   cstr_keys = SortedSet(keys(QCQP.constraints))
-#   voltm_keys = filter(x->occursin(r"VOLTM", x), cstr_keys)
-#   unit_keys = filter(x->occursin(r"UNIT", x), cstr_keys)
+#   voltm_keys = filter(x->ismatch(r"VOLTM", x), cstr_keys)
+#   unit_keys = filter(x->ismatch(r"UNIT", x), cstr_keys)
 #   load_keys = setdiff(cstr_keys, union(unit_keys, voltm_keys))
 #   id_to_loadkey = SortedDict(nb_from_str(str)=> (str, "LOAD_$(string(nb_from_str(str)))") for str in load_keys)
 #   id_to_voltmkey = SortedDict(nb_from_str(str)=> (str, String(split(str, "_")[2])) for str in voltm_keys)

@@ -4,3 +4,6 @@
 .tags*
 Knitro_runs
 Mosek_runs
+docs/build
+*.log
+*.json

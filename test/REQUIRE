@@ -2,3 +2,5 @@ julia 0.6
 
 Ipopt
 KNITRO
+SCS
+CSDP

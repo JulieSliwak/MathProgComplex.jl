@@ -96,8 +96,8 @@ function SDPPrimal_cplx2real(sdp::SDPPrimal{T}) where T<:Complex
     for (block, vartype) in sdp.block_to_vartype
         if vartype == :SDPC
             block_to_vartype[block] = :SDP
-        elseif vartype == :SymC
-            block_to_vartype[block] = :Sym
+        elseif vartype == :Null
+            block_to_vartype[block] = :Null
         else
             error(LOGGER, "SDPPrimal_cplx2real(): Unhandled matrix type $vartype for $block")
         end

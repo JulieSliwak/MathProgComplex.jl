@@ -1,8 +1,12 @@
 # MathProgComplex.jl
 
-Dev:
+Master:
 [![Build Status](https://travis-ci.org/JulieSliwak/MathProgComplex.jl.svg?branch=master)](https://travis-ci.org/JulieSliwak/MathProgComplex.jl)
 [![codecov](https://codecov.io/gh/JulieSliwak/MathProgComplex.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JulieSliwak/MathProgComplex.jl)
+
+Hierarchy branch:
+[![Build Status](https://api.travis-ci.org/JulieSliwak/MathProgComplex.jl.svg?branch=hierarchy)](https://travis-ci.org/JulieSliwak/MathProgComplex.jl)
+[![codecov](https://codecov.io/gh/JulieSliwak/MathProgComplex.jl/branch/hierarchy/graph/badge.svg)](https://codecov.io/gh/JulieSliwak/MathProgComplex.jl)
 
 The `MathProgComplex` module is a tool for polynomial optimization problems with complex variables. These problems consist in optimizing a generic complex multivariate polynomial function, subject to some complex polynomial equality and inequality constraints.
 The `MathProgComplex` module enables:
@@ -40,12 +44,9 @@ From `Variable` type, `Exponent` and `Polynomial` can be constructed by calling 
 
 ```julia
 expo1 = a*b
-expo2 = Base.power_by_squaring(conj(a),3)*Base.power_by_squaring(b,5)
+expo2 = conj(a)^3*b^5
 expo3 = abs2(a) # =a*conj(a)
 ```
-
-> **_NOTE:_** `x^p` has been replaced by `Base.power_by_squaring(x,p)` in Julia 1.0.3
-
 
 - A `Polynomial` is a sum of `Exponents` times complex numbers.
 
@@ -116,8 +117,8 @@ using MathProgComplex
 a = Variable("a", Complex)
 b = Variable("b", Real)
 p_obj = abs2(a) + abs2(b) + 2
-p_cstr1 = 3*a + b + 2
-p_cstr2 = abs2(b) + 5*a*b + 2
+p_cstr1 = 3a + b + 2
+p_cstr2 = abs2(b) + 5a*b + 2
 
 pb = Problem()
 
