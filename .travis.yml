@@ -21,9 +21,9 @@ addons:
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   # - julia -e 'using Pkg; Pkg.clone(pwd()); Pkg.test("MathProgComplex", coverage=true)'
-  - julia --project -e 'import Pkg; Pkg.clone(pwd()) ; Pkg.build("MathProgComplex");  Pkg.test("MathProgComplex", coverage=true)'
+  - julia --project -e 'import Pkg; Pkg.build();  Pkg.test(coverage=true)'
   # - julia -e 'Pkg.clone(pwd())'
   # - julia -e 'Pkg.test("MathProgComplex", coverage=true)'
-after_success:
-  - julia -e  'using Coverage; cd(Pkg.dir("MathProgComplex")); LCOV.writefile("lcov.info", process_folder(".")); run(pipeline(`curl -s https://codecov.io/bash`, `bash`))'
-  # - julia -e 'cd(Pkg.dir("MathProgComplex")); include(joinpath("docs", "make.jl"))'
+# after_success:
+#   - julia -e  'using Coverage; cd(Pkg.dir("MathProgComplex")); LCOV.writefile("lcov.info", process_folder(".")); run(pipeline(`curl -s https://codecov.io/bash`, `bash`))'
+#   # - julia -e 'cd(Pkg.dir("MathProgComplex")); include(joinpath("docs", "make.jl"))'
