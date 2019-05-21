@@ -1,6 +1,0 @@
-authors = ["Julie Sliwak <julie.sliwak@rte-france.com>"]
-name = "MathProgComplex"
-uuid = "96bcb2c2-7ba5-11e9-0ed0-d3b3a6c019e1"
-version = "0.1.0"
-
-[deps]
