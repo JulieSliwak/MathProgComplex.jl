@@ -1,6 +1,6 @@
-# name = MathProgComplex
-# authors = ["Julie Sliwak"]
-# repo = "https://github.com/JulieSliwak/MathProgComplex.jl"
+name = MathProgComplex
+authors = ["Julie Sliwak"]
+repo = "https://github.com/JulieSliwak/MathProgComplex.jl"
 
 [deps]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
