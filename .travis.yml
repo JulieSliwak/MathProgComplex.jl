@@ -20,7 +20,7 @@ addons:
 #   - julia -e 'if !("OPFInstances" in keys(Pkg.installed())) Pkg.clone("https://github.com/JulieSliwak/OPFInstances.jl.git") end'
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'using Pkg; Pkg.clone(pwd()); Pkg.test("MathProgComplex", coverage=true)'
+  - julia -e 'using Pkg; add LinearAlgebra; add Printf; add pwd(); Pkg.test("MathProgComplex", coverage=true)'
   # - julia -e 'Pkg.clone(pwd())'
   # - julia -e 'Pkg.test("MathProgComplex", coverage=true)'
 after_success:
