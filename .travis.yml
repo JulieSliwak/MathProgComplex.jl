@@ -4,9 +4,6 @@ os:
 julia:
   - nightly
   - 1.0.3
-matrix:
-  allow_failures:
-- julia: nightly
 cache:
  directories:
    - /home/travis/.julia
