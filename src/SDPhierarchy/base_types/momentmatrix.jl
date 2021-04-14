@@ -132,7 +132,7 @@ function product(momentpoly::Dict{Moment, M}, p::Polynomial, var_to_cliques::Dic
             # resmpoly[resmoment] += val1*val2
             addindex!(resmpoly, val1*val2, resmoment)
 
-            isnull(resmpoly[resmoment]) && delete!(resmpoly, resmoment)
+            isnan(resmpoly[resmoment]) && delete!(resmpoly, resmoment)
         end
     end
 

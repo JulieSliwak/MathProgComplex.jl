@@ -2,7 +2,7 @@ isdefined(Base, :__precompile__) && __precompile__()
 
 module MathProgComplex
 
-using DataStructures, JuMP, Printf, LinearAlgebra, Dates
+using DataStructures, JuMP, Printf, LinearAlgebra, Dates, DelimitedFiles, Statistics
 
 # see https://invenia.github.io/Memento.jl/latest/faq/pkg-usage.html#Using-Memento-in-Julia-packages?-1
 using Memento
@@ -61,6 +61,6 @@ include(joinpath("export_JuMP", "utils_jump.jl"))
 
 
 # SDPhierarchy function
-# include(joinpath("SDPhierarchy", "SDPhierarchy.jl"))
+include(joinpath("SDPhierarchy", "SDPhierarchy.jl"))
 
 end

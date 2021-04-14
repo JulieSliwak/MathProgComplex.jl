@@ -5,7 +5,7 @@
 #using OPFInstances
 
 export RelaxationContext, Moment, MomentMatrix, SDPDual, SDPPrimal
-export SDP_Instance, SDP_Block, SDP_Moment, SDP_Problem
+export SDP_Instance, SDP_Block, SDP_Moment, SDP_Problem, buildPOP_WB2
 
 
 ###############################################################################
@@ -39,7 +39,7 @@ include(joinpath("core", "build_relaxationcontext.jl"))
 include(joinpath("core", "build_decomposition.jl"))
 
 abstract type AbstractSymmetry end
-type PhaseInvariance <: AbstractSymmetry end
+abstract type PhaseInvariance <: AbstractSymmetry end
 include("symmetries.jl")
 
 ###############################################################################
@@ -103,7 +103,7 @@ include("SDPPrimal_cplx2real.jl")
 ###############################################################################
 ## Mosek Structures
 ###############################################################################
-type SDP_Instance
+struct SDP_Instance
   VAR_TYPES
   BLOCKS
   LINEAR
@@ -111,7 +111,7 @@ type SDP_Instance
 end
 
 
-type SDP_Block
+struct SDP_Block
   id::Int64
   name::String
   var_to_id::SortedDict{String, Int64}
@@ -121,7 +121,7 @@ end
 
 const SDP_Moment = Tuple{String, String, String}
 
-type SDP_Problem
+struct SDP_Problem
   # SDP vars
   name_to_sdpblock::SortedDict{String, SDP_Block}
   id_to_sdpblock::SortedDict{Int64, SDP_Block}

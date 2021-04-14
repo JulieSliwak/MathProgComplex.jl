@@ -3,11 +3,13 @@ export print, init_output, final_output
 ###############################################################################
 ####  Relaxation context
 ###############################################################################
+#using Statistics #for mean function
+
 function print_build_relctx(relax_ctx, pb)
     relaxparams = relax_ctx.relaxparams
 
     outstream = []
-    relaxparams[:opt_outmode]!=1 && push!(outstream, STDOUT)
+    relaxparams[:opt_outmode]!=1 && push!(outstream, stdout)
     relaxparams[:opt_outmode]>0  && push!(outstream, open(relaxparams[:opt_outname], "a"))
 
     (relaxparams[:opt_outlev] == 0) && return
@@ -63,7 +65,7 @@ function print_build_relctx(relax_ctx, pb)
             @printf(outstr, "All variables appearing in such constraints will be linked in the sparsity pattern, which will largely densify it.\n")
         end
 
-        (outstr!=STDOUT) && close(outstr)
+        (outstr!=stdout) && close(outstr)
     end
 end
 
@@ -99,7 +101,7 @@ function print_build_momentrelax(relax_ctx, momentrelaxation, nb_expos)
     (relaxparams[:opt_outlev] == 0) && return
 
     outstream = []
-    relaxparams[:opt_outmode]!=1 && push!(outstream, STDOUT)
+    relaxparams[:opt_outmode]!=1 && push!(outstream, stdout)
     relaxparams[:opt_outmode]>0  && push!(outstream, open(relaxparams[:opt_outname], "a"))
 
 
@@ -118,7 +120,7 @@ function print_build_momentrelax(relax_ctx, momentrelaxation, nb_expos)
             ## NOTE: which relevant indicators here ?
         end
 
-        (outstr!=STDOUT) && close(outstr)
+        (outstr!=stdout) && close(outstr)
     end
 end
 
@@ -164,7 +166,7 @@ function print_build_SOSrelax(relax_ctx::RelaxationContext, sosrel::SDPPrimal)
     (relaxparams[:opt_outlev] == 0) && return
 
     outstream = []
-    relaxparams[:opt_outmode]!=1 && push!(outstream, STDOUT)
+    relaxparams[:opt_outmode]!=1 && push!(outstream, stdout)
     relaxparams[:opt_outmode]>0  && push!(outstream, open(relaxparams[:opt_outname], "a"))
 
     ## Compute indicators
@@ -212,7 +214,7 @@ function print_build_SOSrelax(relax_ctx::RelaxationContext, sosrel::SDPPrimal)
             ## NOTE: which relevant indicators here ?
         end
 
-        (outstr!=STDOUT) && close(outstr)
+        (outstr!=stdout) && close(outstr)
     end
 end
 

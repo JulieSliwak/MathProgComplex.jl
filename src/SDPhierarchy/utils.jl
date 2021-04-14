@@ -68,17 +68,17 @@ end
 
 function format_string(α::Exponent, β::Exponent)
     s = "$α,$β"
-    return replace(s, " ", "")
+    return replace(s, " " => "")
 end
 
 function format_string(s1::String, s2::String)
     s = "$s1,$s2"
-    return replace(s, " ", "")
+    return replace(s, " " => "")
 end
 
 function format_string(α::Exponent)
     s = "$α"
-    return replace(s, " ", "")
+    return replace(s, " " => "")
 end
 
 function format_string(α::Exponent, block::String)

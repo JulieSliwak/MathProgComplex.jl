@@ -2,7 +2,7 @@ export read_SDPPrimal, set_constraints!, set_vartypes!, set_blocks!, set_linvars
 
 function read_SDPPrimal(path::String)
   BLOCKS = readdlm(joinpath(path, "matrix.sdp"), String)
-  if isfile(joinpath(path, "lin.sdp")) && length(matchall(r"\n", readstring(joinpath(path, "lin.sdp")))) > 7
+  if isfile(joinpath(path, "lin.sdp")) && length(collect(eachmatch(r"\n", read(joinpath(path, "lin.sdp"), String)))) > 7
     LINEAR = readdlm(joinpath(path, "lin.sdp"), String)
   else
     LINEAR = []

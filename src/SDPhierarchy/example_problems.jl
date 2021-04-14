@@ -66,7 +66,8 @@ end
 function buildPOP_WB2(; v2max = 0.976, rmeqs = false, setnetworkphase=false, addball=false)
     # OPFpbs = load_OPFproblems(MatpowerInput, joinpath("..", "data", "data_Matpower", "matpower", "WB2.m"))
     # problem_c = build_globalpb!(OPFpbs)
-    problem_c, pt = import_from_dat(getinstancepath("Matpower", "QCQP", "WB2"))
+    # problem_c, pt = import_from_dat(getinstancepath("Matpower", "QCQP", "WB2"))
+    problem_c, pt = import_from_dat("D:\\repo\\data\\data_Matpower\\matpower_QCQP\\WB2.dat")
 
     ## Converting to real ineq. only problem
     !rmeqs || change_eq_to_ineq!(problem_c)

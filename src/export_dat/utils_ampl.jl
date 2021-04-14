@@ -66,8 +66,8 @@ function run_knitro(pb_path::String; src_ampl_path::String=joinpath(Pkg.dir("Mat
     end
 
     try
-        # run(`cmd /c ampl real_minlp.run '>' $(outlog)`)
-        run(`cmd /c ampl real_minlp.run `)
+        run(`cmd /c ampl real_minlp.run '>' $(outlog)`)
+        # run(`cmd /c ampl real_minlp.run `)
     catch
         warn(LOGGER, "AMPL/Knitro failed, returning.")
     end

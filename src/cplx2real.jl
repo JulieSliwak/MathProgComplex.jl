@@ -32,15 +32,15 @@ function pb_cplx2real(pb_C::Problem)
 
 		if length(realPart) != 0
 			# Set bounds to proper infty, easier to detect... TODO : Missing attribute ctr_kind ?
-			lb = real(cstr.lb)==-Inf ? -Inf-im*Inf : real(cstr.lb)
-			ub = real(cstr.ub)== Inf ? +Inf+im*Inf : real(cstr.ub)
+			lb = real(cstr.lb)==-Inf ? -Inf#=-im*Inf=# : real(cstr.lb)  #NOTE: probably a mistake : lb cannot be Inf-im*Inf since lb must be real
+			ub = real(cstr.ub)== Inf ? +Inf#=+im*Inf=# : real(cstr.ub)
 			cstrreal = lb << realPart << ub
 			cstr.precond != :none && (cstrreal.precond = cstr.precond)
 			add_constraint!(pb, cstrName_real, cstrreal)
 		end
 		if length(imagPart) != 0
-			lb = imag(cstr.lb)==-Inf ? -Inf-im*Inf : imag(cstr.lb)
-			ub = imag(cstr.ub)== Inf ? +Inf+im*Inf : imag(cstr.ub)
+			lb = imag(cstr.lb)==-Inf ? -Inf#=-im*Inf=# : imag(cstr.lb)
+			ub = imag(cstr.ub)== Inf ? +Inf#=+im*Inf=# : imag(cstr.ub)
 			cstrimag = lb << imagPart << ub
 			cstr.precond != :none && (cstrimag.precond = cstr.precond)
 			add_constraint!(pb, cstrName_imag, cstrimag)
@@ -90,24 +90,35 @@ function cplx2real(expo::Exponent, λ::Number)
 				z1 = last(expo.expo)
 			end
 			# println("Bilinear : ", z1, ", ", z2)
-			x1 = Variable(z1[1].name*"_Re", Real)
-			y1 = Variable(z1[1].name*"_Im", Real)
-			x2 = Variable(z2[1].name*"_Re", Real)
-			y2 = Variable(z2[1].name*"_Im", Real)
-			# (a+ib)*conj(z1) * z2  = (a+ib)*(x1-iy1)*(x2+iy2)
-			# = (a+ib)*(x1.x2 + y1.y2 + ix1.y2-ix2.y1)
-			# = a.x1.x2 + a.y1.y2 + ia.x1.y2-ia.x2.y1+ib.x1.x2 + ib.y1.y2 - b.x1.y2+b.x2.y1
-			# =
-			#    a.x1.x2+a.y1.y2-b.x1.y2+b.x2.y1
-			#    +
-			#    i(a.x1.y2-a.x2.y1+b.x1.x2+b.y1.y2)
-			x1x2 = SortedDict{Variable, Degree}(x1=>Degree(1,0), x2=>Degree(1,0))
-			y1y2 = SortedDict{Variable, Degree}(y1=>Degree(1,0), y2=>Degree(1,0))
-			x1y2 = SortedDict{Variable, Degree}(x1=>Degree(1,0), y2=>Degree(1,0))
-			x2y1 = SortedDict{Variable, Degree}(x2=>Degree(1,0), y1=>Degree(1,0))
+			if isbool(z2[1])
+				x1 = Variable(z1[1].name*"_Re", Real)
+				y1 = Variable(z1[1].name*"_Im", Real)
+				bin = z2[1]
+				bx1x1 = SortedDict{Variable, Degree}(x1=>Degree(2,0), bin=>Degree(1,0))
+				by1y1 = SortedDict{Variable, Degree}(y1=>Degree(2,0), bin=>Degree(1,0))
 
-			realPart = Polynomial(SortedDict{Exponent, Number}(Exponent(x1x2)=>a, Exponent(y1y2)=>a, Exponent(x1y2)=>-b, Exponent(x2y1)=>b))
-			imagPart = Polynomial(SortedDict{Exponent, Number}(Exponent(x1x2)=>b, Exponent(y1y2)=>b, Exponent(x1y2)=>a, Exponent(x2y1)=>-a))
+				realPart = Polynomial(SortedDict{Exponent, Number}(Exponent(bx1x1)=>a, Exponent(by1y1)=>a))
+				imagPart = Polynomial(SortedDict{Exponent, Number}(Exponent(bx1x1)=>b, Exponent(by1y1)=>b))
+			else
+				x1 = Variable(z1[1].name*"_Re", Real)
+				y1 = Variable(z1[1].name*"_Im", Real)
+				x2 = Variable(z2[1].name*"_Re", Real)
+				y2 = Variable(z2[1].name*"_Im", Real)
+				# (a+ib)*conj(z1) * z2  = (a+ib)*(x1-iy1)*(x2+iy2)
+				# = (a+ib)*(x1.x2 + y1.y2 + ix1.y2-ix2.y1)
+				# = a.x1.x2 + a.y1.y2 + ia.x1.y2-ia.x2.y1+ib.x1.x2 + ib.y1.y2 - b.x1.y2+b.x2.y1
+				# =
+				#    a.x1.x2+a.y1.y2-b.x1.y2+b.x2.y1
+				#    +
+				#    i(a.x1.y2-a.x2.y1+b.x1.x2+b.y1.y2)
+				x1x2 = SortedDict{Variable, Degree}(x1=>Degree(1,0), x2=>Degree(1,0))
+				y1y2 = SortedDict{Variable, Degree}(y1=>Degree(1,0), y2=>Degree(1,0))
+				x1y2 = SortedDict{Variable, Degree}(x1=>Degree(1,0), y2=>Degree(1,0))
+				x2y1 = SortedDict{Variable, Degree}(x2=>Degree(1,0), y1=>Degree(1,0))
+
+				realPart = Polynomial(SortedDict{Exponent, Number}(Exponent(x1x2)=>a, Exponent(y1y2)=>a, Exponent(x1y2)=>-b, Exponent(x2y1)=>b))
+				imagPart = Polynomial(SortedDict{Exponent, Number}(Exponent(x1x2)=>b, Exponent(y1y2)=>b, Exponent(x1y2)=>a, Exponent(x2y1)=>-a))
+			end	
 			return realPart, imagPart
 		end
 	elseif expo.degree.explvar  == 0 && expo.degree.conjvar  == 0

@@ -187,7 +187,7 @@ end
 
     Type for storing and working on sparsitty patterns.
 """
-type SparsityPattern end
+abstract type SparsityPattern end
 
 """
     sparsity_pattern = compute_sparsitypattern(problem, di, ki)

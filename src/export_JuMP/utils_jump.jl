@@ -26,9 +26,9 @@ m = get_JuMP_cartesian_model(problem_poly, mysolver)
 print(m)
 ```
 """
-function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
+function get_JuMP_cartesian_model(problem_poly::Problem)
     pb_poly_real = problem_poly
-    m = Model(with_optimizer(mysolver))
+    m = Model()
     variables_jump = SortedDict{String, JuMP.VariableRef}()
 
     ## Define JuMP variables
@@ -38,7 +38,7 @@ function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
         if vartype==Real
             variables_jump["$varname"] = @variable(m, base_name="$varname", start=startReal)
         elseif vartype==Bool
-            variables_jump["$varname"] = @variable(m, category=:Bin, base_name="$varname", start=startBool)
+            variables_jump["$varname"] = @variable(m, binary=true, base_name="$varname", start=startBool)
         else
             error(LOGGER, "$varname must be of type Real or Bool, here type is $vartype")
         end
@@ -61,11 +61,18 @@ function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
                 error(LOGGER, "Polynom coefficients have to be real numbers")
             end
         end
-        my_timer = @elapsed s_ctr, ispolylinear = poly_to_NLexpression(m, variables_jump,polynome)
+        my_timer = @elapsed s_ctr, ispolylinear, ispolyquadratic = poly_to_NLexpression(m, variables_jump,polynome)
         ctr_exp[ctrname] = (s_ctr, lb, ub)
         # @printf("%-35s%10.6f s\n", "poly_to_NLexpression for $ctr", my_timer)
         if ispolylinear
             @constraint(m, lb <= s_ctr <= ub)
+        elseif ispolyquadratic
+            if lb == ub
+                @constraint(m, s_ctr == ub)
+            else
+                @constraint(m, lb <= s_ctr )
+                @constraint(m,  s_ctr <= ub)
+            end
         else
             if precond == :sqrt
                 if lb == -Inf && ub >0
@@ -82,9 +89,11 @@ function get_JuMP_cartesian_model(problem_poly::Problem, mysolver)
 
     ## Define JuMP objective
     polynome_obj = pb_poly_real.objective
-    my_timer = @elapsed s_obj, ispolylinear = poly_to_NLexpression(m, variables_jump,polynome_obj)
+    my_timer = @elapsed s_obj, ispolylinear, ispolyquadratic = poly_to_NLexpression(m, variables_jump,polynome_obj)
     # @printf("%-35s%10.6f s\n", "poly_to_NLexpression for objective", my_timer)
     if ispolylinear
+        @objective(m, Min, s_obj)
+    elseif ispolyquadratic
         @objective(m, Min, s_obj)
     else
         @NLobjective(m,Min,s_obj)
@@ -95,38 +104,58 @@ end
 function poly_to_NLexpression(m::JuMP.Model, variables_jump#=::SortedDict{String, JuMP.Variable}=#,polynome::Polynomial)
     s = 0
     ispolylinear = true
+    ispolyquadratic = true
     d = compute_degree(polynome) #max degree on one variable, not total degree
     for expo in keys(polynome.poly)
         explsum, conjsum = get_sumdegs(expo)
         d.explvar = max(d.explvar, explsum)
         d.conjvar = max(d.conjvar,conjsum)
     end
-    if d.explvar + d.conjvar > 1
+    if d.explvar + d.conjvar == 2
         ispolylinear = false
     end
+    if d.explvar + d.conjvar > 2
+        ispolylinear = false
+        ispolyquadratic = false
+    end
+
     for (monome,coeff) in polynome.poly
         prod = 1
         for (varname, degree) in monome.expo
-            if !ispolylinear
+            if !ispolylinear && !ispolyquadratic
                 if degree.explvar > 1
                 prod = @NLexpression(m, prod * variables_jump["$varname"]^degree.explvar)
                 elseif degree.explvar == 1
                 prod = @NLexpression(m, prod * variables_jump["$varname"])
                 end
-            else
-                if degree.explvar != 1
-                    error(LOGGER, "Exponent is supposed to be degree 1 since polynome is linear. ")
+            elseif ispolyquadratic
+                if degree.explvar > 1
+                prod = @expression(m, prod * variables_jump["$varname"]^degree.explvar)
+                elseif degree.explvar == 1
+                prod = @expression(m, prod * variables_jump["$varname"])
                 end
-                prod = @expression(m, variables_jump["$varname"])
+            elseif ispolylinear
+                if degree.explvar != 1
+                    error(LOGGER, "Exponent is supposed to be degree 1 or 2 since polynome is linear or quadratic. ")
+                else
+                    prod = @expression(m, variables_jump["$varname"])
+                end
             end
         end
         if ispolylinear
+            s = @expression(m, s + coeff * prod)
+        elseif ispolyquadratic
             s = @expression(m, s + coeff * prod)
         else
             s = @NLexpression(m, s + coeff * prod)
         end
     end
-    return s, ispolylinear
+    # if ispolylinear
+    #     s = @expression(m, sum(coeff*(variables_jump["$varname"] for (varname, degree) in monome.expo) for (monome,coeff) in polynome.poly))
+    # elseif ispolyquadratic
+    #     s = @expression(m, sum(coeff*(prod(variables_jump["$varname"]^(degree.explvar) for (varname, degree) in monome.expo)) for (monome,coeff) in polynome.poly))
+    # end
+    return s, ispolylinear, ispolyquadratic
 end
 
 

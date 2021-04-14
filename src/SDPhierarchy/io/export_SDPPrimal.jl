@@ -153,17 +153,17 @@ function print_blocksfile(io::IO, sdpblocks::Dict{Tuple{Moment, String, Exponent
         println(io, "#")
     end
 
-    cstrlenα = maximum(x->length(haskey(momentdict, x[1].conj_part)?momentdict[x[1].conj_part]: string(x[1].conj_part)), keys(sdpblocks))
+    cstrlenα = maximum(x->length(haskey(momentdict, x[1].conj_part) ? momentdict[x[1].conj_part] : string(x[1].conj_part)), keys(sdpblocks))
     cstrlenα= max(cstrlenα, length("#j_conj"))
-    cstrlenβ = maximum(x->length(haskey(momentdict, x[1].expl_part)?momentdict[x[1].expl_part]: string(x[1].expl_part)), keys(sdpblocks))
+    cstrlenβ = maximum(x->length(haskey(momentdict, x[1].expl_part) ? momentdict[x[1].expl_part] : string(x[1].expl_part)), keys(sdpblocks))
     cstrlenβ= max(cstrlenβ, length("j_expl"))
     cliquelen = maximum(x->length(x[1].clique), keys(sdpblocks))
     cliquelen= max(cliquelen, length("clique"))
     blocklen = maximum(x->length(x[2]), keys(sdpblocks))
     blocklen= max(blocklen, length("Zi"))
-    rowlen = maximum(x->length(haskey(momentdict, x[3])?momentdict[x[3]]:string(x[3])), keys(sdpblocks))
+    rowlen = maximum(x->length(haskey(momentdict, x[3]) ? momentdict[x[3]] : string(x[3])), keys(sdpblocks))
     rowlen = max(rowlen, length("k"))
-    collen = maximum(x->length(haskey(momentdict, x[4])?momentdict[x[4]]:string(x[4])), keys(sdpblocks))
+    collen = maximum(x->length(haskey(momentdict, x[4]) ? momentdict[x[4]] : string(x[4])), keys(sdpblocks))
     collen = max(collen, length("l"))
 
     print_string(io, "#j_conj", cstrlenα, indentedprint=indentedprint)
@@ -180,12 +180,12 @@ function print_blocksfile(io::IO, sdpblocks::Dict{Tuple{Moment, String, Exponent
         λ = sdpblocks[(moment, blockname, γ, δ)]
 
         α, β = moment.conj_part, moment.expl_part
-        print_string(io, haskey(momentdict, α)?momentdict[α]: string(α), cstrlenα, indentedprint=indentedprint)
-        print_string(io, haskey(momentdict, β)?momentdict[β]: string(β), cstrlenβ, indentedprint=indentedprint)
+        print_string(io, haskey(momentdict, α) ? momentdict[α] : string(α), cstrlenα, indentedprint=indentedprint)
+        print_string(io, haskey(momentdict, β) ? momentdict[β] : string(β), cstrlenβ, indentedprint=indentedprint)
         print_string(io, moment.clique, cliquelen, indentedprint=indentedprint)
         print_string(io, blockname, blocklen, indentedprint=indentedprint)
-        print_string(io, haskey(momentdict, γ)?momentdict[γ]: string(γ), rowlen, indentedprint=indentedprint)
-        print_string(io, haskey(momentdict, δ)?momentdict[δ]: string(δ), collen, indentedprint=indentedprint)
+        print_string(io, haskey(momentdict, γ) ? momentdict[γ] : string(γ), rowlen, indentedprint=indentedprint)
+        print_string(io, haskey(momentdict, δ) ? momentdict[δ] : string(δ), collen, indentedprint=indentedprint)
         @printf(io, "% .16e % .16e\n", real(λ), imag(λ))
     end
 end
@@ -210,8 +210,8 @@ function print_linfile(io::IO, sdplin::Dict{Tuple{Moment, Exponent}, T}, sdplins
     varlen = varlensym = 0
 
     if length(union(keys(sdplin), keys(sdplinsym))) > 0
-        cstrlenα = maximum(x->length(haskey(momentdict, x[1].conj_part)?momentdict[x[1].conj_part]: string(x[1].conj_part)), union(keys(sdplin), keys(sdplinsym)))
-        cstrlenβ = maximum(x->length(haskey(momentdict, x[1].expl_part)?momentdict[x[1].expl_part]: string(x[1].expl_part)), union(keys(sdplin), keys(sdplinsym)))
+        cstrlenα = maximum(x->length(haskey(momentdict, x[1].conj_part) ? momentdict[x[1].conj_part] : string(x[1].conj_part)), union(keys(sdplin), keys(sdplinsym)))
+        cstrlenβ = maximum(x->length(haskey(momentdict, x[1].expl_part) ? momentdict[x[1].expl_part] : string(x[1].expl_part)), union(keys(sdplin), keys(sdplinsym)))
         cliquelen = maximum(x->length(x[1].clique), union(keys(sdplin), keys(sdplinsym)))
         varlen = length(sdplin)!=0 ? maximum(x->length(format_string(x[2])), keys(sdplin)) : 0
         varlensym = length(sdplinsym)!=0 ? maximum(x->length(format_string(x[3], x[2])), keys(sdplinsym)) : 0
@@ -235,8 +235,8 @@ function print_linfile(io::IO, sdplin::Dict{Tuple{Moment, Exponent}, T}, sdplins
             λ = sdplin[(moment, var)]
 
             α, β = moment.conj_part, moment.expl_part
-            print_string(io, haskey(momentdict, α)?momentdict[α]: string(α), cstrlenα, indentedprint=indentedprint)
-            print_string(io, haskey(momentdict, β)?momentdict[β]: string(β), cstrlenβ, indentedprint=indentedprint)
+            print_string(io, haskey(momentdict, α) ? momentdict[α] : string(α), cstrlenα, indentedprint=indentedprint)
+            print_string(io, haskey(momentdict, β) ? momentdict[β] : string(β), cstrlenβ, indentedprint=indentedprint)
             print_string(io, moment.clique, cliquelen, indentedprint=indentedprint)
             print_string(io, format_string(var), varlen, indentedprint=indentedprint)
             @printf(io, "% .16e % .16e\n", real(λ), imag(λ))
@@ -247,8 +247,8 @@ function print_linfile(io::IO, sdplin::Dict{Tuple{Moment, Exponent}, T}, sdplins
             λ = sdplinsym[(moment, blockname, var)]
 
             α, β = moment.conj_part, moment.expl_part
-            print_string(io, haskey(momentdict, α)?momentdict[α]: string(α), cstrlenα, indentedprint=indentedprint)
-            print_string(io, haskey(momentdict, β)?momentdict[β]: string(β), cstrlenβ, indentedprint=indentedprint)
+            print_string(io, haskey(momentdict, α) ? momentdict[α] : string(α), cstrlenα, indentedprint=indentedprint)
+            print_string(io, haskey(momentdict, β) ? momentdict[β] : string(β), cstrlenβ, indentedprint=indentedprint)
             print_string(io, moment.clique, cliquelen, indentedprint=indentedprint)
             print_string(io, format_string(var, blockname), varlen, indentedprint=indentedprint)
             @printf(io, "% .16e % .16e\n", real(λ), imag(λ))
@@ -271,9 +271,9 @@ function print_cstfile(io::IO, sdpcst::Dict{Moment, T};
         println(io, "#")
     end
 
-    cstrlenα = maximum(x->length(haskey(momentdict, x.conj_part)?momentdict[x.conj_part]: string(x.conj_part)), union(ctr_keys, keys(sdpcst)))
+    cstrlenα = maximum(x->length(haskey(momentdict, x.conj_part) ? momentdict[x.conj_part] : string(x.conj_part)), union(ctr_keys, keys(sdpcst)))
     cstrlenα= max(cstrlenα, length("#j_conj"))
-    cstrlenβ = maximum(x->length(haskey(momentdict, x.expl_part)?momentdict[x.expl_part]: string(x.expl_part)), union(ctr_keys, keys(sdpcst)))
+    cstrlenβ = maximum(x->length(haskey(momentdict, x.expl_part) ? momentdict[x.expl_part] : string(x.expl_part)), union(ctr_keys, keys(sdpcst)))
     cstrlenβ= max(cstrlenβ, length("j_expl"))
     cliquelen = maximum(x->length(x.clique), union(ctr_keys, keys(sdpcst)))
     cliquelen= max(cliquelen, length("clique"))
@@ -285,11 +285,12 @@ function print_cstfile(io::IO, sdpcst::Dict{Moment, T};
     print_string(io, "Imag(c_j)", 23, indentedprint=indentedprint)
     println(io)
 
-    for moment in sort(union(ctr_keys, keys(sdpcst)))
+    for moment in union(ctr_keys, keys(sdpcst))
+    # for moment in sort(union(ctr_keys, keys(sdpcst)))
         α, β = moment.conj_part, moment.expl_part
-        λ = haskey(sdpcst, moment)?sdpcst[moment]:0
-        print_string(io, haskey(momentdict, α)?momentdict[α]: string(α), cstrlenα, indentedprint=indentedprint)
-        print_string(io, haskey(momentdict, β)?momentdict[β]: string(β), cstrlenβ, indentedprint=indentedprint)
+        λ = haskey(sdpcst, moment) ? sdpcst[moment] : 0
+        print_string(io, haskey(momentdict, α) ? momentdict[α] : string(α), cstrlenα, indentedprint=indentedprint)
+        print_string(io, haskey(momentdict, β) ? momentdict[β] : string(β), cstrlenβ, indentedprint=indentedprint)
         print_string(io, moment.clique, cliquelen, indentedprint=indentedprint)
         @printf(io, "% .16e % .16e\n", real(λ), imag(λ))
     end
